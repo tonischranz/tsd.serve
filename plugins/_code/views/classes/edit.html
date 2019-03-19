@@ -1,0 +1,36 @@
+<!doctype html>
+<html>
+
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>Edit Code File: {name}</title>
+    <style>
+      textarea {width:95%; height:80%;}
+      button>i.fa {margin-right: .5em;}
+      footer {margin-top: 1em; }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.9/ace.js" ></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.9/mode-php.js" ></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.9/theme-twilight.js" ></script>
+    <script src="/static/scripts/jquery-ace.min.js" ></script>
+    <script>
+        $(function () {
+          $('textarea').ace({ theme: 'twilight', lang: 'php' })
+        });
+    </script>
+  </head>
+
+  <body>
+    <main>
+      <h2>File: {name}</h2>
+      <form method="post" action="edit">
+        <input type="hidden" name="path" value="{path}" />
+        <textarea name="content" rows="20">{content}</textarea>
+        <footer>
+          <button type="submit"><i class="fa fa-save"></i>Speichern</button>
+        </footer>
+      </form>
+    </main>
+  </body>
+
+</html>

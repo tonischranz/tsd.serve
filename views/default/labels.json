@@ -1,0 +1,10 @@
+{
+  "title": {
+    "de": "Willkommen",
+    "fr": "Bienvenue"
+  },
+  "Hallo (u)": {
+    "de": "Hallo {u}, wie geht's?",
+    "en": "hello {u}, how are you?"
+  }
+}

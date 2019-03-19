@@ -1,0 +1,314 @@
+<html>
+<head>
+<title>[System Error]</title>
+<style>
+
+
+body
+{
+	padding-top:48px;
+	font-family:sans;
+}
+
+a
+{
+	color:black;
+}
+
+ul
+{
+	list-style-type:none;
+}
+
+#content img
+{
+	width:360px;
+	
+}
+
+#header
+{
+	height:48px;
+	background-color:#ccc;
+	text-align:right;
+	padding-right:2px;
+}
+
+#header a.logo
+{
+	position:fixed;
+	height:48px;
+	position:absolute;
+	top:0;
+	left:0;
+}
+
+#header a.logo>img
+{
+	position:fixed;
+	height:48px;
+	top:2px;
+	left:2px;
+}
+
+#header a.mobile-menu
+{
+	position:fixed;
+	top:2px;
+	right:2px;
+	display:inline-block;
+}
+
+#header a.mobile-menu>i.fa
+{
+	font-size:48px;
+}
+
+#header a.mobile-menu:hover + #header ul.nav:hover
+{
+	display:block;
+}
+
+#header ul.nav
+{
+	top:48px;
+	left:0;
+	right:0;
+	bottom:0;
+	padding-left:0;
+}
+
+#header ul.nav>li
+{
+	background-color:#ccc;
+}
+
+#footer
+{
+	position:static;
+}
+
+@media screen and (min-width: 480px) {
+#content img
+{
+	width:420px;
+
+	border: 1px solid black;
+	padding: 2px;
+}
+}
+
+@media screen and (min-width: 800px) {
+
+body
+{
+	padding-top:0;
+}
+
+#content img 
+{
+        width:756px;
+	
+	border: 1px solid black;
+	padding: 3px;
+}
+
+#header
+{
+	position:relative;
+}
+
+#header a.mobile-menu
+{
+	display:none;
+}
+
+#header a.logo
+{
+	position:absolute;
+	top:0;
+	left:0;
+}
+
+#header a.logo>img
+{
+	position:static;
+}
+
+#header ul.nav
+{
+	display:block;
+	position:absolute;
+	top:auto;
+	left:auto;
+	bottom:0;
+	right:5px;
+	margin-bottom:0;
+}
+
+#header ul.nav>li
+{
+	display:inline-block;
+	font-size:xx-large;
+}
+
+}
+
+@media screen and (min-width: 1280px) {
+#content img
+{
+	width:1024px;
+
+	border: 1px solid black;
+	padding: 5px;
+}
+}
+
+@media screen and (min-height: 720px) and (min-width: 800px) {
+
+body
+{
+	padding-top:1.1em;
+}
+
+#header
+{
+	height:128px;
+	text-align:right;
+	padding-left:30%;
+}
+
+#header a.logo
+{
+	height:128px;
+	position:absolute;
+	left:0;
+	top:0;
+
+}
+
+#header a.logo>img
+{
+	height:128px;
+}
+
+#header ul.nav
+{
+	padding-right:5px;
+	padding-bottom:5px;
+}
+
+#footer
+{
+	position:fixed;
+	top:0;
+	right:0;
+	left:0;
+	background-color: black;
+	padding:5px;
+}
+
+#footer a
+{
+	color:white;
+}
+
+#footer>div
+{
+	display:inline-block;
+}
+
+#footer div.user-menu
+{
+	position:relative;
+
+}
+
+#footer div.user-menu>ul
+{
+	position:absolute;
+	background-color:#222;
+	padding:5px;
+	text-align:left;
+}
+
+#footer div.lang-bar
+{
+	position:absolute;
+	right:5px;
+	top:5px;
+}
+
+#footer div.admin-bar
+{
+	position:absolute;
+	left:5px;
+	top:5px;
+}
+
+
+}/* end @media*/
+
+#content h2
+{
+	background-color: black;
+	color:white;
+}
+
+body
+{
+	text-align:center;
+	min-width:420px;
+	max-width:1440px;
+}
+
+</style>
+
+<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
+
+</head>
+
+<body>
+
+<div id="header">
+<a class="logo" href="" ><img src="/static/images/logo.png" alt="[Home]" /></a>
+<a class="mobile-menu" href=""><i class="fa fa-bars" ></i></a>
+<ul class="nav">
+<li><a href=""><i class="fa fa-newspaper-o" ></i>[News]</a></li>
+<li><a href=""><i class="fa fa-tags" ></i>[Products]</a></li>
+<li><a href=""><i class="fa fa-support" ></i>[Support]</a></li>
+<li><a href=""><i class="fa fa-users" ></i>[About Us]</a></li>
+</ul>
+</div>
+
+<div id="content">
+<h2>[System Error]</h2>
+<img alt="[System Error]" src="/static/images/syserr.png" />
+<p>[System Error Description]</p>
+<h3>{type}</h3>
+<p>{msg}</p>
+</div>
+
+<div id="footer">
+<div class="admin-bar" >
+<a href="" ><i class="fa fa-cog" ></i>[System]</a>
+<a href="" ><i class="fa fa-wrench" ></i>[Settings]</a>
+<a href="" ><i class="fa fa-paint-brush" ></i>[Customize]</a>
+</div>
+<div class="user-menu" >
+<a href="" ><i class="fa fa-user" ></i>{username}</a>
+<ul>
+<li><a href="" ><i class="fa fa-id-card"></i>[Account]</a></li>
+<li><a href="" ><i class="fa fa-ban"></i>[logout]</a></li>
+</ul>
+</div>
+<div class="lang-bar">
+<i class="fa fa-globe"></i>
+<a href="" >[DE]</a>
+<a href="" >[FR]</a>
+<a href="" >[EN]</a>
+</div>
+</div>
+
+</body>
+</html>

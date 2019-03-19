@@ -1,0 +1,47 @@
+<html>
+<head>
+  <title>[configuration]</title>
+</head>
+<body>
+  <div id="content">
+    <fieldset>
+      <legend>[db_config]</legend>
+      <form method="post" action="setDB">
+        <label>[host]</label>
+        <input type="text" name="host" value="{db.host}" />
+        <label>[username]</label>
+        <input type="text" name="username" value="{db.username}" />
+        <label>[password]</label>
+        <input type="text" name="password" value="{db.password}" />
+        <label>[db]</label>
+        <input type="text" name="db" value="{db.database}" />
+        <button type="submit">[/save]</button>
+      </form>
+    </fieldset>
+    <fieldset>
+      <legend>[languages_config]</legend>
+      <ul>
+        {foreach $l in lang}
+        <li>
+          {$l}
+          <div class="tools">
+            <form method="post" action="moveLanguageUp">
+              <input type="hidden" name="lang" value="{$l}" />
+              <button type="submit"><i class="fa fa-up" />[/up]</button>
+            </form>
+            <form method="post" action="moveLanguageDown">
+              <input type="hidden" name="lang" value="{$l}" />
+              <button type="submit"><i class="fa fa-down" />[/down]</button>
+            </form>
+            <form method="post" action="removeLanguage">
+              <input type="hidden" name="lang" value="{$l}" />
+              <button type="submit"><i class="fa fa-delete" />[/delete]</button>
+            </form>
+          </div>
+        </li>
+        {/foreach}
+      </ul>
+    </fieldset>
+  </div>
+</body>
+</html>
