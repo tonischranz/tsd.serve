@@ -3,40 +3,49 @@
 /*
  * Main PHP File
  */
+// phpinfo();
 
+ob_start ();
 
 set_include_path ('./classes');
 spl_autoload_extensions ('.class.php');
 spl_autoload_register ();
-ob_start ();
 
-if (!is_string ($_SERVER['REDIRECT_URL']))
+
+if (is_string ($_SERVER['REDIRECT_URL']))
 {
-  header ("HTTP/1.0 404 Not Found");
-  exit;
+	$path = $_SERVER['REDIRECT_URL'];
 }
-else if (!is_string ($_SERVER['REQUEST_METHOD']))
+else if(is_string ($_SERVER['REQUEST_URI']))
 {
-  header ("HTTP/1.0 400 Bad Request");
-  exit;
+	$path = $_SERVER['REQUEST_URI'];
 }
 else
 {
-  $path = $_SERVER['REDIRECT_URL'];
-
-  $c = tsd\serve\Controller::getController ($path);
-
-  if ($_SERVER['REQUEST_METHOD'] == 'POST')
-  {
-    $c->servePOST ($path, $_POST);
-  }
-  else if ($_SERVER['REQUEST_METHOD'] == 'GET')
-  {
-    $c->serveGET ($path, $_GET);
-  }
-  else
-  {
-    header ("HTTP/1.0 501 Not Implemented");
-    exit;
-  }
+	header ("HTTP/1.0 404 Not Found");
+	exit;
 }
+
+
+if (!is_string ($_SERVER['REQUEST_METHOD']))
+{
+ 	header ("HTTP/1.0 400 Bad Request");
+ 	exit;
+}
+
+$c = tsd\serve\Controller::getController ($path);
+
+if ($_SERVER['REQUEST_METHOD'] == 'POST')
+{
+	$c->servePOST ($path, $_POST);
+}
+else if ($_SERVER['REQUEST_METHOD'] == 'GET')
+{
+	$c->serveGET ($path, $_GET);
+}
+else
+{
+	header ("HTTP/1.0 501 Not Implemented");
+	exit;
+}
+
