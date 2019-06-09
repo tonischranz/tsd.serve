@@ -5,6 +5,8 @@ namespace tsd\serve;
 abstract class Membership
 {
 
+  
+  //yasdfasdf
   abstract function isAnonymous ();
 
   abstract function isInGroup ($group);
