@@ -13,6 +13,8 @@ class PluginController extends Controller
 
     $this->name = $name;
 
+    //sdkj,fhgskdjlfg
+
     //ToDo: Plugins in phar-archives
 
     $filename = "./plugins/$name/plugin.json";
