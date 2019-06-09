@@ -36,8 +36,8 @@ class Controller
     $this->membership = Membership::create($m['mode'], $m);
     $this->viewsPath = './views';
 
-    set_include_path (get_include_path () . PATH_SEPARATOR . './lib');
-    spl_autoload_register ();
+ //   set_include_path (get_include_path () . PATH_SEPARATOR . './lib');
+ //   spl_autoload_register ();
   }
 
   private function getMethodPath (string $path)
@@ -153,7 +153,7 @@ class Controller
       {
         if ($mem->isAnonymous ())
         {
-          $this->redirect ('/member/login');
+          $this->redirect ('/_member/login');
         }
         else
         {

@@ -6,13 +6,14 @@
 // phpinfo();
 
 
-//ob_start ();
+
 ini_set('display_errors','On');
 
 set_include_path ('./classes');
 spl_autoload_extensions ('.class.php');
 spl_autoload_register ();
 
+ob_start ();
 
 if (key_exists('REDIRECT_URL', $_SERVER))
 {
