@@ -111,7 +111,8 @@ class View
         $args   = [];
         $i      = 0;
         $params = explode(',', $m['params']);
-        foreach (explode(',', $m['args']) as $a) {
+        $arg_ex = explode(',', $m['args']);
+        foreach ($arg_ex as $a) {
           $exp    = View::compileExpression($a);
           $args[] = "'$params[$i]'=>$exp";
           $i++;
