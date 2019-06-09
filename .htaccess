@@ -5,5 +5,5 @@ RewriteCond "%{REQUEST_URI}" "!^/static/"
 RewriteCond "%{REQUEST_URI}" "!=/serve.php"
 RewriteCond "%{REQUEST_URI}" "!=/system-error.html"
 
-sd#
+#
 RewriteRule "^(.*)" "/serve.php" [L]
