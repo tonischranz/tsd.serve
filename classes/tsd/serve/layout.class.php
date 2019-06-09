@@ -21,17 +21,15 @@ class Layout extends View
     parent::__construct ('./views/layout.html');
   }
 
+  //public function 
+
   public function render (array $data)
   {
-    $this->load ();
-    $this->localize ();
-    $this->compile ();
+    $template = $this->compile ($this->localize ($this->load ()));
 
-    $view = $this->getCompiled ();
-
-    Layout::renderInt ($view, $data);
+    Layout::renderInt ($template, $data);
   }
-
+  
   private static function renderInt ($view, $data)
   {
     $d = $data;

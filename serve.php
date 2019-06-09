@@ -5,14 +5,16 @@
  */
 // phpinfo();
 
-ob_start ();
+
+//ob_start ();
+ini_set('display_errors','On');
 
 set_include_path ('./classes');
 spl_autoload_extensions ('.class.php');
 spl_autoload_register ();
 
 
-if (is_string ($_SERVER['REDIRECT_URL']))
+if (key_exists('REDIRECT_URL', $_SERVER))
 {
 	$path = $_SERVER['REDIRECT_URL'];
 }
