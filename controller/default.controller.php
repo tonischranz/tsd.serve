@@ -10,11 +10,11 @@ class defaultController extends Controller
     $this->render ('index', ['user' => 'Toni Schranz']);
   }
 
-  function show ($name)
+  function show ($names)
   {
-    var_dump($name);
+    var_dump($names);
     
-    $this->render ('index', ['user' => $name[0]]);
+    $this->render ('index', ['user' => $names[0]]);
   }
 
 }
