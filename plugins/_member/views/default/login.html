@@ -1,0 +1,34 @@
+<!doctype html>
+<html>
+
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>[title]</title>
+    <style type="text/css">
+      /*h1 { text-align: center; font-size: 10rem;}*/
+    </style>
+  </head>
+
+  <body>
+    <div id="content">
+      <h1>⚒</h1>
+      <form method="POST" action="login">
+        <input type="hidden" name="redirect_url" value="{redirect_url}" />
+        <div class="_input">
+          <label for="username">[username]</label>
+          <input type="text" id="username" name="username" required>
+          <span class="_error">[error(m){error.username}]</span>
+        </div>
+        <div class="_input">
+          <label for="password">[password]</label>
+          <input type="password" id="password" name="passsword" required>
+          <span class="_error">[error(m){error.password}]</span>
+        </div>
+        <footer class="_buttons">
+          <button type="submit">go</button>
+        </footer>
+      </form>
+    </div>
+  </body>
+
+</html>
