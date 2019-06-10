@@ -338,11 +338,35 @@ class Controller
 
     require_once $fileName;
 
-    $c = new $ctrlName();
+
+    $c= Controller::create($ctrlName);
+    //$c = new $ctrlName();
     $c->name = $name;
 
     return $c;
   }
+
+  private static function create($name, $pname='')
+{
+	$t = new \ReflectionClass($name);
+	$con = $t->getConstructor();
+  $par = $con?$con->getParameters():[];
+  $args = [];
+	
+	foreach ($par as $p)
+	{
+    if ($p->isArray() && $p->name == 'config' && $pname) 
+      $args[]=Config::getConfig($pname);
+    else if ($p->hasType() && !$p->isArray())
+      $args[]=Controller::create($p->getType()->getName(), $p->getName());
+    else if ($p->isArray())
+      $args[]=[];
+    else 
+      $args[]=null;
+  }
+  
+  return $con?$args?$t->newInstanceArgs($args):new $name():new $name();
+}
 
   private static function getMethodName (string $methodPath, string $prefix, array &$params, array &$pathAlternatives = null)
   {

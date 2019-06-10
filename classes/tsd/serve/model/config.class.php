@@ -62,4 +62,12 @@ class Config
     file_put_contents ($path, json_encode ($data));
   }
 
+  /**
+   * 
+   */
+  static function getConfig(string $name)
+  {
+    return ['mode'=>'default'];
+  }
+
 }
