@@ -13,7 +13,7 @@ class _codeController extends Controller
   
   function showClasses ($path)
   {
-    var_dump ($path);exit();
+    //var_dump ($path);exit();
   
   
     $filepath = 'classes' . implode(DIRECTORY_SEPARATOR, $path) . '.class.php';
@@ -23,7 +23,7 @@ class _codeController extends Controller
   
   function doClasses ($path, $content)
   {
-    var_dump($path, $content);
+    //var_dump($path, $content);
     $this->render ();  
   } 
 

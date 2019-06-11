@@ -6,7 +6,7 @@ class Factory
 {
     function create($type, $name = '')
     {
-        var_dump($type, $name);
+        //var_dump($type, $name);
 
         $t = new \ReflectionClass($type);
 
@@ -15,7 +15,7 @@ class Factory
         if ($t->isAbstract() && $config && isset($config['mode']))
         {
             $t=$this->getImplementation($t, $config['mode']);
-            var_dump($t); 
+            //var_dump($t); 
         }
 
         $con = $t->getConstructor();
@@ -35,8 +35,8 @@ class Factory
                 $args[] = null;
         }
 
-        var_dump($con);
-        var_dump($args);
+        //var_dump($con);
+        //var_dump($args);
         return $con ? $t->newInstanceArgs($args) : new $type();
         
     }
@@ -46,22 +46,22 @@ class Factory
         $doc = $type->getDocComment();
         $matches = [];
 
-        var_dump($doc);
+        //var_dump($doc);
 
         if (preg_match_all ('#@Implementation\s(.*)#', $doc, $matches) > 0)
         {
             foreach ($matches[1] as $i)
             {
-                var_dump($i);
+                //var_dump($i);
                 $itype = new \ReflectionClass($i);
                 
                 $idoc = $itype->getDocComment();
                 $imatches = [];
-                var_dump($idoc);
+                //var_dump($idoc);
 
                 if (preg_match_all ('#@Mode\s(\w+)#', $idoc, $imatches) > 0)
                 {
-                    var_dump($imatches);
+                    //var_dump($imatches);
                     foreach ($imatches[1] as $m)
                     {
                         if ($m == $mode) return $itype;

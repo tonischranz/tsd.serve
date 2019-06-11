@@ -2,15 +2,22 @@
 
 namespace tsd\serve;
 
+
 class App
 {
+    const CONFIG = '.config.json';
     private static $instance;
 
     private $factory;
 
-    function __construct()
+    function __construct(array $config = null)
     {
-        $this->factory = new Factory();
+        if ($config == null && file_exists(App::CONFIG))
+            $config = json_decode (file_get_contents (App::CONFIG), true);
+        else
+            $config = [];
+        
+        $this->factory = new Factory($config);
     }
     
     private static function getInstance()
