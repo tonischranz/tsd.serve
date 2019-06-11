@@ -19,7 +19,7 @@ class InstallMembership extends Membership
 
   public function isAnonymous ()
   {
-    return !$_SESSION['logged_in'];
+    return !isset($_SESSION['logged_in']);
   }
 
   public function isInGroup ($group)
@@ -33,5 +33,10 @@ class InstallMembership extends Membership
   {
     if ($username == 'install' && $password == $this->password)
       $_SESSION['logged_in']=true;
+  }
+
+  public function logout ()
+  {
+    session_destroy();
   }
 }

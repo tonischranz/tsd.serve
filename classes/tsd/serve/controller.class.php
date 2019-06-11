@@ -130,6 +130,12 @@ class Controller
     $mem = App::create('\tsd\serve\Membership', 'member');
     $doc = $mi->getDocComment ();
     $matches = [];
+    $authorized = true;
+
+    if (preg_match('#@SecurityUser#', $doc))
+    {
+        $authorized = !$mem->isAnonymous();
+    }
 
     if (preg_match_all ('#@SecurityGroup\s(\w+)#', $doc, $matches) > 0)
     {
@@ -140,17 +146,18 @@ class Controller
         {
           $authorized = true;
         }
-      }
-      if (!$authorized)
+      }     
+    }
+
+    if (!$authorized)
+    {
+      if ($mem->isAnonymous ())
       {
-        if ($mem->isAnonymous ())
-        {
-          $this->redirect ('/_member/login');
-        }
-        else
-        {
-          $this->error (403, 'Forbidden');
-        }
+        $this->redirect ('/_member/login');
+      }
+      else
+      {
+        $this->error (403, 'Forbidden');
       }
     }
 
