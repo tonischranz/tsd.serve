@@ -2,14 +2,18 @@
 
 namespace tsd\serve;
 
+
+/**
+ * @Mode install
+ */
 class InstallMembership extends Membership
 {
 
   private $password;
 
-  protected function __construct ($password)
+  function __construct (array $config)
   {
-    $this->password = $password;
+    $this->password = $config['password'];
   }
 
   public function isAnonymous ()

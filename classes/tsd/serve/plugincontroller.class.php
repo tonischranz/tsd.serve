@@ -65,11 +65,11 @@ class PluginController extends Controller
       $d['namespace'] = implode ('\\', $nps);
     }
 
-    $c = Controller::loadControllerInt ($name, "plugins/$name_plugin/controller", $d['namespace']);
+    $c = App::getPluginController ($name, "plugins/$name_plugin/controller", $d['namespace']);
 
     if (!$c)
     {
-      $c = Controller::loadControllerInt ('default', "plugins/$name_plugin/controller", $d['namespace']);
+      $c = App::getPluginController ('default', "plugins/$name_plugin/controller", $d['namespace']);
     }
 
     $c->setViewsPath ("./plugins/$name_plugin/views");

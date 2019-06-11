@@ -36,7 +36,7 @@ if (!is_string ($_SERVER['REQUEST_METHOD']))
  	exit;
 }
 
-$c = tsd\serve\Controller::getController ($path);
+$c = tsd\serve\App::getController ($path);
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST')
 {

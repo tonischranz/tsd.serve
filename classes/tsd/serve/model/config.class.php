@@ -67,7 +67,10 @@ class Config
    */
   static function getConfig(string $name)
   {
-    return ['mode'=>'default'];
+    if ($name == "member")
+      return ['mode'=>'install', 'password'=>'1234'];
+    else
+      return [];
   }
 
 }
