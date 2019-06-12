@@ -4,7 +4,6 @@ namespace tsd\serve;
 
 class View
 {
-
   private $path;
   private $labels;
 
@@ -73,7 +72,7 @@ class View
       return false;
     if (!$parts[0])
       return false;
-    $o     = $parts[0][0] == '$' ? $parts[0] : "\$d['$parts[0]']";
+      $o = $parts[0][0] == '$' ? $parts[0] : "\$d['$parts[0]']";
     array_shift($parts);
     foreach ($parts as $p) {
       $o .= "['$p']";

@@ -73,5 +73,4 @@ class PluginController extends Controller
     $c->setBasePath ($c->buildBasePath ($path));
     $c->serve ($p, $prefix, $data);
   }
-
 }
