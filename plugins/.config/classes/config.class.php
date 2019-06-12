@@ -1,5 +1,5 @@
 <?php
-
+/*
 namespace tsd\serve\model;
 
 class Config
@@ -60,6 +60,14 @@ class Config
   private static function write_data ($path, $data)
   {
     file_put_contents ($path, json_encode ($data));
+  }
+
+  static function getConfig(string $name)
+  {
+    if ($name == "member")
+      return ['mode'=>'install', 'password'=>'1234'];
+    else
+      return [];
   }
 
 }

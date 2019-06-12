@@ -21,23 +21,15 @@ use tsd\serve\model\Config;
 class Controller
 {
 
-  protected $name;
-  private $config;
-  private $membership;
+  public $name;
+  //private $config;
+  //private $membership;
   private $viewsPath;
   private $basePath;
 
   function __construct ()
   {
-    //$this->membership = new Membership();
-    $c = new Config();
-    $this->config = $c;
-    $m = $c->getMembershipConfig();
-    $this->membership = Membership::create($m['mode'], $m);
     $this->viewsPath = './views';
-
- //   set_include_path (get_include_path () . PATH_SEPARATOR . './lib');
- //   spl_autoload_register ();
   }
 
   private function getMethodPath (string $path)
@@ -135,9 +127,15 @@ class Controller
     }
 
     // check permission
-    $mem = $this->getMembership ();
+    $mem = App::create('\tsd\serve\Membership', 'member');
     $doc = $mi->getDocComment ();
     $matches = [];
+    $authorized = true;
+
+    if (preg_match('#@SecurityUser#', $doc))
+    {
+        $authorized = !$mem->isAnonymous();
+    }
 
     if (preg_match_all ('#@SecurityGroup\s(\w+)#', $doc, $matches) > 0)
     {
@@ -148,17 +146,18 @@ class Controller
         {
           $authorized = true;
         }
-      }
-      if (!$authorized)
+      }     
+    }
+
+    if (!$authorized)
+    {
+      if ($mem->isAnonymous ())
       {
-        if ($mem->isAnonymous ())
-        {
-          $this->redirect ('/_member/login');
-        }
-        else
-        {
-          $this->error (403, 'Forbidden');
-        }
+        $this->redirect ('/_member/login');
+      }
+      else
+      {
+        $this->error (403, 'Forbidden');
       }
     }
 
@@ -178,15 +177,6 @@ class Controller
     }
 
     $mi->invokeArgs ($this, $params);
-  }
-
-  /**
-   *
-   * @return Membership
-   */
-  protected function getMembership ()
-  {
-    return $this->membership;
   }
 
   protected function render (string $view, array $data = null)
@@ -298,50 +288,10 @@ class Controller
     Controller::error (501, 'Not Implemented', 'PDF Rendering is not yet implemented');
   }
 
-  static function getController (string $path)
-  {
-    $parts = explode ('/', $path);
-
-    $name = count ($parts) > 1 ? $parts [1] : 'default';
-    $c = Controller::loadController ($name);
-
-    if (!$c)
-    {
-      $c = Controller::loadController ('default');
-    }
-
-    return $c;
-  }
-
   private static function renderTemplate (string $view, array $data)
   {
     $v = new View ($view);
     $v->render ($data);
-  }
-
-  /**
-   *
-   * @param string $name
-   * @param string $path
-   * @param string $namespace
-   * @return boolean|\tsd\serve\Controller
-   */
-  protected static function loadControllerInt (string $name, string $path = 'controller', string $namespace = '')
-  {
-    $fileName = "$path/$name.controller.php";
-    $ctrlName = ($namespace ? '\\' : '') . $namespace . '\\' . $name . 'Controller';
-
-    if (!file_exists ($fileName))
-    {
-      return false;
-    }
-
-    require_once $fileName;
-
-    $c = new $ctrlName();
-    $c->name = $name;
-
-    return $c;
   }
 
   private static function getMethodName (string $methodPath, string $prefix, array &$params, array &$pathAlternatives = null)
@@ -414,25 +364,7 @@ class Controller
     return $methodName;
   }
 
-  private static function loadController (string $name)
-  {
-    //ToDo: Namespaces & Plugins
-    if ($name && file_exists ("./plugins/$name/"))
-    {
-      try
-      {
-        return new PluginController ($name);
-      }
-      catch (Exception $e)
-      {
-        echo $e->getTraceAsString ();
-        Controller::error (500, "Loading Plugin $name failed");
-        return false;
-      }
-    }
-
-    return Controller::loadControllerInt ($name);
-  }
+  
 
   private static function error (int $code, string $message, string $description = '')
   {
