@@ -4,18 +4,28 @@ namespace tsd\serve;
 
 class Factory
 {
+    private $config;
+    private $plugins;
+
+    function __construct(array $config, array $plugins)
+    {
+        $this->config = $config;
+        $this->plugins = $plugins;
+    }
+
+    //function createAll($type, )
+    //function createA($type, $$)
+    //fu todo:
+
     function create($type, $name = '')
     {
-        //var_dump($type, $name);
-
         $t = new \ReflectionClass($type);
 
-        if ($name) $config = model\Config::getConfig($name);
+        $config = $this->config[$name];
         
         if ($t->isAbstract() && $config && isset($config['mode']))
         {
             $t=$this->getImplementation($t, $config['mode']);
-            //var_dump($t); 
         }
 
         $con = $t->getConstructor();
@@ -24,9 +34,12 @@ class Factory
 
         foreach ($par as $p) {
             if ($p->isArray() && $p->name == 'config' && $name)
-                $args[] = model\Config::getConfig($name);
+                $args[] = $config;
             else if ($p->hasType() && !$p->isArray())
                 $args[] = $this->create($p->getType()->getName(), $p->getName());
+		//todo: single values
+		else if ($config[$p->name])
+		$args[] = $config[$p->name];
             else if ($p->name == 'name')
                 $args[]=$name;
             else if ($p->isArray())
@@ -47,7 +60,7 @@ class Factory
         $matches = [];
 
         //var_dump($doc);
-
+        //todo: use plugins to search classes
         if (preg_match_all ('#@Implementation\s(.*)#', $doc, $matches) > 0)
         {
             foreach ($matches[1] as $i)
