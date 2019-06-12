@@ -16,8 +16,10 @@ class App
             $config = json_decode (file_get_contents (App::CONFIG), true);
         else
             $config = [];
+
+        //$plugins = //list plugin directory names
         
-        $this->factory = new Factory($config);
+        $this->factory = new Factory($config, $plugins);
     }
     
     private static function getInstance()
