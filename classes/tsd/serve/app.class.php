@@ -18,6 +18,7 @@ class App
             $config = [];
 
         //$plugins = //list plugin directory names
+		$plugins = [];
         
         $this->factory = new Factory($config, $plugins);
     }

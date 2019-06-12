@@ -34,9 +34,12 @@ class Factory
 
         foreach ($par as $p) {
             if ($p->isArray() && $p->name == 'config' && $name)
-                $args[] = model\Config::getConfig($name);
+                $args[] = $config;
             else if ($p->hasType() && !$p->isArray())
                 $args[] = $this->create($p->getType()->getName(), $p->getName());
+		//todo: single values
+		else if ($config[$p->name])
+		$args[] = $config[$p->name];
             else if ($p->name == 'name')
                 $args[]=$name;
             else if ($p->isArray())
