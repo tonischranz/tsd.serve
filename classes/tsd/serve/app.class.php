@@ -6,6 +6,7 @@ namespace tsd\serve;
 class App
 {
     const CONFIG = '.config.json';
+    const PLUGINS = 'plugins';
     private static $instance;
 
     private $factory;
@@ -17,8 +18,7 @@ class App
         else
             $config = [];
 
-        //$plugins = //list plugin directory names
-		$plugins = [];
+        $plugins = scandir(App::PLUGINS);
         
         $this->factory = new Factory($config, $plugins);
     }

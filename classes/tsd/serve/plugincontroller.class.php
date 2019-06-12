@@ -12,9 +12,6 @@ class PluginController extends Controller
     parent::__construct ();
 
     $this->name = $name;
-
-    //sdkj,fhgskdjlfg
-
     //ToDo: Plugins in phar-archives
 
     $filename = "./plugins/$name/plugin.json";
