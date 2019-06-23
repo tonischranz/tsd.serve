@@ -12,7 +12,8 @@ class defaultController extends Controller
 
   function show ($names)
   {
-    //var_dump($names);
+    if (count($names) > 0)
+      var_dump($names);
     
     $this->render ('index', ['user' => $names[0]]);
   }

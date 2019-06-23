@@ -3,3 +3,32 @@ body {
     background-color:#222; 
     font-family: sans-serif; 
 }
+
+a, a:visited {
+    text-decoration: none;
+    color:#088;
+}
+
+a:active, a:hover{
+    text-decoration:#ddd underline;
+}
+
+button{
+    border: thin solid transparent;
+    background-color: #088;
+    color: #ddd;
+    font-weight: bold;
+}
+
+button:hover{
+    border: thin solid #ddd;
+}
+
+h1 a, h1 a:visited {
+    color:#ddd;
+}
+
+h1 a:hover, h1 a:active {
+    color:#088;
+    text-decoration: none;
+}

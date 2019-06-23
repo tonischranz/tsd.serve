@@ -21,7 +21,8 @@ class Factory
     {
         $t = new \ReflectionClass($type);
 
-        $config = $this->config[$name];
+        $config = array_key_exists($name, $this->config) ? 
+                    $this->config[$name]:false;
         
         if ($t->isAbstract() && $config && isset($config['mode']))
         {

@@ -6,5 +6,7 @@
   "Hallo (u)": {
     "de": "Hallo {u}, wie geht's?",
     "en": "hello {u}, how are you?"
-  }
+  },
+  "✔":      {"de":"bla"},
+  "_code":{"de":"✎ code"}
 }

@@ -5,5 +5,6 @@
   "yes":    {"de":"ja",       "en": "yes",    "fr": "oui"},
   "no":     {"de":"nein",     "en": "no",     "fr": "non"},
   "save":   {"de":"speichern","en": "save",   "fr": "sauvegarder"},
-  "title":  {"de":"tsd.serve", "en": "tsd.serve", "fr": "tsd.serve"}
+  "title":  {"de":"tsd.serve", "en": "tsd.serve", "fr": "tsd.serve"},
+  "✔":      {"de":"✔ ok",       "en": "✔ ok",   "fr": "✔ ok"}
 }
