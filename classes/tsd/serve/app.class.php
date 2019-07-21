@@ -30,6 +30,8 @@ class App
 
     static function serve()
     {
+        ob_start ();
+
         $app = new App();
         $app->serveRequest(
             $_SERVER['REQUEST_METHOD'], 
@@ -37,6 +39,8 @@ class App
             key_exists('REDIRECT_URL', $_SERVER) ? 
                 $_SERVER['REDIRECT_URL']:$_SERVER['REQUEST_URI'], 
             $_GET, $_POST, $_FILES, $_COOKIE, $_SERVER['HTTP_ACCEPT'] );
+
+        ob_flush();
     }
 
     protected function serveRequest($method, $host, $path, $get_data, $post_data, $files_data, $cookie_data, $accept)
@@ -70,6 +74,6 @@ class ViewEngine
 {
     function render($data)
     {
-        
+
     }
 }
