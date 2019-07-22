@@ -155,36 +155,48 @@ abstract class ViewEngine
 {
     function render($result, $accept)
     {
-        if (is_a($result, 'AccessDeniedException')) $result = new ErrorResult (401, $result);
+        if (is_a($result, 'AccessDeniedException')) $result = new ErrorResult (403, $result);
         if (is_a($result, 'NotFoundException')) $result = new ErrorResult (404, $result);
-        if (is_a($result, 'Exception')) $result = new ErrorResult (500, $result);
+        if (is_a($result, 'Exception')) $result = new ErrorResult ($result);
         if (!is_a($result, 'Result')) $result = new DataResult ($result);
+
+        http_response_code($result->getStatusCode());
+        $headers = $result->getHeaders();
+        foreach ($headers as $h)
+        {
+            header($h);
+        }
 
         if ($accept == 'application/json') $this->renderJson($result);
         if ($accept == 'text/xml') $this->renderXml($result);
 
-        $this->renderView($result);
+        if (is_a($result, 'ViewResult')) 
+        {
+            $this->renderView($result);
+        }
     }
 
     private function renderJson(Result $result)
     {
-
+        ob_clean();        
+        echo json_encode($result->getData());
     }
 
     private function renderXml(Result $result)
     {
-
+        ob_clean();
+        echo $result->getData()->asXML();
     }
 
-    protected abstract function renderView (Result $result);
+    protected abstract function renderView (ViewResult $result);
 }
 
 class ServeViewEngine extends ViewEngine
 {
-    function renderView(Result $result)
+    function renderView(ViewResult $result)
     {
-        if (is_a($result, 'ViewResult'));
-        else if (is_a($result, 'DataResult'));
+        $v = new View ($result->view);
+        $v->render ($result->data);        
     }
 }
 
@@ -192,18 +204,20 @@ interface Result
 {
     function getData();
     function getStatusCode();
-//    function 
+    function getHeaders();
 }
 
 class ResultBase implements Result
 {
     private $statuscode;
     private $data;
+    private $headers;
 
-    function __construct($data, $statuscode)
+    function __construct($data, $statuscode, $headers = [])
     {
         $this->statuscode = $statuscode;
-        $this->data = $data;    
+        $this->data = $data;
+        $this->headers = $headers;
     }
 
     function getData()
@@ -216,6 +230,10 @@ class ResultBase implements Result
         return $this->statuscode;
     }
 
+    function getHeaders()
+    {
+        return $this->headers;
+    }
 }
 
 class RedirectResult
@@ -227,22 +245,44 @@ class RedirectResult
 }
 
 class ViewResult
-{
+{   
+    public $view;
+    public $data;
+
     function __construct(string $view, $data, $statuscode = 200)
     {
 
     }
 }
 
-class ErrorResult
+class ErrorResult extends MessageResult
 {
-
+    function __construct(int $code=500,$message)
+    {
+        parent::__construct($code, 'error', $message);
+    }
 }
 
-class DataResult extends ResultBase
+class MessageResult extends ViewResult
+{
+    function __construct($code=200, $type, $massage, $url=null) 
+    {
+        parent::__construct($type, ["message"=>$massage, "url"=>$url], $code);
+    }
+}
+
+class SucessResult extends MessageResult
+{
+    function __construct($message, $url = null)
+    {
+        parent::__construct('sucess', $message, $url);
+    }
+}
+
+class DataResult extends ViewResult
 {
     function __construct($data)
     {
-        parent::__construct($data, 200);
+        parent::__construct($data, 'data', 200);
     }
 }

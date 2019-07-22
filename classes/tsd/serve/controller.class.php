@@ -22,17 +22,34 @@ class Controller
 {
 
   public $name;
+  public $basePath;
   //private $config;
   //private $membership;
-  private $viewsPath;
-  private $basePath;
+  //private $viewsPath;
+  
 
   function __construct ()
   {
-    $this->viewsPath = './views';
+    //$this->viewsPath = './views';
   }
 
-  protected function render (string $view, array $data = null)
+  protected function view ($data = null, string $view = null)
+  {
+    if ($view == null)
+    {
+      $backtrace = debug_backtrace();
+      $view = $backtrace[0]['function'];
+    }
+
+    return new ViewResult($this->name."/$view", $data);
+  }
+
+  protected function redirect ($url)
+  {
+    return new RedirectResult($url);
+  }
+
+  /*protected function render (string $view, array $data = null)
   {
     $template = $this->getTemplatePath ($view);
 
@@ -61,7 +78,7 @@ class Controller
   {
     header ("Location: $path");
     exit;
-  }
+  }*/
 
 
   protected function buildMenu ()
