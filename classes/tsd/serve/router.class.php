@@ -261,3 +261,84 @@ class Router
     return $mp;
   }
 }
+class GetRoute extends Route
+{
+    function __construct(Controller $c, \ReflectionMethod $mi) 
+    {
+        parent::__construct($c, $mi);
+    }
+
+    function fill(array $data)
+    {
+        $this->data = array_merge($data['_GET'], $data);
+    }
+}
+
+class PostRoute extends Route
+{
+    function __construct(Controller $c, \ReflectionMethod $mi) 
+    {
+        parent::__construct($c, $mi);
+    }
+
+    function fill(array $data)
+    {
+        $this->data = array_merge($data['_POST'], $data);
+    }
+}
+
+abstract class Route
+{
+    private $controlller;
+    private $methodInfo;
+    protected $data;
+
+    function __construct(Controller $controlller, \ReflectionMethod $methodInfo)
+    {
+        $this->controlller = $controlller;
+        $this->methodInfo = $methodInfo;
+    }
+
+    abstract function fill(array $data);
+    
+    function follow()
+    {
+        // invoke
+        $pinfos = $this->methodInfo->getParameters();
+        $n = 0;
+        $params = [];
+
+        foreach ($pinfos as $pi) {
+            if (count($params) <= $n) {
+                $params[] = $this->data[$pi->name];
+            }
+         $n++;
+        }
+
+        $this->methodInfo->invokeArgs($this->controlller, $params);
+    }
+
+    function checkPermission(Membership $member)
+    {
+        // check permission
+    
+    $doc = $this->methodInfo->getDocComment();
+    $matches = [];
+    $authorized = true;
+
+    if (preg_match('#@SecurityUser#', $doc)) {
+      $authorized = !$member->isAnonymous();
+    }
+
+    if (preg_match_all('#@SecurityGroup\s(\w+)#', $doc, $matches) > 0) {
+      $authorized = false;
+      foreach ($matches[1] as $g) {
+        if ($member->isInGroup($g)) {
+          $authorized = true;
+        }
+      }
+    }
+
+    return $authorized;
+    }
+}

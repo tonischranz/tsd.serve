@@ -7,17 +7,16 @@ class defaultController extends Controller
 
   function showIndex ()
   {
-    $this->render ('index', ['user' => 'Toni Schranz']);
+    $this->view (['user' => 'Toni Schranz']);
   }
 
-  function show ($names)
+  function show (array $names)
   {
     echo "--- DUMP --- \n";
     
     if (count($names) > 0)
       var_dump($names);
     
-    $this->render ('index', ['user' => $names[0]]);
+    $this->view (['user' => $names[0]],'index');
   }
-
 }

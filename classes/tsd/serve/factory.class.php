@@ -24,9 +24,15 @@ class Factory
         $config = array_key_exists($name, $this->config) ? 
                     $this->config[$name]:false;
         
-        if ($t->isAbstract() && $config && isset($config['mode']))
+        if ($t->isAbstract())
         {
-            $t=$this->getImplementation($t, $config['mode']);
+            if($config && isset($config['mode']))
+            {
+                $t=$this->getImplementation($t, $config['mode']);
+            }
+            else {
+                $t=$this->getImplementation($t);
+            }
         }
 
         $con = $t->getConstructor();
@@ -51,18 +57,19 @@ class Factory
 
         //var_dump($con);
         //var_dump($args);
+        $type = $t->name;
         return $con ? $t->newInstanceArgs($args) : new $type();
         
     }
 
-    function getImplementation(\ReflectionClass $type, string $mode)
+    function getImplementation(\ReflectionClass $type, string $mode = null)
     {
         $doc = $type->getDocComment();
         $matches = [];
 
         //var_dump($doc);
         //todo: use plugins to search classes
-        if (preg_match_all ('#@Implementation\s(.*)#', $doc, $matches) > 0)
+        if (preg_match_all ('/@Implementation\s(.*)/', $doc, $matches) > 0)
         {
             foreach ($matches[1] as $i)
             {
@@ -71,9 +78,15 @@ class Factory
                 
                 $idoc = $itype->getDocComment();
                 $imatches = [];
-                //var_dump($idoc);
+                
 
-                if (preg_match_all ('#@Mode\s(\w+)#', $idoc, $imatches) > 0)
+                if (!$mode && preg_match('/@Default/', $idoc))
+                {
+                    echo "found";
+                    return $itype;
+                } 
+
+                if (preg_match_all ('/@Mode\s(\w+)/', $idoc, $imatches) > 0)
                 {
                     //var_dump($imatches);
                     foreach ($imatches[1] as $m)

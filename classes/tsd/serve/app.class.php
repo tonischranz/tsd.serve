@@ -69,88 +69,9 @@ class App
     }   
 }
 
-class GetRoute extends Route
-{
-    function __construct(Controller $c, ReflectionMethod $mi) 
-    {
-        parent::__construct($c, $mi);
-    }
-
-    function fill(array $data)
-    {
-        $this->data = array_merge($data['_GET'], $data);
-    }
-}
-
-class PostRoute extends Route
-{
-    function __construct(Controller $c, ReflectionMethod $mi) 
-    {
-        parent::__construct($c, $mi);
-    }
-
-    function fill(array $data)
-    {
-        $this->data = array_merge($data['_POST'], $data);
-    }
-}
-
-abstract class Route
-{
-    private $controlller;
-    private $methodInfo;
-    protected $data;
-
-    function __construct(Controller $controlller, ReflectionMethod $methodInfo)
-    {
-        $this->controlller = $controlller;
-        $this->methodInfo = $methodInfo;
-    }
-
-    abstract function fill(array $data);
-    
-    function follow()
-    {
-        // invoke
-        $pinfos = $this->methodInfo->getParameters();
-        $n = 0;
-        $params = [];
-
-        foreach ($pinfos as $pi) {
-            if (count($params) <= $n) {
-                $params[] = $this->data[$pi->name];
-            }
-         $n++;
-        }
-
-        $this->methodInfo->invokeArgs($this->controlller, $params);
-    }
-
-    function checkPermission(Membership $member)
-    {
-        // check permission
-    
-    $doc = $this->methodInfo->getDocComment();
-    $matches = [];
-    $authorized = true;
-
-    if (preg_match('#@SecurityUser#', $doc)) {
-      $authorized = !$member->isAnonymous();
-    }
-
-    if (preg_match_all('#@SecurityGroup\s(\w+)#', $doc, $matches) > 0) {
-      $authorized = false;
-      foreach ($matches[1] as $g) {
-        if ($member->isInGroup($g)) {
-          $authorized = true;
-        }
-      }
-    }
-
-    return $authorized;
-    }
-}
-
+/**
+ * @Implementation tsd\serve\ServeViewEngine
+ */
 abstract class ViewEngine
 {
     function render($result, $accept)
@@ -191,98 +112,14 @@ abstract class ViewEngine
     protected abstract function renderView (ViewResult $result);
 }
 
+/**
+ * @Default
+ */
 class ServeViewEngine extends ViewEngine
 {
     function renderView(ViewResult $result)
     {
         $v = new View ($result->view);
         $v->render ($result->data);        
-    }
-}
-
-interface Result
-{
-    function getData();
-    function getStatusCode();
-    function getHeaders();
-}
-
-class ResultBase implements Result
-{
-    private $statuscode;
-    private $data;
-    private $headers;
-
-    function __construct($data, $statuscode, $headers = [])
-    {
-        $this->statuscode = $statuscode;
-        $this->data = $data;
-        $this->headers = $headers;
-    }
-
-    function getData()
-    {
-        return $this->data;
-    }
-
-    function getStatusCode()
-    {
-        return $this->statuscode;
-    }
-
-    function getHeaders()
-    {
-        return $this->headers;
-    }
-}
-
-class RedirectResult
-{
-    function __construct($location)
-    {
-        parent::__construct($location, 302);
-    }
-}
-
-class ViewResult
-{   
-    public $view;
-    public $data;
-
-    function __construct(string $view, $data, $statuscode = 200)
-    {
-
-    }
-}
-
-class ErrorResult extends MessageResult
-{
-    function __construct(int $code=500,$message)
-    {
-        parent::__construct($code, 'error', $message);
-    }
-}
-
-class MessageResult extends ViewResult
-{
-    function __construct($code=200, $type, $massage, $url=null) 
-    {
-        parent::__construct($type, ["message"=>$massage, "url"=>$url], $code);
-    }
-}
-
-class SucessResult extends MessageResult
-{
-    function __construct($message, $url = null)
-    {
-        parent::__construct('sucess', $message, $url);
-    }
-}
-
-class DataResult extends ViewResult
-{
-    function __construct($data)
-    {
-        parent::__construct($data, 'data', 200);
     }
 }
