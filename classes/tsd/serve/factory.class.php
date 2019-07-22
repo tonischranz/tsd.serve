@@ -82,7 +82,7 @@ class Factory
 
                 if (!$mode && preg_match('/@Default/', $idoc))
                 {
-                    echo "found";
+                    //echo "found";
                     return $itype;
                 } 
 

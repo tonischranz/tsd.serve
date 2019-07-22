@@ -2,8 +2,6 @@
 
 namespace tsd\serve;
 
-use ReflectionMethod;
-
 class App
 {
     const CONFIG = '.config.json';
@@ -21,6 +19,8 @@ class App
             $config = [];
 
         $plugins = scandir(App::PLUGINS);
+
+        echo "hallo";
         $factory = new Factory($config, preg_grep('/^\.\w/',$plugins));
         
         $this->router = new Router($factory, preg_grep('/^[^\._]\w/', $plugins));
@@ -31,8 +31,9 @@ class App
     static function serve()
     {
         ob_start ();
-
+        
         $app = new App();
+
         $app->serveRequest(
             $_SERVER['REQUEST_METHOD'], 
             $_SERVER['HTTP_HOST'],
@@ -50,11 +51,9 @@ class App
     protected function serveRequest($method, $host, $path, $data, $accept)
     {
         $route = $this->router->route($host, $method, $path);
-        var_dump($route);
         
         try { $result = $this->getResult($route, $data); }
         catch (Exception $e) { $result = $e; }
-        var_dump($result);    
         
         $this->view_engine->render($result, $accept);
     }
@@ -66,7 +65,7 @@ class App
         
         $route->fill($data);        
         return $route->follow();
-    }   
+    }
 }
 
 /**
@@ -76,10 +75,10 @@ abstract class ViewEngine
 {
     function render($result, $accept)
     {
-        if (is_a($result, 'AccessDeniedException')) $result = new ErrorResult (403, $result);
-        if (is_a($result, 'NotFoundException')) $result = new ErrorResult (404, $result);
-        if (is_a($result, 'Exception')) $result = new ErrorResult ($result);
-        if (!is_a($result, 'Result')) $result = new DataResult ($result);
+        if ($result instanceof tsd\serve\AccessDeniedException) $result = new ErrorResult (403, $result);
+        if ($result instanceof tsd\serve\NotFoundException) $result = new ErrorResult (404, $result);
+        if ($result instanceof \Exception) $result = new ErrorResult (500, $result->getMessage());
+        if (!($result instanceof Result)) $result = new DataResult ($result);
 
         http_response_code($result->getStatusCode());
         $headers = $result->getHeaders();
@@ -88,10 +87,11 @@ abstract class ViewEngine
             header($h);
         }
 
+        //todo: better
         if ($accept == 'application/json') $this->renderJson($result);
         if ($accept == 'text/xml') $this->renderXml($result);
 
-        if (is_a($result, 'ViewResult')) 
+        if ($result instanceof ViewResult) 
         {
             $this->renderView($result);
         }
@@ -117,9 +117,11 @@ abstract class ViewEngine
  */
 class ServeViewEngine extends ViewEngine
 {
+    const VIEWS = './views';
+
     function renderView(ViewResult $result)
     {
-        $v = new View ($result->view);
-        $v->render ($result->data);        
+        $v = new View (ServeViewEngine::VIEWS.'/'.$result->getView());
+        $v->render ($result->getData());        
     }
 }

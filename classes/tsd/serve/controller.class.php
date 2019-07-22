@@ -32,7 +32,14 @@ class Controller
     if ($view == null)
     {
       $backtrace = debug_backtrace();
-      $view = $backtrace[0]['function'];
+      //var_dump($backtrace);
+      $view = $backtrace[1]['function'];
+      echo "<br>";
+      echo "<br>";
+      echo "$view";
+      echo "<br>";
+      echo "<br>";
+      $view = str_replace('showI', 'i', $view);
     }
 
     return new ViewResult($this->name."/$view", $data);
@@ -43,7 +50,7 @@ class Controller
     return new RedirectResult($url);
   }
 
-  protected function setBasePath ($path)
+  /*protected function setBasePath ($path)
   {
     $this->basePath = $path;
   }
@@ -51,7 +58,7 @@ class Controller
   protected function getBasePath ()
   {
     return $this->basePath;
-  }
+  }*/
 
 }
 
@@ -109,6 +116,11 @@ class ViewResult extends ResultBase
       parent::__construct($data,$statuscode);
       $this->view = $view;
     }
+
+    function getView()
+    {
+      return $this->view;
+    }
 }
 
 class MessageResult extends ViewResult
@@ -139,6 +151,6 @@ class DataResult extends ViewResult
 {
     function __construct($data)
     {
-        parent::__construct($data, 'data', 200);
+        parent::__construct('data', $data, 200);
     }
 }

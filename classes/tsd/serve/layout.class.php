@@ -18,12 +18,10 @@ class Layout extends View
 
   public function __construct ()
   {
-    parent::__construct ('./views/layout.html');
+    parent::__construct ('./views/layout');
   }
 
-  //public function 
-
-  public function render (array $data)
+  public function render ($data)
   {
     $template = $this->compile ($this->localize ($this->load ()));
 
@@ -38,5 +36,4 @@ class Layout extends View
 
     unset ($d);
   }
-
 }

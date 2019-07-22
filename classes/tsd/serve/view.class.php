@@ -9,11 +9,11 @@ class View
 
   function __construct(string $path)
   {
-    $this->path   = $path;
+    $this->path   = $path.'.html';
     $this->labels = Labels::create($path);
   }
 
-  function render(array $data)
+  function render($data)
   {
     $template = $this->compile($this->localize($this->load()));
     View::run($template, $data);
@@ -138,7 +138,7 @@ class View
 
   private static function run(string $view, array $data)
   {
-    $d     = $data['viewData'];
+    $d     = $data;//['viewData'];
     $debug = ob_get_contents();
     ob_clean();
     ob_start();

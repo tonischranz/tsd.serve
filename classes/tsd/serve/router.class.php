@@ -13,12 +13,6 @@ class Router
     $this->plugins = $plugins;
   }
 
-  function getData(string $method, string $host, string $path, array $data)
-  {
-    $controller = $this->getController($host, $path);    
-    return Router::serve($controller, $method, $path, $data);
-  }
-
   function route(string $host, string $method, string $path)
   {
     $controller = $this->getController($host, $path);
@@ -36,7 +30,7 @@ class Router
         if (!$mi) {
           $alternatives = [];
           $methodName = Router::getMethodName($methodPath, $prefix, $params, $alternatives);
-    
+
           foreach ($alternatives as $a) {
             $mi = Router::getMethodInfo($controller, $a['methodName']);
     
@@ -50,8 +44,8 @@ class Router
           }
         }
 
-        return $method == 'POST' ? new PostRoute($controller, $mi) : 
-          $method == 'GET' ? new GetRoute($controller, $mi) : false;
+        return $method == 'POST' ? new PostRoute($controller, $mi, $params) : 
+          $method == 'GET' ? new GetRoute($controller, $mi, $params) : false;
   }
 
   private static function getMethodName(string $methodPath, string $prefix, array &$params, array &$pathAlternatives = null)
@@ -170,15 +164,9 @@ class Router
     return $c ? $c : $this->loadController('default');
   }
 
-  /*static function getPluginController(string $name, string $path, string $namespace)
-  {
-    $instance = App::getInstance();
-    return $instance->createController($name, $path, $namespace);
-  }*/
-
   private function loadController(string $name)
   {
-    echo "Load Controller $name";
+    //echo "Load Controller $name";
 
     if (in_array($name, $this->plugins))
       return $this->createController('', App::PLUGINS."/{$name}/controller");
@@ -195,7 +183,7 @@ class Router
 
   private function createController(string $name, string $path = 'controller', string $namespace = '')
   {
-    echo "try create Controller '$name'\n";
+    //echo "try create Controller '$name'\n";
 
     $fileName = "$path/$name.controller.php";
     $ctrlName = ($namespace ? '\\' : '') . $namespace . '\\' . $name . 'Controller';
@@ -206,7 +194,7 @@ class Router
 
     require_once $fileName;
 
-    echo "File included, trying to instanciate.\n";
+    //echo "File included, trying to instanciate.\n";
 
     $c = $this->factory->create($ctrlName);
     $c->name = $name;
@@ -245,7 +233,7 @@ class Router
     return $mp;
   }
 
-  protected function buildBasePath($path)
+  /*protected function buildBasePath($path)
   {
     $parts = explode('/', $path);
     $mp = '/';
@@ -259,31 +247,32 @@ class Router
     }
 
     return $mp;
-  }
+  }*/
 }
 class GetRoute extends Route
 {
-    function __construct(Controller $c, \ReflectionMethod $mi) 
+    function __construct(Controller $c, \ReflectionMethod $mi, array $data) 
     {
-        parent::__construct($c, $mi);
+        parent::__construct($c, $mi, $data);
     }
 
     function fill(array $data)
     {
-        $this->data = array_merge($data['_GET'], $data);
+        $d = array_merge($this->data, $data['_GET']); 
+        $this->data = array_merge($d, $data);
     }
 }
 
 class PostRoute extends Route
 {
-    function __construct(Controller $c, \ReflectionMethod $mi) 
+    function __construct(Controller $c, \ReflectionMethod $mi, array $params) 
     {
-        parent::__construct($c, $mi);
+        parent::__construct($c, $mi, $params);
     }
 
     function fill(array $data)
     {
-        $this->data = array_merge($data['_POST'], $data);
+        $this->data = array_merge($this->data, $data['_POST'], $data);
     }
 }
 
@@ -293,10 +282,11 @@ abstract class Route
     private $methodInfo;
     protected $data;
 
-    function __construct(Controller $controlller, \ReflectionMethod $methodInfo)
+    function __construct(Controller $controlller, \ReflectionMethod $methodInfo, array $data)
     {
         $this->controlller = $controlller;
         $this->methodInfo = $methodInfo;
+        $this->data = $data;
     }
 
     abstract function fill(array $data);
@@ -310,12 +300,13 @@ abstract class Route
 
         foreach ($pinfos as $pi) {
             if (count($params) <= $n) {
-                $params[] = $this->data[$pi->name];
+                //todo: Model validation
+                $params[] = key_exists($pi->name, $this->data) ? $this->data[$pi->name]:$this->data[$n];
             }
          $n++;
         }
 
-        $this->methodInfo->invokeArgs($this->controlller, $params);
+        return $this->methodInfo->invokeArgs($this->controlller, $params);
     }
 
     function checkPermission(Membership $member)
