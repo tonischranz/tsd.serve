@@ -7,7 +7,7 @@ class Router
   private $factory;
   private $plugins;
 
-  function __construct($factory, $plugins)
+  function __construct(Factory $factory, array $plugins)
   {
     $this->factory = $factory;
     $this->plugins = $plugins;
@@ -17,6 +17,41 @@ class Router
   {
     $controller = $this->getController($host, $path);    
     return Router::serve($controller, $method, $path, $data);
+  }
+
+  function route(string $host, string $method, string $path)
+  {
+    $controller = $this->getController($host, $path);
+    
+        //extract method name and parameters
+        $params = [];
+        $prefix = $method == 'POST' ? 'do' : $method == 'GET' ? 'show' : $method;
+    
+        $methodPath = Router::getMethodPath($controller->name, $path);
+        $methodName = Router::getMethodName($methodPath, $prefix, $params);
+    
+        // find suitable Method
+    
+        $mi = Router::getMethodInfo($controller, $methodName);
+        if (!$mi) {
+          $alternatives = [];
+          $methodName = Router::getMethodName($methodPath, $prefix, $params, $alternatives);
+    
+          foreach ($alternatives as $a) {
+            $mi = Router::getMethodInfo($controller, $a['methodName']);
+    
+            if ($mi) {
+              $params = [$a['params']];
+              break;
+            }
+          }
+          if (!$mi) {
+            //Controller::error (404, "Not Found", "Keine passende Methode ($methodName) gefunden.");
+          }
+        }
+
+        return $method == 'POST' ? new PostRoute($controller, $mi) : 
+          $method == 'GET' ? new GetRoute($controller, $mi) : false;
   }
 
   private static function getMethodName(string $methodPath, string $prefix, array &$params, array &$pathAlternatives = null)
@@ -107,32 +142,7 @@ class Router
       }
     }
 
-    // check permission
-    $mem = $this->factory->create('\tsd\serve\Membership', 'member');
-    $doc = $mi->getDocComment();
-    $matches = [];
-    $authorized = true;
-
-    if (preg_match('#@SecurityUser#', $doc)) {
-      $authorized = !$mem->isAnonymous();
-    }
-
-    if (preg_match_all('#@SecurityGroup\s(\w+)#', $doc, $matches) > 0) {
-      $authorized = false;
-      foreach ($matches[1] as $g) {
-        if ($mem->isInGroup($g)) {
-          $authorized = true;
-        }
-      }
-    }
-
-    if (!$authorized) {
-      if ($mem->isAnonymous()) {
-        $this->redirect('/_member/login');
-      } else {
-        $this->error(403, 'Forbidden');
-      }
-    }
+    
 
 
     // invoke
