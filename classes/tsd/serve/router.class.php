@@ -15,13 +15,18 @@ class Router
 
     function route(string $host, string $method, string $path)
     {
-        $controller = $this->getController($host, $path);
+        //echo "\nMethod $path\n";
+        $base = '';
+
+        $controller = $this->getController($host, $path, $base);
         
         //extract method name and parameters
         $params = [];
         $prefix = $method == 'POST' ? 'do' : $method == 'GET' ? 'show' : $method;
         
-        $methodPath = Router::getMethodPath($controller->name, $path);
+        echo " CN $controller->name";
+        $methodPath = Router::getMethodPath($base, $controller->name, $path);
+        echo " MP $methodPath ";
         $methodName = Router::getMethodName($methodPath, $prefix, $params);
         
         // find suitable Method        
@@ -171,26 +176,29 @@ class Router
         $mi->invokeArgs($c, $params);
     }*/
 
-    function getController(string $host, string $path)
+    function getController(string $host, string $path, string &$base)
     {
-        var_dump($path);        
+        //var_dump($path);        
 
         $parts = explode('/', $path);
 
-        var_dump($parts);
+        //var_dump($parts);
 
         $name = count($parts) > 1 ? $parts[1] : 'default';
-        $c = $this->loadController($name);
+        $c = $this->loadController($name, $base);
 
-        return $c ? $c : $this->loadController('default');
+        return $c ? $c : $this->loadController('default', $base);
     }
 
-    private function loadController(string $name)
+    private function loadController(string $name, string &$base)
     {
-        var_dump($this->plugins);
+        //var_dump($this->plugins);
 
         if (in_array($name, $this->plugins))
-        return $this->createController('default', App::PLUGINS."/{$name}/controller");
+        {
+            $base = $name;
+            return $this->createController('default', App::PLUGINS."/{$name}/controller");
+        }
         
         /*try {
             return new PluginController($name);
@@ -236,12 +244,13 @@ class Router
         return false;
     }
 
-    private static function getMethodPath(string $name, string $path)
+    private static function getMethodPath(string $base, string $name, string $path)
     {
         $parts = explode('/', $path);
         $mp = '/';
+        $bs = $base ? 1 : 0;
 
-        $start = ($name == 'default' && (count($parts) > 1 && $parts[1] != 'default')) ? 1 : 2;
+        $start = $bs + ($name == 'default' && (count($parts) > 1 && $parts[1] != 'default')) ? 1 : 2;
 
         for ($i = $start; $i < count($parts); $i++) 
         {
