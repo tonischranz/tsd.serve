@@ -2,15 +2,46 @@
 
 namespace tsd\serve;
 
+/**
+ * The Application
+ * 
+ * @author Toni Schranz
+ */
 class App
 {
+    /**
+     * Config file name
+     */
     const CONFIG = '.config.json';
+
+    /**
+     * Plugins directory name
+     */
     const PLUGINS = 'plugins';
  
+    /** 
+     * the Router
+     * @var Router $router
+     */
     private $router;
+    
+    /**
+     * the View Engine
+     * @var ViewEngine $view_engine 
+     */
     private $view_engine;
+
+    /** 
+     * the Membership Provider
+     * @var Membership $member 
+     */
     private $member;
 
+    /**
+     * Creates a new Instance
+     * 
+     * @param array $config optional alternative Configuration values to use
+     */
     function __construct(array $config = null)
     {
         if ($config == null && file_exists(App::CONFIG))
@@ -28,6 +59,9 @@ class App
         $this->view_engine = $factory->create('tsd\serve\ViewEngine', 'views');
     }
 
+    /**
+     * serves a HTTP Request
+     */
     static function serve()
     {
         ob_start ();
@@ -48,80 +82,43 @@ class App
         ob_flush();
     }
 
-    protected function serveRequest($method, $host, $path, $data, $accept)
+    /**
+     * gets the Route, Evaluates the Result and renders it with the View Engine
+     * 
+     * @param string $method the HTTP Method
+     * @param string $host the Hostname
+     * @param string $path the Path of the requested Resource
+     * @param array $data data sent along with the Request
+     * 
+     * @internal
+     */
+    protected function serveRequest(string $method, string $host, string $path, array $data, $accept)
     {
         $route = $this->router->route($host, $method, $path);
         
         try { $result = $this->getResult($route, $data); }
         catch (Exception $e) { $result = $e; }
+
+        echo $accept;
         
         $this->view_engine->render($result, $accept);
     }
 
+    /**
+     * evaluates the Result for a given Route
+     * 
+     * @param Route $route the Route
+     * @param array $data data
+     * 
+     * @internal
+     */
     private function getResult(Route $route, array $data)
     {
         if (!$route->checkPermission($this->member))
             throw new AccessDeniedException($route);
         
-        $route->fill($data);        
+        $route->fill($data);
+
         return $route->follow();
-    }
-}
-
-/**
- * @Implementation tsd\serve\ServeViewEngine
- */
-abstract class ViewEngine
-{
-    function render($result, $accept)
-    {
-        if ($result instanceof tsd\serve\AccessDeniedException) $result = new ErrorResult (403, $result);
-        if ($result instanceof tsd\serve\NotFoundException) $result = new ErrorResult (404, $result);
-        if ($result instanceof \Exception) $result = new ErrorResult (500, $result->getMessage());
-        if (!($result instanceof Result)) $result = new DataResult ($result);
-
-        http_response_code($result->getStatusCode());
-        $headers = $result->getHeaders();
-        foreach ($headers as $h)
-        {
-            header($h);
-        }
-
-        //todo: better
-        if ($accept == 'application/json') $this->renderJson($result);
-        if ($accept == 'text/xml') $this->renderXml($result);
-
-        if ($result instanceof ViewResult) 
-        {
-            $this->renderView($result);
-        }
-    }
-
-    private function renderJson(Result $result)
-    {
-        ob_clean();        
-        echo json_encode($result->getData());
-    }
-
-    private function renderXml(Result $result)
-    {
-        ob_clean();
-        echo $result->getData()->asXML();
-    }
-
-    protected abstract function renderView (ViewResult $result);
-}
-
-/**
- * @Default
- */
-class ServeViewEngine extends ViewEngine
-{
-    const VIEWS = './views';
-
-    function renderView(ViewResult $result)
-    {
-        $v = new View (ServeViewEngine::VIEWS.'/'.$result->getView());
-        $v->render ($result->getData());        
     }
 }
