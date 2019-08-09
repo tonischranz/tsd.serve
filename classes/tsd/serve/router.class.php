@@ -122,7 +122,7 @@ class Router
         return $methodName;
     }
 
-    private function serve(Controller $c, string $method, string $path, array $data)
+    /*private function serve(Controller $c, string $method, string $path, array $data)
     {
         //extract method name and parameters
         $params = [];
@@ -170,7 +170,7 @@ class Router
         }
 
         $mi->invokeArgs($c, $params);
-    }
+    }*/
 
     function getController(string $path)
     {
@@ -197,7 +197,6 @@ class Router
         return $this->createController($name);
     }
 
-
     private function createController(string $name, string $path = 'controller', string $namespace = '')
     {
         $fileName = "$path/$name.controller.php";
@@ -215,7 +214,6 @@ class Router
 
         return $c;
     }
-
 
     private static function getMethodInfo(Controller $c, string $name)
     {
