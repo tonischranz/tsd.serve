@@ -17,34 +17,40 @@ class Router
   {
     $controller = $this->getController($host, $path);
     
-        //extract method name and parameters
-        $params = [];
-        $prefix = $method == 'POST' ? 'do' : $method == 'GET' ? 'show' : $method;
+    //extract method name and parameters
+    $params = [];
+    $prefix = $method == 'POST' ? 'do' : $method == 'GET' ? 'show' : $method;
     
-        $methodPath = Router::getMethodPath($controller->name, $path);
-        $methodName = Router::getMethodName($methodPath, $prefix, $params);
+    $methodPath = Router::getMethodPath($controller->name, $path);
+    $methodName = Router::getMethodName($methodPath, $prefix, $params);
     
-        // find suitable Method
+    // find suitable Method
     
-        $mi = Router::getMethodInfo($controller, $methodName);
-        if (!$mi) {
-          $alternatives = [];
-          $methodName = Router::getMethodName($methodPath, $prefix, $params, $alternatives);
+    $mi = Router::getMethodInfo($controller, $methodName);
+    if (!$mi) 
+    {
+      $alternatives = [];
+      $methodName = Router::getMethodName($methodPath, $prefix, $params, $alternatives);
 
-          foreach ($alternatives as $a) {
-            $mi = Router::getMethodInfo($controller, $a['methodName']);
+      foreach ($alternatives as $a) 
+      {
+        $mi = Router::getMethodInfo($controller, $a['methodName']);
     
-            if ($mi) {
-              $params = [$a['params']];
-              break;
-            }
-          }
-          if (!$mi) {
-            //Controller::error (404, "Not Found", "Keine passende Methode ($methodName) gefunden.");
-          }
+        if ($mi) 
+        {
+          $params = [$a['params']];
+          break;
         }
+      }
+      
+      if (!$mi) 
+      {
+        //Controller::error (404, "Not Found", "Keine passende Methode ($methodName) gefunden.");
+        return false;
+      }
+    }
 
-        return $method == 'POST' ? new PostRoute($controller, $mi, $params) : 
+    return $method == 'POST' ? new PostRoute($controller, $mi, $params) :
           $method == 'GET' ? new GetRoute($controller, $mi, $params) : false;
   }
 
@@ -54,17 +60,21 @@ class Router
     $methodName = $prefix;
     $params = [];
 
-    if ($methodPath == '/') {
+    if ($methodPath == '/') 
+    {
       $methodName .= 'index';
     }
 
-    foreach ($parts as $p) {
-      if (is_numeric($p)) {
+    foreach ($parts as $p) 
+    {
+      if (is_numeric($p)) 
+      {
         $params[] = $p;
       } else {
         $sparts = explode('.', $p);
 
-        foreach ($sparts as $sp) {
+        foreach ($sparts as $sp) 
+        {
           if (is_numeric($sp)) {
             $params[] = $sp;
           } else if (is_array($pathAlternatives) && $sp) {
@@ -76,16 +86,21 @@ class Router
       }
     }
 
-    if (is_array($pathAlternatives)) {
-
-      foreach ($params as $p) {
+    if (is_array($pathAlternatives)) 
+    {
+      foreach ($params as $p) 
+      {
         $a = ['methodName' => $prefix, 'params' => []];
         $x = 0;
 
-        foreach ($params as $p2) {
-          if ($x > count($pathAlternatives)) {
+        foreach ($params as $p2) 
+        {
+          if ($x > count($pathAlternatives))
+          {
             $a['methodName'] .= $p2;
-          } else {
+          } 
+          else 
+          {
             $a['params'][] = $p2;
             $x++;
           }
@@ -119,11 +134,13 @@ class Router
     // find suitable Method
 
     $mi = Router::getMethodInfo($c, $methodName);
-    if (!$mi) {
+    if (!$mi) 
+    {
       $alternatives = [];
       $methodName = Router::getMethodName($methodPath, $prefix, $params, $alternatives);
 
-      foreach ($alternatives as $a) {
+      foreach ($alternatives as $a) 
+      {
         $mi = Router::getMethodInfo($c, $a['methodName']);
 
         if ($mi) {
@@ -131,20 +148,20 @@ class Router
           break;
         }
       }
-      if (!$mi) {
+      if (!$mi) 
+      {
         //Controller::error (404, "Not Found", "Keine passende Methode ($methodName) gefunden.");
       }
     }
-
     
-
-
     // invoke
     $pinfos = $mi->getParameters();
     $n = 0;
 
-    foreach ($pinfos as $pi) {
-      if (count($params) <= $n) {
+    foreach ($pinfos as $pi) 
+    {
+      if (count($params) <= $n) 
+      {
         $params[] = $data[$pi->name];
       }
 
@@ -166,11 +183,10 @@ class Router
 
   private function loadController(string $name)
   {
-    //echo "Load Controller $name";
-
     if (in_array($name, $this->plugins))
       return $this->createController('', App::PLUGINS."/{$name}/controller");
-    /*try {
+    
+      /*try {
         return new PluginController($name);
       } catch (Exception $e) {
         echo $e->getTraceAsString();
@@ -183,18 +199,15 @@ class Router
 
   private function createController(string $name, string $path = 'controller', string $namespace = '')
   {
-    //echo "try create Controller '$name'\n";
-
     $fileName = "$path/$name.controller.php";
     $ctrlName = ($namespace ? '\\' : '') . $namespace . '\\' . $name . 'Controller';
 
-    if (!file_exists($fileName)) {
+    if (!file_exists($fileName)) 
+    {
       return false;
     }
 
     require_once $fileName;
-
-    //echo "File included, trying to instanciate.\n";
 
     $c = $this->factory->create($ctrlName);
     $c->name = $name;
@@ -209,7 +222,8 @@ class Router
     $m = $rc->getMethods(\ReflectionMethod::IS_PUBLIC);
     $n = strtolower($name);
 
-    foreach ($m as $mi) {
+    foreach ($m as $mi) 
+    {
       if (strtolower($mi->name) == $n)
         return $mi;
     }
@@ -224,8 +238,10 @@ class Router
 
     $start = ($name == 'default' && (count($parts) > 1 && $parts[1] != 'default')) ? 1 : 2;
 
-    for ($i = $start; $i < count($parts); $i++) {
-      if ($parts[$i] != '') {
+    for ($i = $start; $i < count($parts); $i++) 
+    {
+      if ($parts[$i] != '') 
+      {
         $mp .= "$parts[$i]/";
       }
     }
@@ -249,6 +265,69 @@ class Router
     return $mp;
   }*/
 }
+
+abstract class Route
+{
+    private $controlller;
+    private $methodInfo;
+    protected $data;
+
+    function __construct(Controller $controlller, \ReflectionMethod $methodInfo, array $data)
+    {
+        $this->controlller = $controlller;
+        $this->methodInfo = $methodInfo;
+        $this->data = $data;
+    }
+
+    abstract function fill(array $data);
+    
+    function follow()
+    {
+        $pinfos = $this->methodInfo->getParameters();
+        $n = 0;
+        $params = [];
+
+        foreach ($pinfos as $pi) 
+        {
+            if (count($params) <= $n) 
+            {
+                //todo: Model validation
+                $params[] = key_exists($pi->name, $this->data) ? $this->data[$pi->name]:$this->data[$n];
+            }
+    
+            $n++;
+        }
+
+        return $this->methodInfo->invokeArgs($this->controlller, $params);
+    }
+
+    function checkPermission(Membership $member)
+    {
+        $doc = $this->methodInfo->getDocComment();
+        $matches = [];
+        $authorized = true;
+
+        if (preg_match('#@SecurityUser#', $doc)) 
+        {
+            $authorized = !$member->isAnonymous();
+        }
+
+        if (preg_match_all('#@SecurityGroup\s(\w+)#', $doc, $matches) > 0) 
+        {
+            $authorized = false;
+            foreach ($matches[1] as $g) 
+            {
+                if ($member->isInGroup($g)) 
+                {
+                $authorized = true;
+                }
+            }
+        }
+
+        return $authorized;
+    }
+}
+
 class GetRoute extends Route
 {
     function __construct(Controller $c, \ReflectionMethod $mi, array $data) 
@@ -273,63 +352,5 @@ class PostRoute extends Route
     function fill(array $data)
     {
         $this->data = array_merge($this->data, $data['_POST'], $data);
-    }
-}
-
-abstract class Route
-{
-    private $controlller;
-    private $methodInfo;
-    protected $data;
-
-    function __construct(Controller $controlller, \ReflectionMethod $methodInfo, array $data)
-    {
-        $this->controlller = $controlller;
-        $this->methodInfo = $methodInfo;
-        $this->data = $data;
-    }
-
-    abstract function fill(array $data);
-    
-    function follow()
-    {
-        // invoke
-        $pinfos = $this->methodInfo->getParameters();
-        $n = 0;
-        $params = [];
-
-        foreach ($pinfos as $pi) {
-            if (count($params) <= $n) {
-                //todo: Model validation
-                $params[] = key_exists($pi->name, $this->data) ? $this->data[$pi->name]:$this->data[$n];
-            }
-         $n++;
-        }
-
-        return $this->methodInfo->invokeArgs($this->controlller, $params);
-    }
-
-    function checkPermission(Membership $member)
-    {
-        // check permission
-    
-    $doc = $this->methodInfo->getDocComment();
-    $matches = [];
-    $authorized = true;
-
-    if (preg_match('#@SecurityUser#', $doc)) {
-      $authorized = !$member->isAnonymous();
-    }
-
-    if (preg_match_all('#@SecurityGroup\s(\w+)#', $doc, $matches) > 0) {
-      $authorized = false;
-      foreach ($matches[1] as $g) {
-        if ($member->isInGroup($g)) {
-          $authorized = true;
-        }
-      }
-    }
-
-    return $authorized;
     }
 }
