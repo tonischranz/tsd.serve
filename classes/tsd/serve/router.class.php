@@ -24,10 +24,9 @@ class Router
         $methodPath = Router::getMethodPath($controller->name, $path);
         $methodName = Router::getMethodName($methodPath, $prefix, $params);
         
-        // find suitable Method
-        
+        // find suitable Method        
         $mi = Router::getMethodInfo($controller, $methodName);
-        if (!$mi) 
+        if (!$mi)
         {
             $alternatives = [];
             $methodName = Router::getMethodName($methodPath, $prefix, $params, $alternatives);
@@ -46,7 +45,7 @@ class Router
             if (!$mi) 
             {
                 //Controller::error (404, "Not Found", "Keine passende Methode ($methodName) gefunden.");
-                return false;
+                //return false;
             }
         }
 
@@ -172,9 +171,13 @@ class Router
         $mi->invokeArgs($c, $params);
     }*/
 
-    function getController(string $path)
+    function getController(string $host, string $path)
     {
+        var_dump($path);        
+
         $parts = explode('/', $path);
+
+        var_dump($parts);
 
         $name = count($parts) > 1 ? $parts[1] : 'default';
         $c = $this->loadController($name);
@@ -184,8 +187,10 @@ class Router
 
     private function loadController(string $name)
     {
+        var_dump($this->plugins);
+
         if (in_array($name, $this->plugins))
-        return $this->createController('', App::PLUGINS."/{$name}/controller");
+        return $this->createController('default', App::PLUGINS."/{$name}/controller");
         
         /*try {
             return new PluginController($name);
@@ -199,6 +204,7 @@ class Router
 
     private function createController(string $name, string $path = 'controller', string $namespace = '')
     {
+        echo "trying to create Controller '$name' from $path";
         $fileName = "$path/$name.controller.php";
         $ctrlName = ($namespace ? '\\' : '') . $namespace . '\\' . $name . 'Controller';
 

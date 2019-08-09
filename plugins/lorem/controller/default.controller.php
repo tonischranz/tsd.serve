@@ -1,5 +1,7 @@
 <?php
 
+use tsd\serve\Controller;
+
 class defaultController extends Controller
 {
   function showIndex ()
