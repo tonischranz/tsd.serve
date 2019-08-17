@@ -9,19 +9,8 @@ class DefaultRouting extends RoutingStrategy
 {
     function createRoute (string $host, string $method, string $path, Factory $factory, array $plugins)
     {
-         //echo "\nMethod $path\n";
-         //$base = '';
-
-         //$controller = $this->getController($host, $path, $base);
-
-         //function getController(string $host, string $path, string &$base)
-         //{
-             //var_dump($path);        
-     
         $parts = explode('/', $path);
      
-        var_dump($parts);
-  
         $cutoff = 1;
 
         $name = count($parts) > 1 ? $parts[1] : 'default';
@@ -43,11 +32,9 @@ class DefaultRouting extends RoutingStrategy
 
         echo "Cutoff : $cutoff";
       
-
-
-         //extract method name and parameters
-         $params = [];
-         $prefix = $method == 'POST' ? 'do' : $method == 'GET' ? 'show' : $method;
+        //extract method name and parameters
+        $params = [];
+        $prefix = $method == 'POST' ? 'do' : $method == 'GET' ? 'show' : $method;
          
          echo " CN $c->name";
 
