@@ -21,13 +21,16 @@ class DefaultRouting extends RoutingStrategy
         $parts = explode('/', $path);
      
         var_dump($parts);
-     
+  
+        $cutoff = 1;
+
         $name = count($parts) > 1 ? $parts[1] : 'default';
         
         if (in_array($name, $plugins))
         {
             $plugin = $name;
             $name = count($parts) > 2 ? $parts[2] : 'default';
+            $cutoff++;
             
             $c = $this->createController($name, $factory, App::PLUGINS."/{$plugin}/controller");
         }
@@ -36,12 +39,14 @@ class DefaultRouting extends RoutingStrategy
      
         if (!$c)  $c = $this->createController('default', $factory);//, $base);
              
+
+        echo "Cutoff : $cutoff";
       
          //extract method name and parameters
          $params = [];
          $prefix = $method == 'POST' ? 'do' : $method == 'GET' ? 'show' : $method;
          
-         echo " CN $controller->name";
+         echo " CN $c->name";
          $methodPath = Router::getMethodPath($base, $controller->name, $path);
          echo " MP $methodPath ";
          $methodName = Router::getMethodName($methodPath, $prefix, $params);
@@ -80,14 +85,14 @@ class DefaultRouting extends RoutingStrategy
          {
              echo "trying to create Controller '$name' from $path";
              $fileName = "$path/$name.controller.php";
-             $ctrlName = ($namespace ? '\\' : '') . $namespace . '\\' . $name . 'Controller';
+             $ctrlName = $name . 'Controller';
      
              if (!file_exists($fileName)) 
              {
                  return false;
              }
      
-             require_once $filthis->eName;
+             require_once $fileName;
      
              $c = $factory->create($ctrlName);
              $c->name = $name;
