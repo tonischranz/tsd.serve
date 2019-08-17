@@ -40,11 +40,38 @@ class DefaultRouting extends RoutingStrategy
 
         for ($i = 0; $i < $cutoff; $i ++) \array_shift($parts);
         $methodPath = \implode('/', $parts);
+
          //$methodPath = Router::getMethodPath($base, $controller->name, $path);
          echo " MP $methodPath ";
          //$methodName = Router::getMethodName($methodPath, $prefix, $params);
          
          // find suitable Method        
+        
+         $params = [];
+
+         if ($methodPath == '/') 
+         {
+             $methodName .= 'index';
+         }
+ 
+         foreach ($parts as $p) 
+         {
+             if (is_numeric($p)) 
+             {
+                 $params[] = $p;
+             } 
+             else 
+             {
+                 $sparts = explode('.', $p);
+ 
+                 foreach ($sparts as $sp) //echo "\nMethod $path\n";
+                {
+
+                }
+            }
+        } 
+        
+        
          $mi = Router::getMethodInfo($controller, $methodName);
          if (!$mi)
          {
