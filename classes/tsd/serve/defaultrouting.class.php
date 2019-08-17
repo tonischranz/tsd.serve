@@ -34,22 +34,28 @@ class DefaultRouting extends RoutingStrategy
             
             $c = $this->createController($name, $factory, App::PLUGINS."/{$plugin}/controller");
         }
-
-        $c = $this->createController($name, $factory);//, $base);
-     
+        else
+        {
+            $c = $this->createController($name, $factory);//, $base);
+        }
         if (!$c)  $c = $this->createController('default', $factory);//, $base);
              
 
         echo "Cutoff : $cutoff";
       
+
+
          //extract method name and parameters
          $params = [];
          $prefix = $method == 'POST' ? 'do' : $method == 'GET' ? 'show' : $method;
          
          echo " CN $c->name";
-         $methodPath = Router::getMethodPath($base, $controller->name, $path);
+
+        for ($i = 0; $i < $cutoff; $i ++) \array_shift($parts);
+        $methodPath = \implode('/', $parts);
+         //$methodPath = Router::getMethodPath($base, $controller->name, $path);
          echo " MP $methodPath ";
-         $methodName = Router::getMethodName($methodPath, $prefix, $params);
+         //$methodName = Router::getMethodName($methodPath, $prefix, $params);
          
          // find suitable Method        
          $mi = Router::getMethodInfo($controller, $methodName);
