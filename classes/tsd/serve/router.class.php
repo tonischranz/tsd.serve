@@ -35,8 +35,91 @@ class DefaultRouting implements RoutingStrategy
 {
     function createRoute (string $host, string $method, string $path, Factory $factory, array $plugins)
     {
+         //echo "\nMethod $path\n";
+         //$base = '';
+
+         //$controller = $this->getController($host, $path, $base);
+
+         //function getController(string $host, string $path, string &$base)
+         //{
+             //var_dump($path);        
+     
+        $parts = explode('/', $path);
+     
+             //var_dump($parts);
+     
+        $name = count($parts) > 1 ? $parts[1] : 'default';
+        
+        if (in_array($name, $plugins))
+        {
+            $plugin = $name;
+            $name = count($parts) > 2 ? $parts[2] : 'default';
+            
+            $c = $this->createController($name, $factory, App::PLUGINS."/{$plugin}/controller");
+        }
+
+        $c = $this->createController($name, $factory);//, $base);
+     
+        if (!$c)  $c = $this->createController('default', $factory);//, $base);
+             
+      
+         //extract method name and parameters
+         $params = [];
+         $prefix = $method == 'POST' ? 'do' : $method == 'GET' ? 'show' : $method;
+         
+         echo " CN $controller->name";
+         $methodPath = Router::getMethodPath($base, $controller->name, $path);
+         echo " MP $methodPath ";
+         $methodName = Router::getMethodName($methodPath, $prefix, $params);
+         
+         // find suitable Method        
+         $mi = Router::getMethodInfo($controller, $methodName);
+         if (!$mi)
+         {
+             $alternatives = [];
+             $methodName = Router::getMethodName($methodPath, $prefix, $params, $alternatives);
+ 
+             foreach ($alternatives as $a) 
+             {
+                 $mi = Router::getMethodInfo($controller, $a['methodName']);
+             
+                 if ($mi) 
+                 {
+                     $params = [$a['params']];
+                     break;
+                 }
+             }
+         
+             if (!$mi) 
+             {
+                 //Controller::error (404, "Not Found", "Keine passende Methode ($methodName) gefunden.");
+                 //return false;
+             }
+         }
+ 
+         return $method == 'POST' ? new PostRoute($controller, $mi, $params) :
+             $method == 'GET' ? new GetRoute($controller, $mi, $params) : false;
 
     }
+
+    private function createController(string $name, Factory $factory, string $path = 'controller')//, string $namespace = '')
+         {
+             echo "trying to create Controller '$name' from $path";
+             $fileName = "$path/$name.controller.php";
+             $ctrlName = ($namespace ? '\\' : '') . $namespace . '\\' . $name . 'Controller';
+     
+             if (!file_exists($fileName)) 
+             {
+                 return false;
+             }
+     
+             require_once $filthis->eName;
+     
+             $c = $factory->create($ctrlName);
+             $c->name = $name;
+     
+             return $c;
+         }
 }
 
 /**
@@ -65,7 +148,31 @@ class WWWRouting implements RoutingStrategy
 /*
 
 
-        //echo "\nMethod $path\n";
+       
+    }
+
+    private static function getMethodName(string $methodPath, string $prefix, array &$params, array &$pathAlternatives = null)
+    {
+        $parts = explode('/', $methodPath);
+        $methodName = $prefix;
+        $params = [];
+
+        if ($methodPath == '/') 
+        {
+            $methodName .= 'index';
+        }
+
+        foreach ($parts as $p) 
+        {
+            if (is_numeric($p)) 
+            {
+                $params[] = $p;
+            } 
+            else 
+            {
+                $sparts = explode('.', $p);
+
+                foreach ($sparts as $sp) //echo "\nMethod $path\n";
         $base = '';
 
         $controller = $this->getController($host, $path, $base);
@@ -106,34 +213,90 @@ class WWWRouting implements RoutingStrategy
 
         return $method == 'POST' ? new PostRoute($controller, $mi, $params) :
             $method == 'GET' ? new GetRoute($controller, $mi, $params) : false;
-    }
+                {
+                    if (is_numeric($sp)) //echo "\nMethod $path\n";
+        $base = '';
 
-    private static function getMethodName(string $methodPath, string $prefix, array &$params, array &$pathAlternatives = null)
-    {
-        $parts = explode('/', $methodPath);
-        $methodName = $prefix;
+        $controller = $this->getController($host, $path, $base);
+        
+        //extract method name and parameters
         $params = [];
-
-        if ($methodPath == '/') 
+        $prefix = $method == 'POST' ? 'do' : $method == 'GET' ? 'show' : $method;
+        
+        echo " CN $controller->name";
+        $methodPath = Router::getMethodPath($base, $controller->name, $path);
+        echo " MP $methodPath ";
+        $methodName = Router::getMethodName($methodPath, $prefix, $params);
+        
+        // find suitable Method        
+        $mi = Router::getMethodInfo($controller, $methodName);
+        if (!$mi)
         {
-            $methodName .= 'index';
+            $alternatives = [];
+            $methodName = Router::getMethodName($methodPath, $prefix, $params, $alternatives);
+
+            foreach ($alternatives as $a) 
+            {
+                $mi = Router::getMethodInfo($controller, $a['methodName']);
+            
+                if ($mi) 
+                {
+                    $params = [$a['params']];
+                    break;
+                }
+            }
+        
+            if (!$mi) 
+            {
+                //Controller::error (404, "Not Found", "Keine passende Methode ($methodName) gefunden.");
+                //return false;
+            }
         }
 
-        foreach ($parts as $p) 
-        {
-            if (is_numeric($p)) 
-            {
-                $params[] = $p;
-            } 
-            else 
-            {
-                $sparts = explode('.', $p);
-
-                foreach ($sparts as $sp) 
-                {
-                    if (is_numeric($sp)) 
+        return $method == 'POST' ? new PostRoute($controller, $mi, $params) :
+            $method == 'GET' ? new GetRoute($controller, $mi, $params) : false;
                     {
-                        $params[] = $sp;
+                        $params[] = $sp; //echo "\nMethod $path\n";
+        $base = '';
+
+        $controller = $this->getController($host, $path, $base);
+        
+        //extract method name and parameters
+        $params = [];
+        $prefix = $method == 'POST' ? 'do' : $method == 'GET' ? 'show' : $method;
+        
+        echo " CN $controller->name";
+        $methodPath = Router::getMethodPath($base, $controller->name, $path);
+        echo " MP $methodPath ";
+        $methodName = Router::getMethodName($methodPath, $prefix, $params);
+        
+        // find suitable Method        
+        $mi = Router::getMethodInfo($controller, $methodName);
+        if (!$mi)
+        {
+            $alternatives = [];
+            $methodName = Router::getMethodName($methodPath, $prefix, $params, $alternatives);
+
+            foreach ($alternatives as $a) 
+            {
+                $mi = Router::getMethodInfo($controller, $a['methodName']);
+            
+                if ($mi) 
+                {
+                    $params = [$a['params']];
+                    break;
+                }
+            }
+        
+            if (!$mi) 
+            {
+                //Controller::error (404, "Not Found", "Keine passende Methode ($methodName) gefunden.");
+                //return false;
+            }
+        }
+
+        return $method == 'POST' ? new PostRoute($controller, $mi, $params) :
+            $method == 'GET' ? new GetRoute($controller, $mi, $params) : false;
                     } 
                     else if (is_array($pathAlternatives) && $sp) 
                     {
@@ -178,58 +341,7 @@ class WWWRouting implements RoutingStrategy
 
   
 
-    function getController(string $host, string $path, string &$base)
-    {
-        //var_dump($path);        
-
-        $parts = explode('/', $path);
-
-        //var_dump($parts);
-
-        $name = count($parts) > 1 ? $parts[1] : 'default';
-        $c = $this->loadController($name, $base);
-
-        return $c ? $c : $this->loadController('default', $base);
-    }
-
-    private function loadController(string $name, string &$base)
-    {
-        //var_dump($this->plugins);
-
-        if (in_array($name, $this->plugins))
-        {
-            $base = $name;
-            return $this->createController('default', App::PLUGINS."/{$name}/controller");
-        }
-        
-        try {
-            return new PluginController($name);
-        } catch (Exception $e) {
-            echo $e->getTraceAsString();
-            throw new Exception("Loading Plugin $name failed");
-        }
-
-        return $this->createController($name);
-    }
-
-    private function createController(string $name, string $path = 'controller', string $namespace = '')
-    {
-        echo "trying to create Controller '$name' from $path";
-        $fileName = "$path/$name.controller.php";
-        $ctrlName = ($namespace ? '\\' : '') . $namespace . '\\' . $name . 'Controller';
-
-        if (!file_exists($fileName)) 
-        {
-            return false;
-        }
-
-        require_once $fileName;
-
-        $c = $this->factory->create($ctrlName);
-        $c->name = $name;
-
-        return $c;
-    }
+   
 
     private static function getMethodInfo(Controller $c, string $name)
     {
