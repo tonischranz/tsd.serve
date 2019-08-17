@@ -54,7 +54,7 @@ class App
         echo "hallo";
         $factory = new Factory($config, preg_grep('/^\.\w/',$plugins));
         
-        $this->router = new Router($factory, preg_grep('/^[^\._]\w/', $plugins));
+        $this->router = new Router($factory, $factory->create('tsd\serve\RoutingStrategy', 'routing'), preg_grep('/^[^\._]\w/', $plugins));
         $this->member = $factory->create('tsd\serve\Membership', 'member');
         $this->view_engine = $factory->create('tsd\serve\ViewEngine', 'views');
     }

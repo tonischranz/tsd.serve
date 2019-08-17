@@ -9,15 +9,62 @@ class Router
 {
     private $factory;
     private $plugins;
+    private $routing;
 
-    function __construct(Factory $factory, array $plugins)
+    function __construct(Factory $factory, RoutingStrategy $routing, array $plugins)
     {
         $this->factory = $factory;
         $this->plugins = $plugins;
     }
 
-    function route(string $host, string $method, string $path)
+    function getRoute(string $host, string $method, string $path)
     {
+        return $this->routing->createRoute($host, $method, $path, $this->factory, $this->plugins);
+    }
+}
+
+interface RoutingStrategy
+{
+    function createRoute (string $host, string $method, string $path, Factory $factory, array $plugins);
+}
+
+/**
+ * @Default
+ */
+class DefaultRouting implements RoutingStrategy
+{
+    function createRoute (string $host, string $method, string $path, Factory $factory, array $plugins)
+    {
+
+    }
+}
+
+/**
+ * @Mode simple
+ */
+class SimpleRouting implements RoutingStrategy
+{
+    function createRoute (string $host, string $method, string $path, Factory $factory, array $plugins)
+    {
+        throw new NotImplementedException();
+    }
+}
+
+/**
+ * 
+ * @Mode www
+ */
+class WWWRouting implements RoutingStrategy
+{
+    function createRoute (string $host, string $method, string $path, Factory $factory, array $plugins)
+    {
+        throw new NotImplementedException();
+    }
+}
+
+/*
+
+
         //echo "\nMethod $path\n";
         $base = '';
 
@@ -129,55 +176,7 @@ class Router
         return $methodName;
     }
 
-    /*private function serve(Controller $c, string $method, string $path, array $data)
-    {
-        //extract method name and parameters
-        $params = [];
-        $prefix = $method == 'POST' ? 'do' : $method == 'GET' ? 'show' : $method;
-
-        $methodPath = Router::getMethodPath($c->name, $path);
-        $methodName = Router::getMethodName($methodPath, $prefix, $params);
-
-        // find suitable Method
-
-        $mi = Router::getMethodInfo($c, $methodName);
-        if (!$mi) 
-        {
-            $alternatives = [];
-            $methodName = Router::getMethodName($methodPath, $prefix, $params, $alternatives);
-
-            foreach ($alternatives as $a) 
-            {
-                $mi = Router::getMethodInfo($c, $a['methodName']);
-
-                if ($mi)
-                {
-                    $params = [$a['params']];
-                    break;
-                }
-            }
-            if (!$mi) 
-            {
-                //Controller::error (404, "Not Found", "Keine passende Methode ($methodName) gefunden.");
-            }
-        }
-        
-        // invoke
-        $pinfos = $mi->getParameters();
-        $n = 0;
-
-        foreach ($pinfos as $pi) 
-        {
-            if (count($params) <= $n) 
-            {
-                $params[] = $data[$pi->name];
-            }
-
-            $n++;
-        }
-
-        $mi->invokeArgs($c, $params);
-    }*/
+  
 
     function getController(string $host, string $path, string &$base)
     {
@@ -203,12 +202,12 @@ class Router
             return $this->createController('default', App::PLUGINS."/{$name}/controller");
         }
         
-        /*try {
+        try {
             return new PluginController($name);
         } catch (Exception $e) {
             echo $e->getTraceAsString();
             throw new Exception("Loading Plugin $name failed");
-        }*/
+        }
 
         return $this->createController($name);
     }
@@ -266,7 +265,7 @@ class Router
         return $mp;
     }
 
-  /*protected function buildBasePath($path)
+  protected function buildBasePath($path)
   {
     $parts = explode('/', $path);
     $mp = '/';
@@ -280,8 +279,8 @@ class Router
     }
 
     return $mp;
-  }*/
-}
+  }
+}*/
 
 abstract class Route
 {
