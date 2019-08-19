@@ -34,7 +34,7 @@ class DefaultRouting extends RoutingStrategy
       
         //extract method name and parameters
         $params = [];
-        $prefix = $method == 'POST' ? 'do' : $method == 'GET' ? 'show' : $method;
+        $methodName = $method == 'POST' ? 'do' : $method == 'GET' ? 'show' : $method;
          
          echo " CN $c->name";
 
@@ -42,14 +42,14 @@ class DefaultRouting extends RoutingStrategy
         $methodPath = \implode('/', $parts);
 
          //$methodPath = Router::getMethodPath($base, $controller->name, $path);
-         echo " MP $methodPath ";
+         echo " MP ($methodPath) ";
          //$methodName = Router::getMethodName($methodPath, $prefix, $params);
          
          // find suitable Method        
         
          $params = [];
 
-         if ($methodPath == '/') 
+         if ($methodPath == '') 
          {
              $methodName .= 'index';
          }
@@ -72,10 +72,22 @@ class DefaultRouting extends RoutingStrategy
         } 
         
         
-         $mi = Router::getMethodInfo($controller, $methodName);
+//         $mi = Router::getMethodInfo($controller, $methodName);
+        $rc = new \ReflectionClass($c);
+        $m = $rc->getMethods(\ReflectionMethod::IS_PUBLIC);
+        $n = strtolower($methodName);
+
+        foreach ($m as $mi) 
+        {
+            if (strtolower($mi->name) == $n)
+                break;
+                
+            $mi = false;
+        }
+
          if (!$mi)
          {
-             $alternatives = [];
+             /*$alternatives = [];
              $methodName = Router::getMethodName($methodPath, $prefix, $params, $alternatives);
  
              foreach ($alternatives as $a) 
@@ -93,11 +105,11 @@ class DefaultRouting extends RoutingStrategy
              {
                  //Controller::error (404, "Not Found", "Keine passende Methode ($methodName) gefunden.");
                  //return false;
-             }
+             }*/
          }
  
-         return $method == 'POST' ? new PostRoute($controller, $mi, $params) :
-             $method == 'GET' ? new GetRoute($controller, $mi, $params) : false;
+         return $method == 'POST' ? new PostRoute($c, $mi, $params) :
+             $method == 'GET' ? new GetRoute($c, $mi, $params) : false;
 
     }
 
