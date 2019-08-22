@@ -56,6 +56,8 @@ class DefaultRouting extends RoutingStrategy
  
          foreach ($parts as $p) 
          {
+             var_dump($p);
+
              if (is_numeric($p)) 
              {
                  $params[] = $p;
