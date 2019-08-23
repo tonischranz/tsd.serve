@@ -20,6 +20,8 @@ class DefaultRouting extends RoutingStrategy
             $plugin = $name;
             $name = count($parts) > 2 ? $parts[2] : 'default';
             $cutoff++;
+
+            if ($name == '') $name = 'default';
             
             $c = $this->createController($name, $factory, App::PLUGINS."/{$plugin}/controller");
         }
