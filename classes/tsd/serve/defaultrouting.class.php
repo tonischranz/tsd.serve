@@ -45,6 +45,9 @@ class DefaultRouting extends RoutingStrategy
         for ($i = 0; $i < $cutoff; $i ++) \array_shift($parts);
         $methodPath = \implode('/', $parts);
 
+echo "<br>MethodPath: <br>";
+var_dump ($methodPath);
+
         $params = [];
 
         if ($methodPath == '') 
@@ -55,6 +58,8 @@ class DefaultRouting extends RoutingStrategy
         $rc = new \ReflectionClass($c);
         $m = $rc->getMethods(\ReflectionMethod::IS_PUBLIC);
         $n = strtolower($methodName);
+
+        echo "<br>guessing methodName: $m";
 
         foreach ($m as $mi) 
         {
@@ -67,10 +72,12 @@ class DefaultRouting extends RoutingStrategy
         if (!$mi)
         {
             $alternatives = [];
-            $methodName = Router::getMethodName($methodPath, $prefix, $params, $alternatives);
+            //$methodName = Router::getMethodName($methodPath, $prefix, $params, $alternatives);
  
             foreach ($alternatives as $a) 
             {
+                echo "<br>checking alternative: $a";
+
                 $mi = Router::getMethodInfo($controller, $a['methodName']);
             
                 if ($mi) 

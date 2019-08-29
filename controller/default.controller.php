@@ -9,6 +9,11 @@ class defaultController extends Controller
     return $this->view (['user' => 'Toni Schranz']);
   }
 
+  function showBar (float $amt)
+  {
+      return $this->view (['amt' => $amt * 2]);
+  }
+
   function show (array $names)
   {
     echo "--- DUMP --- \n";
