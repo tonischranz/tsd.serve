@@ -115,10 +115,13 @@ class DefaultRouting extends RoutingStrategy
  
                  foreach ($sparts as $sp) //echo "\nMethod $path\n";
                 {
-
+                    $params[] = $sp;
                 }
             }
         } 
+
+        echo "<br>Params: <br>";
+        var_dump($params);
  
          return $method == 'POST' ? new PostRoute($c, $mi, $params) :
              $method == 'GET' ? new GetRoute($c, $mi, $params) : false;
