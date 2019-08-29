@@ -22,7 +22,6 @@ class Router
 
     function getRoute(string $host, string $method, string $path)
     {
-        echo "Get Route for Path $path";
         return $this->routing->createRoute($host, $method, $path, $this->factory, $this->plugins);
     }
 }
@@ -67,9 +66,6 @@ abstract class Route
     
     function follow()
     {
-        $mi = $this->methodInfo;
-        echo "MethodName $mi->name";
-
         $pinfos = $this->methodInfo->getParameters();
         $n = 0;
         $params = [];

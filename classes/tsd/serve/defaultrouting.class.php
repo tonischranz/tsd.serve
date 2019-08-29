@@ -14,9 +14,7 @@ class DefaultRouting extends RoutingStrategy
         $cutoff = 1;
 
         $name = count($parts) > 1 ? $parts[1] : 'default';
-        
-        echo "<br>Path parts: <br>";
-        var_dump ($parts);
+
 
         if ($name == 'admin')
         {
@@ -25,8 +23,7 @@ class DefaultRouting extends RoutingStrategy
             
             $c = $this->createController($name, $factory, App::PLUGINS."/.{$plugin}");
         }
-
-        if (in_array($name, $plugins))
+        else if (in_array($name, $plugins))
         {
             $plugin = $name;
             $name = count($parts) > 2 ? $parts[2] : 'default';
@@ -35,26 +32,31 @@ class DefaultRouting extends RoutingStrategy
             if ($name == '') $name = 'default';
             
             $c = $this->createController($name, $factory, App::PLUGINS."/{$plugin}");
+
+            if (!$c)
+            {
+                echo "plugin fallback!";
+                $c = $this->createController('default', $factory, App::PLUGINS."/{$plugin}");
+            }  
         }
         else
         {
             $c = $this->createController($name, $factory);
         }
-        if (!$c)  $c = $this->createController('default', $factory);
+        
+        if (!$c)
+        {
+            $c = $this->createController('default', $factory);
+        }  
              
          
         for ($i = 0; $i < $cutoff; $i ++) \array_shift($parts);
         $methodPath = \implode('/', $parts);
-        
-        echo "<br>MethodPath: <br>";
-        var_dump ($methodPath);
-
+ 
         $params = [];
         $prefix = $method == 'POST' ? 'do' : $method == 'GET' ? 'show' : $method;
             
         $methodName = $this->getMethodName ($methodPath, $prefix, $params);
-
-        var_dump($c);
 
         $rc = new \ReflectionClass ($c);
      
@@ -83,8 +85,6 @@ class DefaultRouting extends RoutingStrategy
 
         foreach ($parts as $p) 
         {
-            var_dump($p);
-
             if (is_numeric($p)) 
             {
                 $params[] = $p;
@@ -99,9 +99,6 @@ class DefaultRouting extends RoutingStrategy
                 }
             }
         } 
-
-        echo "<br>Params: <br>";
-        var_dump($params);
  
         return $method == 'POST' ? new PostRoute($c, $mi, $params) :
             $method == 'GET' ? new GetRoute($c, $mi, $params) : false;

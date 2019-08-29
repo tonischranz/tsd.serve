@@ -51,7 +51,6 @@ class App
 
         $plugins = scandir(App::PLUGINS);
 
-        echo "hallo";
         $factory = new Factory($config, preg_grep('/^\.\w/',$plugins));
         
         $this->router = new Router($factory, $factory->create('tsd\serve\RoutingStrategy', 'routing'),$plugins);
@@ -97,10 +96,12 @@ class App
         $i = \strpos($path, '?');
         $route = $this->router->getRoute($host, $method, \substr($path, 0, $i > 0 ? $i : \strlen($path) ));
         
+        var_dump ($route);
+
         try { $result = $this->getResult($route, $data); }
         catch (Exception $e) { $result = $e; }
 
-        echo $accept;
+        //echo $accept;
         
         $this->view_engine->render($result, $accept);
     }

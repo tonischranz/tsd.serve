@@ -16,7 +16,7 @@ class defaultController extends Controller
 
   function show (array $names)
   {
-    echo "--- DUMP --- \n";
+    echo "<br>--- DUMP --- \n";
     
     if (count($names) > 0)
       var_dump($names);

@@ -55,8 +55,6 @@ class Factory
                 $args[] = null;
         }
 
-        //var_dump($con);
-        //var_dump($args);
         $type = $t->name;
         return $con ? $t->newInstanceArgs($args) : new $type();
         
@@ -67,13 +65,11 @@ class Factory
         $doc = $type->getDocComment();
         $matches = [];
 
-        //var_dump($doc);
         //todo: use plugins to search classes
         if (preg_match_all ('/@Implementation\s(.*)/', $doc, $matches) > 0)
         {
             foreach ($matches[1] as $i)
             {
-                //var_dump($i);
                 $itype = new \ReflectionClass($i);
                 
                 $idoc = $itype->getDocComment();
@@ -82,13 +78,11 @@ class Factory
 
                 if (!$mode && preg_match('/@Default/', $idoc))
                 {
-                    //echo "found";
                     return $itype;
                 } 
 
                 if (preg_match_all ('/@Mode\s(\w+)/', $idoc, $imatches) > 0)
                 {
-                    //var_dump($imatches);
                     foreach ($imatches[1] as $m)
                     {
                         if ($m == $mode) return $itype;

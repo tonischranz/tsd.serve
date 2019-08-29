@@ -22,8 +22,7 @@ class Controller
   {
     if ($view == null)
     {
-      $backtrace = debug_backtrace();
-      //var_dump($backtrace);
+      $backtrace = debug_backtrace();      
       $view = $backtrace[1]['function'];
       echo "<br>";
       echo "<br>";
