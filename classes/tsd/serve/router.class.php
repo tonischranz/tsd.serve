@@ -9,12 +9,14 @@ class Router
 {
     private $factory;
     private $plugins;
+    private $adminPlugins;
     private $routing;
 
     function __construct(Factory $factory, RoutingStrategy $routing, array $plugins)
     {
         $this->factory = $factory;
         $this->plugins = $plugins;
+        $this->adminPlugins =  preg_grep('/^[^\._]\w/', $plugins);
         $this->routing = $routing;
     }
 
@@ -313,6 +315,9 @@ abstract class Route
     
     function follow()
     {
+        $mi = $this->methodInfo;
+        echo "MethodName $mi->name";
+
         $pinfos = $this->methodInfo->getParameters();
         $n = 0;
         $params = [];

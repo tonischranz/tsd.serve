@@ -15,6 +15,14 @@ class DefaultRouting extends RoutingStrategy
 
         $name = count($parts) > 1 ? $parts[1] : 'default';
         
+        if ($name == 'admin')
+        {
+            $name = $parts[2];
+            $cutoff += 2;
+            
+            $c = $this->createController($name, $factory, App::PLUGINS."/.{$plugin}");
+        }
+
         if (in_array($name, $plugins))
         {
             $plugin = $name;
@@ -23,7 +31,7 @@ class DefaultRouting extends RoutingStrategy
 
             if ($name == '') $name = 'default';
             
-            $c = $this->createController($name, $factory, App::PLUGINS."/{$plugin}/controller");
+            $c = $this->createController($name, $factory, App::PLUGINS."/{$plugin}");
         }
         else
         {
@@ -56,6 +64,43 @@ class DefaultRouting extends RoutingStrategy
              $methodName .= 'index';
          }
  
+        
+//         $mi = Router::getMethodInfo($controller, $methodName);
+        $rc = new \ReflectionClass($c);
+        $m = $rc->getMethods(\ReflectionMethod::IS_PUBLIC);
+        $n = strtolower($methodName);
+
+        foreach ($m as $mi) 
+        {
+            if (strtolower($mi->name) == $n)
+                break;
+                
+            $mi = false;
+        }
+
+         if (!$mi)
+         {
+             $alternatives = [];
+             $methodName = Router::getMethodName($methodPath, $prefix, $params, $alternatives);
+ 
+             foreach ($alternatives as $a) 
+             {
+                 $mi = Router::getMethodInfo($controller, $a['methodName']);
+             
+                 if ($mi) 
+                 {
+                     $params = [$a['params']];
+                     break;
+                 }
+             }
+         
+             if (!$mi) 
+             {
+                 //Controller::error (404, "Not Found", "Keine passende Methode ($methodName) gefunden.");
+                 //return false;
+             }
+        }
+
          foreach ($parts as $p) 
          {
              var_dump($p);
@@ -74,53 +119,16 @@ class DefaultRouting extends RoutingStrategy
                 }
             }
         } 
-        
-        
-//         $mi = Router::getMethodInfo($controller, $methodName);
-        $rc = new \ReflectionClass($c);
-        $m = $rc->getMethods(\ReflectionMethod::IS_PUBLIC);
-        $n = strtolower($methodName);
-
-        foreach ($m as $mi) 
-        {
-            if (strtolower($mi->name) == $n)
-                break;
-                
-            $mi = false;
-        }
-
-         if (!$mi)
-         {
-             /*$alternatives = [];
-             $methodName = Router::getMethodName($methodPath, $prefix, $params, $alternatives);
- 
-             foreach ($alternatives as $a) 
-             {
-                 $mi = Router::getMethodInfo($controller, $a['methodName']);
-             
-                 if ($mi) 
-                 {
-                     $params = [$a['params']];
-                     break;
-                 }
-             }
-         
-             if (!$mi) 
-             {
-                 //Controller::error (404, "Not Found", "Keine passende Methode ($methodName) gefunden.");
-                 //return false;
-             }*/
-         }
  
          return $method == 'POST' ? new PostRoute($c, $mi, $params) :
              $method == 'GET' ? new GetRoute($c, $mi, $params) : false;
 
     }
 
-    private function createController(string $name, Factory $factory, string $path = 'controller')//, string $namespace = '')
+    private function createController(string $name, Factory $factory, string $path = '.')//, string $namespace = '')
          {
              echo "trying to create Controller '$name' from $path";
-             $fileName = "$path/$name.controller.php";
+             $fileName = "$path/controller/$name.controller.php";
              $ctrlName = $name . 'Controller';
      
              if (!file_exists($fileName)) 
@@ -132,6 +140,7 @@ class DefaultRouting extends RoutingStrategy
      
              $c = $factory->create($ctrlName);
              $c->name = $name;
+             $c->basePath = $path; 
      
              return $c;
          }
