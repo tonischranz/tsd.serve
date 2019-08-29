@@ -94,7 +94,8 @@ class App
      */
     protected function serveRequest(string $method, string $host, string $path, array $data, $accept)
     {
-        $route = $this->router->getRoute($host, $method, substr($path, 0, strpos($path, '?')));
+        $i = \strpos($path, '?');
+        $route = $this->router->getRoute($host, $method, \substr($path, 0, $i > 0 ? $i : \strlen($path) ));
         
         try { $result = $this->getResult($route, $data); }
         catch (Exception $e) { $result = $e; }

@@ -15,6 +15,9 @@ class DefaultRouting extends RoutingStrategy
 
         $name = count($parts) > 1 ? $parts[1] : 'default';
         
+        echo "<br>Path parts: <br>";
+        var_dump ($parts);
+
         if ($name == 'admin')
         {
             $name = $parts[2];
@@ -35,62 +38,46 @@ class DefaultRouting extends RoutingStrategy
         }
         else
         {
-            $c = $this->createController($name, $factory);//, $base);
+            $c = $this->createController($name, $factory);
         }
-        if (!$c)  $c = $this->createController('default', $factory);//, $base);
+        if (!$c)  $c = $this->createController('default', $factory);
              
-        $params = [];
-        $methodName = $method == 'POST' ? 'do' : $method == 'GET' ? 'show' : $method;
          
         for ($i = 0; $i < $cutoff; $i ++) \array_shift($parts);
         $methodPath = \implode('/', $parts);
-
-echo "<br>MethodPath: <br>";
-var_dump ($methodPath);
+        
+        echo "<br>MethodPath: <br>";
+        var_dump ($methodPath);
 
         $params = [];
+        $prefix = $method == 'POST' ? 'do' : $method == 'GET' ? 'show' : $method;
+            
+        $methodName = $this->getMethodName ($methodPath, $prefix, $params);
 
-        if ($methodPath == '') 
-        {
-            $methodName .= 'index';
-        }
- 
-        $rc = new \ReflectionClass($c);
-        $m = $rc->getMethods(\ReflectionMethod::IS_PUBLIC);
-        $n = strtolower($methodName);
+        var_dump($c);
 
-        echo "<br>guessing methodName: $m";
-
-        foreach ($m as $mi) 
-        {
-            if (strtolower($mi->name) == $n)
-                break;
-                
-            $mi = false;
-        }
+        $rc = new \ReflectionClass ($c);
+     
+        $mi = $this->getMethodInfo ($rc, $methodName);
 
         if (!$mi)
         {
             $alternatives = [];
-            //$methodName = Router::getMethodName($methodPath, $prefix, $params, $alternatives);
- 
-            foreach ($alternatives as $a) 
-            {
-                echo "<br>checking alternative: $a";
+            $methodName = $this->getMethodName ($methodPath, $prefix, $params, $alternatives);
 
-                $mi = Router::getMethodInfo($controller, $a['methodName']);
-            
-                if ($mi) 
+            foreach ($alternatives as $a)
+            {
+                $mi = $this->getMethodInfo ($rc, $a['methodName']);
+
+                if ($mi)
                 {
                     $params = [$a['params']];
                     break;
                 }
             }
-         
-            if (!$mi) 
+            if (!$mi)
             {
                 //Controller::error (404, "Not Found", "Keine passende Methode ($methodName) gefunden.");
-                //return false;
             }
         }
 
@@ -119,6 +106,89 @@ var_dump ($methodPath);
         return $method == 'POST' ? new PostRoute($c, $mi, $params) :
             $method == 'GET' ? new GetRoute($c, $mi, $params) : false;
 
+    }
+
+    private static function getMethodName (string $methodPath, string $prefix, array &$params, array &$pathAlternatives = null)
+    {
+        $parts = explode ('/', $methodPath);
+        $methodName = $prefix;
+        $params = [];
+
+        if ($methodPath == '')
+        {
+            $methodName .= 'index';
+        }
+
+        foreach ($parts as $p)
+        {
+            if (is_numeric ($p))
+            {
+                $params[] = $p;
+            }
+            else
+            {
+                $sparts = explode ('.', $p);
+
+                foreach ($sparts as $sp)
+                {
+                    if (is_numeric ($sp))
+                    {
+                        $params[] = $sp;
+                    }
+                    else if (is_array ($pathAlternatives) && $sp)
+                    {
+                        $params[] = $sp;
+                    }
+                    else
+                    {
+                        $methodName .= $sp;
+                    }
+                }
+            }
+        }
+
+        if (is_array ($pathAlternatives))
+        {
+            foreach ($params as $p)
+            {
+                $a = ['methodName' => $prefix, 'params' => []];
+                $x = 0;
+
+                foreach ($params as $p2)
+                {
+                    if ($x > count ($pathAlternatives))
+                    {
+                        $a['methodName'] .= $p2;
+                    }
+                    else
+                    {
+                        $a['params'][] = $p2;
+                        $x++;
+                    }
+                }
+
+                $pathAlternatives[] = $a;
+            }
+
+            $params = [$params];
+            return count ($pathAlternatives);
+        }
+
+        return $methodName;
+    }
+
+    private static function getMethodInfo (\ReflectionClass $rc, string $name)
+    {
+        $m = $rc->getMethods (\ReflectionMethod::IS_PUBLIC);
+        $n = strtolower ($name);
+
+        foreach ($m as $mi)
+        {
+            if (strtolower ($mi->name) == $n)
+            return $mi;
+        }
+
+        return false;
     }
 
     private function createController(string $name, Factory $factory, string $path = '.')//, string $namespace = '')

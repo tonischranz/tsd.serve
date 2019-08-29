@@ -22,6 +22,7 @@ class Router
 
     function getRoute(string $host, string $method, string $path)
     {
+        echo "Get Route for Path $path";
         return $this->routing->createRoute($host, $method, $path, $this->factory, $this->plugins);
     }
 }
