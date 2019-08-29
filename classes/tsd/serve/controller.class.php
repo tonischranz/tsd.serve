@@ -2,19 +2,10 @@
 
 namespace tsd\serve;
 
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
-/*    setlocale(LC_ALL, "de_CH.UTF-8");
-  session_start(); */
-
 /**
- * Description of Controller
+ * Controller baseclass
  *
- * @author tonti
+ * @author Toni Schranz
  */
 class Controller
 {
@@ -49,19 +40,7 @@ class Controller
   {
     return new RedirectResult($url);
   }
-
-  /*protected function setBasePath ($path)
-  {
-    $this->basePath = $path;
-  }
-
-  protected function getBasePath ()
-  {
-    return $this->basePath;
-  }*/
-
 }
-
 
 interface Result
 {
