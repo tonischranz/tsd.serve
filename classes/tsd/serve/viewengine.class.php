@@ -51,7 +51,7 @@ abstract class ViewEngine
  */
 class ServeViewEngine extends ViewEngine
 {
-    const VIEWS = './views';
+    const VIEWS = '.';
 
     function renderView(ViewResult $result)
     {

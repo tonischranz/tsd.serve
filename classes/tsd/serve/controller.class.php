@@ -32,7 +32,7 @@ class Controller
       $view = str_replace('showI', 'i', $view);
     }
 
-    return new ViewResult($this->basePath.'/'.$this->name."/$view", $data);
+    return new ViewResult($this->basePath.'/views/'.$this->name."/$view", $data);
   }
 
   protected function redirect ($url)
