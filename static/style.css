@@ -1,7 +1,7 @@
 body { 
     color:#ddd; 
     background-color:#222; 
-    font-family: dejavu-sans; 
+    font-family: myfont, sans-serif; 
 }
 
 a, a:visited {
@@ -34,6 +34,6 @@ h1 a:hover, h1 a:active {
 }
 
 @font-face {
-    font-family: dejavu-sans;
-    src: url(https://cdn.jsdelivr.net/npm/dejavu-sans@1.0.0/fonts/dejavu-sans-webfont.ttf);
+    font-family: myfont;
+    src: url(font.ttf);
   }
