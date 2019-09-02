@@ -29,7 +29,9 @@ class Controller
       echo "$view";
       echo "<br>";
       echo "<br>";
-      $view = str_replace('showI', 'i', $view);
+
+      if (\preg_match('/^show/', $view) == 1) $view = \strtolower(\substr($view,4));
+      else if (\preg_match('/^do/', $view) == 1) $view = \strtolower(\substr($view,2));
     }
 
     return new ViewResult($this->basePath.'/views/'.$this->name."/$view", $data);
