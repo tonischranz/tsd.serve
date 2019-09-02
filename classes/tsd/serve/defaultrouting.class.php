@@ -39,7 +39,6 @@ class DefaultRouting extends RoutingStrategy
 
             if (!$c)
             {
-                echo "plugin fallback!";
                 $c = $this->createController('default', $factory, App::PLUGINS."/{$plugin}");
             }  
         }
