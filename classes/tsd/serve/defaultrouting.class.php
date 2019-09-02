@@ -19,7 +19,7 @@ class DefaultRouting extends RoutingStrategy
         if ($name == 'admin')
         {
             $name = $parts[2];
-            $cutoff += 2;
+            $cutoff += 3;
             
             $c = $this->createController($name, $factory, App::PLUGINS."/.{$plugin}");
         }
@@ -27,9 +27,13 @@ class DefaultRouting extends RoutingStrategy
         {
             $plugin = $name;
             $name = count($parts) > 2 ? $parts[2] : 'default';
-            $cutoff++;
+            $cutoff += 2;
 
-            if ($name == '') $name = 'default';
+            if ($name == '')
+            {
+                $name = 'default';
+                $cutoff--;
+            } 
             
             $c = $this->createController($name, $factory, App::PLUGINS."/{$plugin}");
 
