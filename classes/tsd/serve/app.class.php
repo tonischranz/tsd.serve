@@ -96,13 +96,9 @@ class App
         $i = \strpos($path, '?');
         $route = $this->router->getRoute($host, $method, \substr($path, 0, $i > 0 ? $i : \strlen($path) ));
         
-        //var_dump ($route);exit;
-
         try { $result = $this->getResult($route, $data); }
         catch (Exception $e) { $result = $e; }
 
-        //echo $accept;
-        
         $this->view_engine->render($result, $accept);
     }
 
