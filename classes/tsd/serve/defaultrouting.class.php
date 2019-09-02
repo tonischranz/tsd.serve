@@ -40,6 +40,7 @@ class DefaultRouting extends RoutingStrategy
             if (!$c)
             {
                 $c = $this->createController('default', $factory, App::PLUGINS."/{$plugin}");
+                $cutoff--;
             }  
         }
         else
@@ -55,10 +56,10 @@ class DefaultRouting extends RoutingStrategy
          
         for ($i = 0; $i < $cutoff; $i ++) \array_shift($parts);
         $methodPath = \implode('/', $parts);
- 
+
         $params = [];
         $prefix = $method == 'POST' ? 'do' : $method == 'GET' ? 'show' : $method;
-            
+
         $methodName = $this->getMethodName ($methodPath, $prefix, $params);
 
         $rc = new \ReflectionClass ($c);
