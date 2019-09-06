@@ -97,7 +97,7 @@ class App
         $route = $this->router->getRoute($host, $method, \substr($path, 0, $i > 0 ? $i : \strlen($path) ));
         
         try { $result = $this->getResult($route, $data); }
-        catch (Exception $e) { $result = $e; }
+        catch (\Exception $e) { $result = $e; }
 
         $this->view_engine->render($result, $accept);
     }
@@ -118,5 +118,13 @@ class App
         $route->fill($data);
 
         return $route->follow();
+    }
+}
+
+class AccessDeniedException extends \Exception
+{
+    function __construct()
+    {
+
     }
 }

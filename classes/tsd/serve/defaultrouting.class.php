@@ -18,9 +18,16 @@ class DefaultRouting extends RoutingStrategy
 
         if ($name == 'admin')
         {
-            $name = $parts[2];
+            $plugin = $parts[2];
+            $name = $parts[3];
             $cutoff += 3;
             
+            if (!$name)
+            {
+                $name = 'default';
+                $cutoff--;
+            }
+
             $c = $this->createController($name, $factory, App::PLUGINS."/.{$plugin}");
         }
         else if (in_array($name, $plugins))
@@ -64,6 +71,8 @@ class DefaultRouting extends RoutingStrategy
 
         $rc = new \ReflectionClass ($c);
      
+        echo "<br>trying $methodName on <br>";
+        \var_dump ($c);
         $mi = $this->getMethodInfo ($rc, $methodName);
 
         if (!$mi)
@@ -83,6 +92,7 @@ class DefaultRouting extends RoutingStrategy
             }
             if (!$mi)
             {
+                echo "No method found for $methodPath";
                 //Controller::error (404, "Not Found", "Keine passende Methode ($methodName) gefunden.");
             }
         }
