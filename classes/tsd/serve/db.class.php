@@ -112,9 +112,9 @@ class MysqlDB implements DB {
     
     function __construct() {
    
-            DB::$con = mysqli_connect('tontich.mysql.db.internal', 'tontich_apps', 'App$3cur3P@$$', 'tontich_offerten');
-            mysqli_set_charset(DB::$con, 'utf8');
-        }
+        DB::$con = mysqli_connect('tontich.mysql.db.internal', 'tontich_apps', 'App$3cur3P@$$', 'tontich_offerten');
+        mysqli_set_charset(DB::$con, 'utf8');
+        
     }
     
     
