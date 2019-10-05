@@ -9,6 +9,7 @@ use tsd\serve\App;
 // Having issues? wanna check your php env?
 //phpinfo();
 
+// wanna see errors?
 ini_set('display_errors','On');
 
 set_include_path ('./classes');

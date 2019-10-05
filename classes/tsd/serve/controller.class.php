@@ -24,11 +24,6 @@ class Controller
     {
       $backtrace = debug_backtrace();      
       $view = $backtrace[1]['function'];
-      /*echo "<br>";
-      echo "<br>";
-      echo "$view";
-      echo "<br>";
-      echo "<br>";*/
 
       if (\preg_match('/^show/', $view) == 1) $view = \strtolower(\substr($view,4));
       else if (\preg_match('/^do/', $view) == 1) $view = \strtolower(\substr($view,2));
