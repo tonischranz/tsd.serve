@@ -71,7 +71,7 @@ class App
             $_SERVER['REQUEST_METHOD'], 
             $_SERVER['HTTP_HOST'],
             key_exists('REDIRECT_URL', $_SERVER) ? 
-                $_SERVER['REDIRECT_URL']:$_SERVER['REQUEST_URI'], 
+                $_SERVER['REDIRECT_URL']:urldecode($_SERVER['REQUEST_URI']), 
             [
                 '_GET' => $_GET,'_COOKIE' => $_COOKIE, 
                 '_POST' => $_POST,'_FILES' => $_FILES 

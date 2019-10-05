@@ -19,7 +19,7 @@ class DefaultRouting extends RoutingStrategy
         if ($name == 'admin')
         {
             $plugin = $parts[2];
-            $name = $parts[3];
+            $name = count($parts) > 3 ? $parts[3] : 'default';
             $cutoff += 3;
             
             if (!$name)
@@ -48,7 +48,7 @@ class DefaultRouting extends RoutingStrategy
             {
                 $c = $this->createController('default', $factory, App::PLUGINS."/{$plugin}");
                 $cutoff--;
-            }  
+            }
         }
         else
         {
@@ -58,8 +58,7 @@ class DefaultRouting extends RoutingStrategy
         if (!$c)
         {
             $c = $this->createController('default', $factory);
-        }  
-             
+        }             
          
         for ($i = 0; $i < $cutoff; $i ++) \array_shift($parts);
         $methodPath = \implode('/', $parts);
@@ -71,8 +70,8 @@ class DefaultRouting extends RoutingStrategy
 
         $rc = new \ReflectionClass ($c);
      
-        echo "<br>trying $methodName on <br>";
-        \var_dump ($c);
+        //echo "<br>trying $methodName on <br>";
+        //var_dump ($c);
         $mi = $this->getMethodInfo ($rc, $methodName);
 
         if (!$mi)
