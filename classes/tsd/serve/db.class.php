@@ -27,7 +27,7 @@ interface DB
 }
  
  /**
- # @Default
+ * @Default
  * @Mode mysql
  */
 class MysqlDB implements DB {
