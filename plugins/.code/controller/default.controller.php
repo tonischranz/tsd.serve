@@ -1,22 +1,19 @@
 <?php
 
 use tsd\serve\Controller;
-use tsd\serve\DB;
 
 class DefaultController extends Controller
 {
-
-  function __construct(DB $db)
-  {
-    
+  function __construct()
+  {        
   }
 
   /**
-    @SecurityGroup developer
+   * @SecurityGroup developer
    */
   function showIndex ()
   {    
-    $this->render ('index', []);
+    return $this->view();
   }
 
 }

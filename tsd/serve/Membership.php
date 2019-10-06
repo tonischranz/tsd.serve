@@ -6,17 +6,17 @@ namespace tsd\serve;
  * @Implementation tsd\serve\InstallMembership
  * @Implementation tsd\serve\OpenIDMembership
  */
-abstract class Membership
+interface Membership
 {
-  abstract function isAnonymous ();
-  abstract function isInGroup ($group);
+  function isAnonymous () : bool;
+  function isInGroup (string $group):bool;
 }
 
 /**
  * @Default
  * @Mode install
  */
-class InstallMembership extends Membership
+class InstallMembership implements Membership
 {
   private $password;
 
@@ -26,12 +26,12 @@ class InstallMembership extends Membership
       $this->password = $config['password'];
   }
 
-  public function isAnonymous ()
+  public function isAnonymous () : bool
   {
     return !isset($_SESSION['logged_in']);
   }
 
-  public function isInGroup ($group)
+  public function isInGroup ($group) : bool
   {
     if ($this->isAnonymous()) return false;
     if ($group == 'developer') return true;

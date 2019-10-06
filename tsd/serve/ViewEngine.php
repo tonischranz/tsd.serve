@@ -231,6 +231,8 @@ class View
         else 
         {
             echo 'Regex Content Lookup failed';
+            echo $html;
+            echo $debug;
         }
     }
 }

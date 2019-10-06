@@ -75,7 +75,7 @@ class App
             [
                 '_GET' => $_GET,'_COOKIE' => $_COOKIE, 
                 '_POST' => $_POST,'_FILES' => $_FILES 
-            ],         
+            ],
             $_SERVER['HTTP_ACCEPT'] );
 
         ob_flush();
@@ -125,6 +125,14 @@ class AccessDeniedException extends \Exception
 {
     function __construct()
     {
+        parent::__construct("Zugriff verweigert!");
+    }
+}
 
+class NotFoundException extends \Exception
+{
+    function __construct()
+    {
+        parent::__construct("Nicht gefunden!");
     }
 }

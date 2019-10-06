@@ -1,34 +1,56 @@
 <?php
 namespace tsd\serve;
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 
 /**
- * Description of DB
+ * CRUD interaction with a SQL database
  *
- * @author tonti
+ * @author Toni Schhranz
  * @Implementation tsd\serve\MysqlDB
  */
  
 interface DB 
 {
+    /**
+     * Execute a SELECT query
+     * @param string $table table name
+     * @param array $fields array of fieldnames
+     * @param array $cond associative array with conditions $field=>$value
+     * @param array $order array of either a name or an array with [0]=>$name, [1]=>ASC/DESC
+     * @return array array of rows as associative arrays $field=>$value
+     */
+    function select (string $table, array $fields = null, array $cond = null, $order = false) : array;
 
-    function select (string $table, array $fields, $cond = false, $order = false) : array;
+    /**
+     * Execute a INSERT statement
+     * @param string $table table name
+     * @param array $values associative array $field=>$value
+     * @return int ID of the created row
+     */
+    function insert (string $table, array $values) : int;
 
-    function insert (string $table, $values) : int;
+    /**
+     * Executes a UPDATE statement
+     * @param string $table table name
+     * @param array $values associative array $field=>$value
+     * @param array $cond associative array with conditions $field=>$value
+     * @return bool TRUE if any roows affected
+     */
+    function update (string $table, array $values, array $cond):bool;
 
-    function update (string $table, $values, $cond):bool;
-
-    function delete (string $table, $cond):bool;
+    /**
+     * Executes a DELETE statement
+     * @param string $table table name
+     * @param array $cond associative array with conditions $field=>$value 
+     */
+    function delete (string $table, array $cond):bool;
 
 }
  
  /**
- * @Default
- * @Mode mysql
+  * MySQL implementation of tsd\serve\DB
+  *
+  * @Default
+  * @Mode mysql
  */
 class MysqlDB implements DB {
     private $con;
@@ -82,7 +104,7 @@ class MysqlDB implements DB {
         return $params;
     }
     
-    private function buildOrders ($cond)
+    private function buildOrders (array $cond)
     {
         $params = [];
         
@@ -110,13 +132,10 @@ class MysqlDB implements DB {
     
     
     
-    function __construct() {
-   
-        //DB::$con = \mysqli_connect('tontich.mysql.db.internal', 'tontich_apps', 'App$3cur3P@$$', 'tontich_offerten');
+    function __construct() 
+    {
         $this->con = new \mysqli();
-        $this->con->set_charset('utf8');
-        //\mysqli_set_charset(DB::$con, 'utf8');
-        
+        $this->con->set_charset('utf8');        
     }
 
     function read ($query)
@@ -130,7 +149,7 @@ class MysqlDB implements DB {
         return $rows;
     }
     
-    function select (string $table, array $fields, $cond = false, $order = false) : array
+    function select (string $table, array $fields = null, array $cond = null, $order = false) : array
     {
         $q = 'SELECT ';
         $q .= join(',',$fields);

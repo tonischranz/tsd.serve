@@ -3,7 +3,9 @@
 namespace tsd\serve;
 
 /**
- * ⚒ 
+ * The Router
+ * 
+ * @author Toni Schranz
  */
 class Router
 {

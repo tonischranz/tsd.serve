@@ -2,6 +2,11 @@
 
 namespace tsd\serve;
 
+/**
+ * The Factory
+ * 
+ * @author Toni Schranz
+ */
 class Factory
 {
     private $config;

@@ -100,9 +100,9 @@ class ViewResult extends ResultBase
 
 class MessageResult extends ViewResult
 {
-    function __construct($code=200, $type, $massage, $url=null) 
+    function __construct($code=200, $type, $message, $url=null) 
     {
-        parent::__construct($type, ["message"=>$massage, "url"=>$url], $code);
+        parent::__construct($type, ["message"=>$message, "url"=>$url], $code);
     }
 }
 
@@ -110,7 +110,7 @@ class ErrorResult extends MessageResult
 {
     function __construct(int $code=500,$message)
     {
-        parent::__construct($code, 'error', $message);
+        parent::__construct($code, 'views/error', $message);
     }
 }
 
