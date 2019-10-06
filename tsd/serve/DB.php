@@ -112,8 +112,10 @@ class MysqlDB implements DB {
     
     function __construct() {
    
-        DB::$con = \mysqli_connect('tontich.mysql.db.internal', 'tontich_apps', 'App$3cur3P@$$', 'tontich_offerten');
-        \mysqli_set_charset(DB::$con, 'utf8');
+        //DB::$con = \mysqli_connect('tontich.mysql.db.internal', 'tontich_apps', 'App$3cur3P@$$', 'tontich_offerten');
+        $this->con = new \mysqli();
+        $this->con->set_charset('utf8');
+        //\mysqli_set_charset(DB::$con, 'utf8');
         
     }
 
@@ -121,9 +123,9 @@ class MysqlDB implements DB {
     {        
         $rows = [];
         
-        $r = \mysqli_query($this->con, $query);
+        $r = $this->con->query($this->con, $query);
         
-        while ($row = \mysqli_fetch_array($r)) $rows[] = $row;
+        while ($row = $r->fetch_array($r)) $rows[] = $row;
         
         return $rows;
     }
@@ -165,8 +167,8 @@ class MysqlDB implements DB {
         $q .= join(',',$vals);
         $q .= ')';
         
-        mysqli_query(DB::$con, $q);
-        return mysqli_insert_id($this->con);
+        $this->con->query($q);
+        return $this->con->insert_id;
     }
     
     function update (string $table, $values, $cond) : bool
@@ -184,8 +186,8 @@ class MysqlDB implements DB {
         $q .= join(' AND ',$params);
         
         
-        mysqli_query($this->con, $q);
-        return mysqli_affected_rows($this->con) == 1;
+        $this->con->query($q);
+        return $this->con->affected_rows == 1;
     }
     
     function delete (string $table, $cond) : bool
@@ -200,7 +202,7 @@ class MysqlDB implements DB {
         $q .= join(' AND ',$params);
               
         
-        mysqli_query($this->con, $q);
-        return mysqli_affected_rows($this->con) > 0;
+        $this->con->query($q);
+        return $this->con->affected_rows > 0;
     }
 }

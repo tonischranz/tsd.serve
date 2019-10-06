@@ -22,7 +22,8 @@ class InstallMembership extends Membership
 
   function __construct (array $config)
   {
-    $this->password = $config['password'];
+    if (isset($config['password']))
+      $this->password = $config['password'];
   }
 
   public function isAnonymous ()
