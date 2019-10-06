@@ -6,14 +6,19 @@ use tsd\serve\App;
  * Main PHP File
  */
 
+spl_autoload_register ();
+
 // Having issues? wanna check your php env?
 //phpinfo();
 
 // wanna see errors?
 ini_set('display_errors','On');
 
-set_include_path ('./classes');
-spl_autoload_extensions ('.class.php');
-spl_autoload_register ();
+//function trace_autoload($name) {var_dump ($name);}
+//spl_autoload_register('trace_autoload', true, true);
+
+function fail_autoload($name){echo "Not Found: $name <br />";}
+spl_autoload_register('fail_autoload');
+
 
 App::serve();

@@ -18,11 +18,11 @@ class Factory
     //fu todo:
 
     function create($type, $name = '')
-    { echo "$type, ";
+    { //echo "$type, ";
         $t = new \ReflectionClass($type);
 
         $config = array_key_exists($name, $this->config) ? 
-                    $this->config[$name]:false;
+                    $this->config[$name]:array();
         
         if ($t->isAbstract())
         {
@@ -66,7 +66,7 @@ class Factory
         $matches = [];
 
         //todo: use plugins to search classes
-        if (preg_match_all ('/@Implementation\s(.*)/', $doc, $matches) > 0)
+        if (preg_match_all ('/@Implementation\s((\w|\\\)*)/', $doc, $matches) > 0)
         {
             foreach ($matches[1] as $i)
             {

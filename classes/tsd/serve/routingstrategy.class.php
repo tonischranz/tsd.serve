@@ -3,8 +3,8 @@
 namespace tsd\serve;
 
 /**
- * @Implementation \tsd\serve\DefaultRouting
- * @Implementation \tsd\serve\SimpleRouting
+ * @Implementation tsd\serve\DefaultRouting
+ * @Implementation tsd\serve\SimpleRouting
  */
 abstract class RoutingStrategy
 {
