@@ -18,13 +18,13 @@ class App
      * Plugins directory name
      */
     const PLUGINS = 'plugins';
- 
+
     /** 
      * the Router
      * @var Router $router
      */
     private $router;
-    
+
     /**
      * the View Engine
      * @var ViewEngine $view_engine 
@@ -45,19 +45,17 @@ class App
     function __construct(array $config = null)
     {
         if ($config == null && file_exists(App::CONFIG))
-            $config = json_decode (file_get_contents (App::CONFIG), true);
+            $config = json_decode(file_get_contents(App::CONFIG), true);
         else
             $config = [];
 
         $plugins = scandir(App::PLUGINS);
 
-        $factory = new Factory($config, preg_grep('/^\.\w/',$plugins));
-        
+        $factory = new Factory($config, preg_grep('/^\.\w/', $plugins));
+
         $this->router = new Router($factory, $plugins);
         $this->member = $factory->create('tsd\serve\Membership', 'member');
         $this->view_engine = $factory->create('tsd\serve\ViewEngine', 'views');
-
-        $this->member->isInGroup('asd');
     }
 
     /**
@@ -65,33 +63,31 @@ class App
      */
     static function serve()
     {
-        $url = key_exists('REDIRECT_URL', $_SERVER) ? 
+        $url = key_exists('REDIRECT_URL', $_SERVER) ?
             $_SERVER['REDIRECT_URL'] :
             urldecode($_SERVER['REQUEST_URI']);
-        
-        if (\stripos($url, '/static/') === 0) 
+
+        if (\stripos($url, '/static/') === 0)
             return false;
-        
-        ob_start ();
-        
-        try
-        {
+
+        ob_start();
+
+        try {
             $app = new App();
 
             $app->serveRequest(
-                $_SERVER['REQUEST_METHOD'], 
+                $_SERVER['REQUEST_METHOD'],
                 $_SERVER['HTTP_HOST'],
-                $url, 
+                $url,
                 [
-                    '_GET' => $_GET,'_COOKIE' => $_COOKIE, 
-                    '_POST' => $_POST,'_FILES' => $_FILES 
+                    '_GET' => $_GET, '_COOKIE' => $_COOKIE,
+                    '_POST' => $_POST, '_FILES' => $_FILES
                 ],
-                $_SERVER['HTTP_ACCEPT'] );
+                $_SERVER['HTTP_ACCEPT']
+            );
 
             ob_flush();
-        }
-        catch (\Exception $e)
-        {
+        } catch (\Exception $e) {
             echo "Error $e->message";
             ob_flush();
         }
@@ -110,10 +106,13 @@ class App
     protected function serveRequest(string $method, string $host, string $path, array $data, $accept)
     {
         $i = \strpos($path, '?');
-        $route = $this->router->getRoute($host, $method, \substr($path, 0, $i > 0 ? $i : \strlen($path) ));
-        
-        try { $result = $this->getResult($route, $data); }
-        catch (\Exception $e) { $result = $e; }
+        $route = $this->router->getRoute($host, $method, \substr($path, 0, $i > 0 ? $i : \strlen($path)));
+
+        try {
+            $result = $this->getResult($route, $data);
+        } catch (\Exception $e) {
+            $result = $e;
+        }
 
         $this->view_engine->render($result, $accept);
     }
@@ -130,7 +129,7 @@ class App
     {
         if (!$route->checkPermission($this->member))
             throw new AccessDeniedException($route);
-        
+
         $route->fill($data);
 
         return $route->follow();
