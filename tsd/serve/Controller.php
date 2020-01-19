@@ -13,10 +13,10 @@ class Controller
   public $name;
   public $basePath;
   
-  function __construct ()
+/*  function __construct ()
   {
 
-  }
+  }*/
 
   protected function view ($data = null, string $view = null)
   {
@@ -74,7 +74,7 @@ class ResultBase implements Result
     }
 }
 
-class RedirectResult
+class RedirectResult extends ResultBase
 {
     function __construct($location)
     {

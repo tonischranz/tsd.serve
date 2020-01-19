@@ -31,9 +31,9 @@ class App
      */
     private $view_engine;
 
-    /** 
+    /**
      * the Membership Provider
-     * @var Membership $member 
+     * @var \tsd\serve\Membership $member
      */
     private $member;
 
@@ -56,6 +56,8 @@ class App
         $this->router = new Router($factory, $plugins);
         $this->member = $factory->create('tsd\serve\Membership', 'member');
         $this->view_engine = $factory->create('tsd\serve\ViewEngine', 'views');
+
+        $this->member->isInGroup('asd');
     }
 
     /**
@@ -63,22 +65,36 @@ class App
      */
     static function serve()
     {
+        $url = key_exists('REDIRECT_URL', $_SERVER) ? 
+            $_SERVER['REDIRECT_URL'] :
+            urldecode($_SERVER['REQUEST_URI']);
+        
+        if (\stripos($url, '/static/') === 0) 
+            return false;
+        
         ob_start ();
         
-        $app = new App();
+        try
+        {
+            $app = new App();
 
-        $app->serveRequest(
-            $_SERVER['REQUEST_METHOD'], 
-            $_SERVER['HTTP_HOST'],
-            key_exists('REDIRECT_URL', $_SERVER) ? 
-                $_SERVER['REDIRECT_URL']:urldecode($_SERVER['REQUEST_URI']), 
-            [
-                '_GET' => $_GET,'_COOKIE' => $_COOKIE, 
-                '_POST' => $_POST,'_FILES' => $_FILES 
-            ],
-            $_SERVER['HTTP_ACCEPT'] );
+            $app->serveRequest(
+                $_SERVER['REQUEST_METHOD'], 
+                $_SERVER['HTTP_HOST'],
+                $url, 
+                [
+                    '_GET' => $_GET,'_COOKIE' => $_COOKIE, 
+                    '_POST' => $_POST,'_FILES' => $_FILES 
+                ],
+                $_SERVER['HTTP_ACCEPT'] );
 
-        ob_flush();
+            ob_flush();
+        }
+        catch (\Exception $e)
+        {
+            echo "Error $e->message";
+            ob_flush();
+        }
     }
 
     /**

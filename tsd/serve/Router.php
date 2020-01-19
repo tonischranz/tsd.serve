@@ -78,7 +78,7 @@ class Router
         $methodPath = \implode('/', $parts);
 
         $params = [];
-        $prefix = $method == 'POST' ? 'do' : $method == 'GET' ? 'show' : $method;
+        $prefix = $method == 'POST' ? 'do' : ($method == 'GET' ? 'show' : $method);
 
         $methodName = $this->getMethodName ($methodPath, $prefix, $params);
 
@@ -128,7 +128,7 @@ class Router
         } 
  
         return $method == 'POST' ? new PostRoute($c, $mi, $params) :
-            $method == 'GET' ? new GetRoute($c, $mi, $params) : false;
+            ($method == 'GET' ? new GetRoute($c, $mi, $params) : false);
 
     }
 
