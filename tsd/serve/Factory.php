@@ -22,21 +22,24 @@ class Factory
     //function createA($type, $$)
     //fu todo:
 
-    function create($type, $name = '')
+    function create(string $type, $name = '', InjectionContext $ctx = null)
     { //echo "$type, ";
+
+        var_dump($name);
+        var_dump($type);
+        //todo: if type unkn, look in plugins
         $t = new \ReflectionClass($type);
 
-        $config = array_key_exists($name, $this->config) ? 
-                    $this->config[$name]:array();
-        
-        if ($t->isAbstract())
-        {
-            if($config && isset($config['mode']))
-            {
-                $t=$this->getImplementation($t, $config['mode']);
-            }
-            else {
-                $t=$this->getImplementation($t);
+        $plugin = $ctx ? $ctx->plugin : '';
+
+        $config = array_key_exists($name, $this->config) ?
+            $this->config[$name] : [];
+
+        if ($t->isAbstract()) {
+            if ($config && isset($config['mode'])) {
+                $t = $this->getImplementation($t, $plugin, $config['mode']);
+            } else {
+                $t = $this->getImplementation($t, $plugin);
             }
         }
 
@@ -44,16 +47,24 @@ class Factory
         $par = $con ? $con->getParameters() : [];
         $args = [];
 
+        $myctx = new InjectionContext();
+        $myctx->name = $name;
+        $myctx->fullname = $ctx ? "$ctx->fullname.$name" : $name;
+        $myctx->plugin = $plugin;
+
         foreach ($par as $p) {
             if ($p->isArray() && $p->name == 'config' && $name)
                 $args[] = $config;
             else if ($p->hasType() && !$p->isArray())
-                $args[] = $this->create($p->getType()->getName(), $p->getName());
-		//todo: single values
-		else if ($config[$p->name])
-		$args[] = $config[$p->name];
+                $args[] = $this->create($p->getType()->getName(), $p->getName(), $myctx);
+            else if ($config[$p->name])
+                $args[] = $config[$p->name];
             else if ($p->name == 'name')
-                $args[]=$name;
+                $args[] = $name;
+            else if ($p->name == 'plugin')
+                $args[] = $ctx->plugin;
+            else if ($p->name == 'fullname')
+                $args[] = $ctx->fullname;
             else if ($p->isArray())
                 $args[] = [];
             else
@@ -62,34 +73,28 @@ class Factory
 
         $type = $t->name;
         return $con ? $t->newInstanceArgs($args) : new $type();
-        
     }
 
-    function getImplementation(\ReflectionClass $type, string $mode = null)
+    function getImplementation(\ReflectionClass $type, string &$plugin, string $mode = null)
     {
         $doc = $type->getDocComment();
         $matches = [];
 
         //todo: use plugins to search classes
-        if (preg_match_all ('/@Implementation\s((\w|\\\)*)/', $doc, $matches) > 0)
-        {
-            foreach ($matches[1] as $i)
-            {
+        if (preg_match_all('/@Implementation\s((\w|\\\)*)/', $doc, $matches) > 0) {
+            foreach ($matches[1] as $i) {
                 $itype = new \ReflectionClass($i);
-                
+
                 $idoc = $itype->getDocComment();
                 $imatches = [];
-                
 
-                if (!$mode && preg_match('/@Default/', $idoc))
-                {
+
+                if (!$mode && preg_match('/@Default/', $idoc)) {
                     return $itype;
-                } 
+                }
 
-                if (preg_match_all ('/@Mode\s(\w+)/', $idoc, $imatches) > 0)
-                {
-                    foreach ($imatches[1] as $m)
-                    {
+                if (preg_match_all('/@Mode\s(\w+)/', $idoc, $imatches) > 0) {
+                    foreach ($imatches[1] as $m) {
                         if ($m == $mode) return $itype;
                     }
                 }
