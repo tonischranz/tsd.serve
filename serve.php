@@ -7,7 +7,7 @@ use tsd\serve\App;
  */
 
 // Autoload with default settings
-spl_autoload_register ();
+spl_autoload_register();
 
 // Autoload from Composer
 # include 'vendor/autoload.php';
@@ -18,7 +18,7 @@ spl_autoload_register ();
 # phpinfo();
 
 // wanna see errors?
-ini_set('display_errors','On');
+ini_set('display_errors', 'On');
 
 // type autoloading issues?
 # function trace_autoload($name) {var_dump ($name);}
@@ -27,7 +27,14 @@ ini_set('display_errors','On');
 # function fail_autoload($name){echo "Not Found: $name <br />";}
 # spl_autoload_register('fail_autoload');
 
-
-
-// run the App
-return App::serve();
+if (PHP_SAPI == 'cli') {
+    if ($argc == 1) {
+        shell_exec(PHP_BINARY . " -S localhost:8000 serve.php");
+    } else {
+        echo "Usage: php serve.php [<command>]\n";
+        echo "\n";
+    }
+} else {
+    // run the App
+    return App::serve();
+}
