@@ -20,14 +20,9 @@ class Factory
 
     //function createAll($type, )
     //function createA($type, $$)
-    //fu todo:
 
     function create(string $type, $name = '', InjectionContext $ctx = null)
-    { //echo "$type, ";
-
-        var_dump($name);
-        var_dump($type);
-        //todo: if type unkn, look in plugins
+    {
         $t = new \ReflectionClass($type);
 
         $plugin = $ctx ? $ctx->plugin : '';
@@ -64,7 +59,7 @@ class Factory
             else if ($p->name == 'plugin')
                 $args[] = $ctx->plugin;
             else if ($p->name == 'fullname')
-                $args[] = $ctx->fullname;
+                $args[] = $myctx->fullname;
             else if ($p->isArray())
                 $args[] = [];
             else
