@@ -25,8 +25,8 @@ jobs:
         
     - name: Build dist
       run: |
-        mkdir dist
-        cp -r ./* dist/
+        mkdir .dist
+        cp -r ./* .dist/
               
     - name: Upload artifact
       uses: actions/upload-artifact@v1.0.0
@@ -34,4 +34,4 @@ jobs:
         # Artifact name
         name: serve
         # Directory containing files to upload
-        path: dist
+        path: .dist
