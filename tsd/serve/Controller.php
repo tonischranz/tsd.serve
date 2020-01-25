@@ -13,10 +13,10 @@ class Controller
   public $name;
   public $basePath;
   
-  function __construct ()
+/*  function __construct ()
   {
 
-  }
+  }*/
 
   protected function view ($data = null, string $view = null)
   {
@@ -24,11 +24,6 @@ class Controller
     {
       $backtrace = debug_backtrace();      
       $view = $backtrace[1]['function'];
-      /*echo "<br>";
-      echo "<br>";
-      echo "$view";
-      echo "<br>";
-      echo "<br>";*/
 
       if (\preg_match('/^show/', $view) == 1) $view = \strtolower(\substr($view,4));
       else if (\preg_match('/^do/', $view) == 1) $view = \strtolower(\substr($view,2));
@@ -79,7 +74,7 @@ class ResultBase implements Result
     }
 }
 
-class RedirectResult
+class RedirectResult extends ResultBase
 {
     function __construct($location)
     {
@@ -105,9 +100,9 @@ class ViewResult extends ResultBase
 
 class MessageResult extends ViewResult
 {
-    function __construct($code=200, $type, $massage, $url=null) 
+    function __construct($code=200, $type, $message, $url=null) 
     {
-        parent::__construct($type, ["message"=>$massage, "url"=>$url], $code);
+        parent::__construct($type, ["message"=>$message, "url"=>$url], $code);
     }
 }
 
@@ -115,7 +110,7 @@ class ErrorResult extends MessageResult
 {
     function __construct(int $code=500,$message)
     {
-        parent::__construct($code, 'error', $message);
+        parent::__construct($code, 'views/error', $message);
     }
 }
 

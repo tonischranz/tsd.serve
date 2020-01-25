@@ -2,6 +2,64 @@
 
 namespace tsd\serve;
 
+/**
+ * @Implementation tsd\serve\ServeViewEngine
+ */
+abstract class ViewEngine
+{
+    function render($result, $accept)
+    {
+        if ($result instanceof tsd\serve\AccessDeniedException) $result = new ErrorResult (403, $result);
+        if ($result instanceof tsd\serve\NotFoundException) $result = new ErrorResult (404, $result);
+        if ($result instanceof \Exception) $result = new ErrorResult (500, $result->getMessage());
+        if (!($result instanceof Result)) $result = new DataResult ($result);
+
+        http_response_code($result->getStatusCode());
+        $headers = $result->getHeaders();
+        foreach ($headers as $h)
+        {
+            header($h);
+        }
+
+        //todo: better
+        if ($accept == 'application/json') $this->renderJson($result);
+        if ($accept == 'text/xml') $this->renderXml($result);
+
+        if ($result instanceof ViewResult) 
+        {
+            $this->renderView($result);
+        }
+    }
+
+    private function renderJson(Result $result)
+    {
+        ob_clean();        
+        echo json_encode($result->getData());
+    }
+
+    private function renderXml(Result $result)
+    {
+        ob_clean();
+        echo $result->getData()->asXML();
+    }
+
+    protected abstract function renderView (ViewResult $result);
+}
+
+/**
+ * @Default
+ */
+class ServeViewEngine extends ViewEngine
+{
+    const VIEWS = '.';
+
+    function renderView(ViewResult $result)
+    {
+        $v = new View (ServeViewEngine::VIEWS.'/'.$result->getView());
+        $v->render ($result->getData());        
+    }
+}
+
 class View
 {
     private $path;
@@ -173,6 +231,102 @@ class View
         else 
         {
             echo 'Regex Content Lookup failed';
+            echo $html;
+            echo $debug;
         }
     }
+}
+
+class Layout extends View
+{
+
+  public function __construct ()
+  {
+    parent::__construct ('./views/layout');
+  }
+
+  public function render ($data)
+  {
+    $template = $this->compile ($this->localize ($this->load ()));
+
+    Layout::renderInt ($template, $data);
+  }
+  
+  private static function renderInt ($view, $data)
+  {
+    $d = $data;
+
+    eval ($view);
+
+    unset ($d);
+  }
+}
+
+
+interface Label
+{
+
+  /**
+   *
+   * @param string $name
+   * @return string
+   */
+  function getLabel (string $name);
+}
+
+
+class JSONLabels implements Label
+{
+
+  private $root;
+  private $data;
+
+  public function __construct(string $path, JSONLabels $root = null)
+  {
+    if ($root)
+      $this->root = $root;
+
+    $file = $path . '/labels.json';
+
+    if (file_exists($file))
+      $this->data = json_decode(file_get_contents($file), true);
+  }
+
+  function getLabel(string $name)
+  {
+    $lang = 'de';
+
+    if (!$name)
+      return false;
+    if ($name[0] == '/')
+    {
+      if ($this->root)
+      {
+        return $this->root->getLabel(substr($name, 1));
+      }
+    }
+    if (!$this->data || !array_key_exists($name, $this->data))
+      return "[not found|$name]";
+    if (!array_key_exists($lang, $this->data[$name]))
+      return "[not $lang|$name]";
+    return $this->data[$name][$lang];
+  }
+
+}
+
+
+class Labels
+{
+
+  /**
+   *
+   * @param string $path
+   * @return \tsd\serve\Label
+   */
+  static function create(string $path)
+  {
+    $l = new JSONLabels(dirname($path), new JSONLabels('./views'));
+    return $l;
+  }
+
 }

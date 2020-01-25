@@ -6,13 +6,28 @@ use tsd\serve\App;
  * Main PHP File
  */
 
-// Having issues? wanna check your php env?
-//phpinfo();
-
-ini_set('display_errors','On');
-
-set_include_path ('./classes');
-spl_autoload_extensions ('.class.php');
+// Autoload with default settings
 spl_autoload_register ();
 
-App::serve();
+// Autoload from Composer
+# include 'vendor/autoload.php';
+
+
+
+// Having issues? wanna check your php env?
+# phpinfo();
+
+// wanna see errors?
+ini_set('display_errors','On');
+
+// type autoloading issues?
+# function trace_autoload($name) {var_dump ($name);}
+# spl_autoload_register('trace_autoload', true, true);
+
+# function fail_autoload($name){echo "Not Found: $name <br />";}
+# spl_autoload_register('fail_autoload');
+
+
+
+// run the App
+return App::serve();

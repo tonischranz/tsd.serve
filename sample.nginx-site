@@ -1,0 +1,26 @@
+#
+#
+#
+
+server {
+	listen 80;
+	listen [::]:80;
+
+	server_name serve.local;
+
+	root /home/toni/serve;
+	index index.html;
+
+	location /static/ {
+
+		include		mime.types;
+	}
+
+	location / {
+		
+		try_files /serve.php 500;
+		fastcgi_pass	localhost:9876;
+		fastcgi_param	SCRIPT_FILENAME $document_root$fastcgi_script_name;
+		include 	fastcgi_params;
+	}
+}
