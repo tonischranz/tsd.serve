@@ -23,10 +23,15 @@ jobs:
         echo Add other actions to build,
         echo test, and deploy your project.
         
+    - name: Build dist
+      run: |
+        mkdir dist
+        cp ./* dist/
+              
     - name: Upload artifact
       uses: actions/upload-artifact@v1.0.0
       with:
         # Artifact name
         name: serve
         # Directory containing files to upload
-        path: . 
+        path: dist
