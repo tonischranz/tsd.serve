@@ -2,6 +2,8 @@
 
 namespace tsd\serve;
 
+use function PHPSTORM_META\type;
+
 /**
  * The Application
  * 
