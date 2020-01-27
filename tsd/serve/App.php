@@ -53,7 +53,7 @@ class App
 
         $plugins = scandir(App::PLUGINS);
 
-        $factory = new Factory($config, preg_grep('/^\.\w/', $plugins));
+        $factory = new Factory($config, $plugins /*preg_grep('/^\.\w/', $plugins)*/);
 
         $this->router = new Router($factory, $plugins);
         $this->member = $factory->create('tsd\serve\Membership', 'member');
@@ -107,10 +107,10 @@ class App
      */
     protected function serveRequest(string $method, string $host, string $path, array $data, $accept)
     {
-        $i = \strpos($path, '?');
-        $route = $this->router->getRoute($host, $method, \substr($path, 0, $i > 0 ? $i : \strlen($path)));
-
         try {
+            $i = \strpos($path, '?');
+            $route = $this->router->getRoute($host, $method, \substr($path, 0, $i > 0 ? $i : \strlen($path)));
+
             $result = $this->getResult($route, $data);
         } catch (\Exception $e) {
             $result = $e;
@@ -135,6 +135,14 @@ class App
         $route->fill($data);
 
         return $route->follow();
+    }
+}
+
+class Exception extends \Exception
+{
+    function __construct($m)
+    {
+        parent::__construct($m);
     }
 }
 

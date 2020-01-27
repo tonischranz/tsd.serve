@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>[title]</title>
+    <style type="text/css">
+      h1 {
+        text-align: center;
+        font-size: 10rem;
+        font-weight: normal;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="content">
+      {for events}
+      <div>
+        <a href="{id}">{name}{if name2} ({name2}){/if}</a>
+      </div>
+      {/for}
+    </div>
+  </body>
+</html>

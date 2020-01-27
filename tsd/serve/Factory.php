@@ -34,26 +34,26 @@ class Factory
     {
         $plugin = '';
 
-        if (!class_exists($type)) {
-            $parts = explode('\\', $type);
-            $plugin = '';
-            $ramaining = $parts;
+        //if (!class_exists($type)) {
+        $parts = explode('\\', $type);
+        $plugin = '';
+        $ramaining = $parts;
 
-            foreach ($parts as $p) {
-                array_shift($ramaining);
+        foreach ($parts as $p) {
+            array_shift($ramaining);
 
-                if (!$plugin) $plugin = $p;
-                else $plugin .= ".$p";
+            if (!$plugin) $plugin = $p;
+            else $plugin .= ".$p";
 
-                if (in_array($plugin, $this->plugins)) {
-                    $filename = App::PLUGINS . "/$plugin/src/" . join('/', $ramaining) . '.php';
-                    if (file_exists($filename)) {
-                        require_once $filename;
-                        break;
-                    }
+            if (in_array($plugin, $this->plugins)) {
+                $filename = App::PLUGINS . "/$plugin/src/" . join('/', $ramaining) . '.php';
+                if (file_exists($filename)) {
+                    require_once $filename;
+                    break;
                 }
             }
         }
+        //}
 
         $t = new \ReflectionClass($type);
 
@@ -166,9 +166,9 @@ class Injection
         foreach ($par as $p) {
             if ($p->isArray() && $p->name == 'config' && $name)
                 $args[] = $this->config;
-            else if ($p->hasType() && !$p->isArray())
+            else if ($p->hasType() && !$p->isArray() && !$p->getType()->isBuiltIn())
                 $args[] = $factory->create($p->getType()->getName(), $p->getName(), $myctx);
-            else if ($this->config[$p->name])
+            else if (isset($this->config[$p->name]))
                 $args[] = $this->config[$p->name];
             else if ($p->name == 'name')
                 $args[] = $name;
