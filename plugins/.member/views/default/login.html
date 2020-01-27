@@ -1,6 +1,5 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
-
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <title>[title]</title>
@@ -10,25 +9,24 @@
   </head>
 
   <body>
-    <div id="content">
+    <main>
       <h1><a href="/">⚒</a></h1>
       <form method="POST" action="login">
         <input type="hidden" name="redirect_url" value="{redirect_url}" />
         <div class="_input">
           <label for="username">[username]</label>
-          <input type="text" id="username" name="username" required>
+          <input type="text" id="username" name="username" required />
           <span class="_error">[error(m){error.username}]</span>
         </div>
         <div class="_input">
           <label for="password">[password]</label>
-          <input type="password" id="password" name="password" required>
+          <input type="password" id="password" name="password" required />
           <span class="_error">[error(m){error.password}]</span>
         </div>
         <footer class="_buttons">
           <button type="submit">go</button>
         </footer>
       </form>
-    </div>
+    </main>
   </body>
-
 </html>
