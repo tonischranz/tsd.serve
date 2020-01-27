@@ -5,7 +5,7 @@ body {
 }
 
 body > main {
-  height: 20em;
+  padding-bottom: 5em;
 }
 
 body > footer {
@@ -28,11 +28,13 @@ table.xdebug-error th > span {
 footer > font[size="1"] {
   display: block;
   background-color: #000;
+  overflow-x: auto;
 }
 
-pre.xdebug-var-dump {
+footer pre.xdebug-var-dump {
   background-color: #000;
   padding: 0.5em;
+  overflow-x: auto;
 }
 
 a,
