@@ -4,7 +4,7 @@ body {
   font-family: myfont, sans-serif;
 }
 
-main#content {
+body > main {
   height: 20em;
 }
 
