@@ -10,37 +10,42 @@ namespace tsd\serve;
 class Controller
 {
 
-  public $name;
-  public $basePath;
-  
-/*  function __construct ()
+    public $name;
+    public $basePath;
+
+    /*  function __construct ()
   {
 
   }*/
 
-  protected function view ($data = null, string $view = null)
-  {
-    if ($view == null)
+    protected function view($data = null, string $view = null)
     {
-      $backtrace = debug_backtrace();      
-      $view = $backtrace[1]['function'];
+        if ($view == null) {
+            $backtrace = debug_backtrace();
+            $view = $backtrace[1]['function'];
 
-      if (\preg_match('/^show/', $view) == 1) $view = \strtolower(\substr($view,4));
-      else if (\preg_match('/^do/', $view) == 1) $view = \strtolower(\substr($view,2));
+            if (\preg_match('/^show/', $view) == 1) $view = \strtolower(\substr($view, 4));
+            else if (\preg_match('/^do/', $view) == 1) $view = \strtolower(\substr($view, 2));
+        }
+
+        $ctx = new ViewContext();
+        $ctx->menu = [
+            ['url' => '#', 'title' => 'Hash'],
+            ['url' => '~', 'title' => 'Tilde', 'tags' => ['home'], 'emblems' => ['~']],
+        ];
+
+        return new ViewResult($this->basePath . '/views/' . $this->name . "/$view", $data, $ctx);
     }
 
-    return new ViewResult($this->basePath.'/views/'.$this->name."/$view", $data);
-  }
-
-  protected function redirect ($url)
-  {
-    return new RedirectResult($url);
-  }
+    protected function redirect($url)
+    {
+        return new RedirectResult($url);
+    }
 }
 
 interface Result
 {
-    function getData();
+    function data();
     function getStatusCode();
     function getHeaders();
 }
@@ -58,7 +63,7 @@ class ResultBase implements Result
         $this->headers = $headers;
     }
 
-    function getData()
+    function data()
     {
         return $this->data;
     }
@@ -82,50 +87,57 @@ class RedirectResult extends ResultBase
     }
 }
 
-class ViewResult extends ResultBase
-{   
-    private $view;
+class ViewResult extends ResultBase implements IViewResult
+{
+    private $_view;
+    private $_ctx;
 
-    function __construct(string $view, $data, $statuscode = 200)
+    function __construct(string $view, $data, ViewContext $ctx = null, $statuscode = 200)
     {
-      parent::__construct($data,$statuscode);
-      $this->view = $view;
+        parent::__construct($data, $statuscode);
+        $this->_ctx = $ctx ?? new ViewContext();
+        $this->_view = $view;
     }
 
-    function getView()
+    function view()
     {
-      return $this->view;
+        return $this->_view;
+    }
+
+    function ctx()
+    {
+        return $this->_ctx;
     }
 }
 
 class MessageResult extends ViewResult
 {
-    function __construct($code=200, $type, $message, $url=null) 
+    function __construct(ViewContext $ctx, $type, $message, $code = 200, $url = null)
     {
-        parent::__construct($type, ["message"=>$message, "url"=>$url], $code);
+        parent::__construct($type, ["message" => $message, "url" => $url], $ctx, $code);
     }
 }
 
 class ErrorResult extends MessageResult
 {
-    function __construct(int $code=500,$message)
+    function __construct(ViewContext $ctx, $message, int $code = 500)
     {
-        parent::__construct($code, 'views/error', $message);
+        parent::__construct($ctx, 'views/error', $message, $code);
     }
 }
 
 class SucessResult extends MessageResult
 {
-    function __construct($message, $url = null)
+    function __construct(ViewContext $ctx, $message, $url = null)
     {
-        parent::__construct('sucess', $message, $url);
+        parent::__construct($ctx, 'views/sucess', $message, 200, $url);
     }
 }
 
-class DataResult extends ViewResult
+class DataResult extends ResultBase
 {
     function __construct($data)
     {
-        parent::__construct('data', $data, 200);
+        parent::__construct($data, 200);
     }
 }

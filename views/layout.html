@@ -11,7 +11,24 @@
   </head>
 
   <body>
-    <header></header>
+    <header>
+      {if @menu}
+      <ul>
+        {each @menu}
+        <li>
+          <a href="{url}">{title}</a>
+
+          <span>
+            {each tags}{.}{/each}
+          </span>
+          <span>
+            {each emblems}{.}{/each}
+          </span>
+        </li>
+        {/each}
+      </ul>
+      {/if}
+    </header>
     {content}
     <footer>
       {debug}

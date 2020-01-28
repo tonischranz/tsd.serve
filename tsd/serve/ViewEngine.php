@@ -2,6 +2,8 @@
 
 namespace tsd\serve;
 
+use ArrayIterator;
+
 /**
  * @Implementation tsd\serve\ServeViewEngine
  */
@@ -9,9 +11,11 @@ abstract class ViewEngine
 {
     function render($result, $accept)
     {
-        if ($result instanceof AccessDeniedException) $result = new ErrorResult(403, $result);
-        if ($result instanceof NotFoundException) $result = new ErrorResult(404, $result);
-        if ($result instanceof \Exception) $result = new ErrorResult(500, $result->getMessage());
+        $ctx = new ViewContext();
+
+        if ($result instanceof AccessDeniedException) $result = new ErrorResult($ctx, $result, 403);
+        if ($result instanceof NotFoundException) $result = new ErrorResult($ctx, $result, 404);
+        if ($result instanceof \Exception) $result = new ErrorResult($ctx, $result->getMessage(), 500);
         if (!($result instanceof Result)) $result = new DataResult($result);
 
         http_response_code($result->getStatusCode());
@@ -32,17 +36,33 @@ abstract class ViewEngine
     private function renderJson(Result $result)
     {
         ob_clean();
-        echo json_encode($result->getData());
+        echo json_encode($result->data());
     }
 
     private function renderXml(Result $result)
     {
         ob_clean();
-        echo $result->getData()->asXML();
+        echo $result->data()->asXML();
     }
 
-    protected abstract function renderView(ViewResult $result);
+    protected abstract function renderView(IViewResult $result);
 }
+
+interface IViewResult
+{
+    function view();
+    function ctx();
+    function data();
+}
+
+class ViewContext
+{
+    public $menu;
+    public $error;
+    public $member;
+}
+
+
 
 /**
  * @Default
@@ -51,10 +71,10 @@ class ServeViewEngine extends ViewEngine
 {
     const VIEWS = '.';
 
-    function renderView(ViewResult $result)
+    function renderView(IViewResult $result)
     {
-        $v = new View(ServeViewEngine::VIEWS . '/' . $result->getView());
-        $v->render($result->getData());
+        $v = new View(ServeViewEngine::VIEWS . '/' . $result->view());
+        $v->render($result->data(), $result->ctx());
     }
 }
 
@@ -69,10 +89,10 @@ class View
         $this->labels = Labels::create($path);
     }
 
-    function render($data)
+    function render($data, $ctx)
     {
         $template = $this->compile($this->localize($this->load()));
-        View::run($template, $data);
+        View::run($template, $data, $ctx);
     }
 
     protected function compile($template)
@@ -121,13 +141,17 @@ class View
 
     private static function compileExpression($exp)
     {
+        if ($exp == '.') return '$d';
+
         $parts = explode('.', $exp);
         if (!$parts)
             return false;
         if (!$parts[0])
             return false;
 
-        $o = $parts[0][0] == '$' ? $parts[0] : "\$d['$parts[0]']";
+        $name = substr($parts[0], 1);
+
+        $o = $parts[0][0] == '@' ? "\$$name" : "\$d['$parts[0]']";
         array_shift($parts);
         foreach ($parts as $p) {
             $o .= "['$p']";
@@ -164,7 +188,7 @@ class View
     private static function compileTemplate($template)
     {
         $patterns = [
-            '#\{label\s*(?<params>[,\w\s]+)\s+with\s+(?<args>.*?)\}(?<label>.*?)\{/label\}#' => function ($m) {
+            '/\{label\s*(?<params>[,\w\s]+)\s+with\s+(?<args>.*?)\}(?<label>.*?)\{\/label\}/' => function ($m) {
                 $args   = [];
                 $i      = 0;
                 $params = explode(',', $m['params']);
@@ -179,15 +203,32 @@ class View
                 $label    = addslashes(View::compileLabel($m['label']));
                 return "<?php call_user_func(function(\$d){ eval('$label'); }, [$as]); ?>";
             },
-            '#\{foreach\s*(?<var>\$\w+)\s+in\s+(?<arg>.*?)\}(?<inner>.*)\{/foreach\}#ms' => function ($m) {
+            //todo: i don't think this works
+            /*'#\{foreach\s*(?<var>\$\w+)\s+in\s+(?<arg>.*?)\}(?<inner>.*)\{/foreach\}#ms' => function ($m) {
                 $inner = View::compileTemplate($m['inner']);
                 $arg   = View::compileExpression($m['arg']);
                 return "<?php foreach($arg as $m[var]) {\n$inner\n} ?>";
+            },*/
+            //
+            '/\{each\s+(?<arg>\@?\w[\.\|\w]*)\s*\}(?<inner>((?:(?!\{\/?each).)|(?R))*)(\{else\}(?<else>((?:(?!\{\/?each).)|(?R))*))?\{\/each\}/ms' => function ($m) {
+                $inner = View::compileTemplate($m['inner']);
+                $arg   = View::compileExpression($m['arg']);
+                return "<?php if (isset($arg) && $arg) { array_push(\$s, \$d); foreach($arg as \$d) {\n$inner\n} \$d=array_pop(\$s); } ?>";
             },
-            '#\{(\$?\w+(\.\w+)*(\|\w+)*)\s*?\}#' => function ($m) {
+            '/\{if\s+(?<arg>\@?\w[\.\|\w]*)\s*\}(?<inner>((?:(?!\{\/?if).)|(?R))*)(\{else\}(?<else>((?:(?!\{\/?if).)|(?R))*))?\{\/if\}/ms' => function ($m) {
+                $inner = View::compileTemplate($m['inner']);
+                $arg   = View::compileExpression($m['arg']);
+                return "<?php if (isset($arg) && $arg) {\n$inner\n} ?>";
+            },
+            '/\{with\s+(?<arg>\@?\w[\.\|\w]*)\s*\}(?<inner>((?:(?!\{\/?if).)|(?R))*)\{\/with\}/ms' => function ($m) {
+                $inner = View::compileTemplate($m['inner']);
+                $arg   = View::compileExpression($m['arg']);
+                return "<?php if (isset($arg) && $arg && array_push(\$s, $arg)) {\n$inner\n} \$d=array_pop(\$s) ?>";
+            },
+            '/\{((\@?\w+(\.\w+)*(\|\w+)*)|\.)\s*\}/' => function ($m) {
                 $o = View::compileOutput($m[1]);
                 return "<?php echo $o; ?>";
-            }
+            },
         ];
 
         $o = preg_replace_callback_array($patterns, $template, -1);
@@ -195,9 +236,13 @@ class View
         return '?>' . $o . '<?php ';
     }
 
-    private static function run(string $view, array $data)
+    private static function run(string $view, array $data, ViewContext $ctx)
     {
-        $d     = $data; //['viewData'];
+        $d     = $data;
+        $model = $data;
+        $s  = [];
+        foreach ($ctx as $k => $v) $$k = $v;
+
         $debug = ob_get_contents();
         ob_clean();
         ob_start();
@@ -216,7 +261,7 @@ class View
             ];
 
             $layout = new Layout();
-            $layout->render(array_merge($data, $layoutData));
+            $layout->render(array_merge($data, $layoutData), $ctx);
         } else {
             echo 'Regex Content Lookup failed';
             echo $html;
@@ -233,16 +278,18 @@ class Layout extends View
         parent::__construct('./views/layout');
     }
 
-    public function render($data)
+    public function render($data, $ctx)
     {
         $template = $this->compile($this->localize($this->load()));
 
-        Layout::renderInt($template, $data);
+        Layout::renderInt($template, $data, $ctx);
     }
 
-    private static function renderInt($view, $data)
+    private static function renderInt($view, $data, ViewContext $ctx)
     {
         $d = $data;
+        $s = [];
+        foreach ($ctx as $k => $v) $$k = $v;
 
         eval($view);
 
