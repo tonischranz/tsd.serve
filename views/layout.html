@@ -15,9 +15,9 @@
       {if @menu}
       <ul>
         {each @menu}
-        <li>
+        <li class="{if active}active{/if}">
           <a href="{url}">{title}</a>
-
+          {if menu} // lets use recursive partials {/if}
           <span>
             {each tags}{.}{/each}
           </span>
