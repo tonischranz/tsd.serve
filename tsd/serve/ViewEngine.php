@@ -2,8 +2,6 @@
 
 namespace tsd\serve;
 
-use ArrayIterator;
-
 /**
  * @Implementation tsd\serve\ServeViewEngine
  */
@@ -203,13 +201,6 @@ class View
                 $label    = addslashes(View::compileLabel($m['label']));
                 return "<?php call_user_func(function(\$d){ eval('$label'); }, [$as]); ?>";
             },
-            //todo: i don't think this works
-            /*'#\{foreach\s*(?<var>\$\w+)\s+in\s+(?<arg>.*?)\}(?<inner>.*)\{/foreach\}#ms' => function ($m) {
-                $inner = View::compileTemplate($m['inner']);
-                $arg   = View::compileExpression($m['arg']);
-                return "<?php foreach($arg as $m[var]) {\n$inner\n} ?>";
-            },*/
-            //
             '/\{each\s+(?<arg>\@?\w[\.\|\w]*)\s*\}(?<inner>((?:(?!\{\/?each).)|(?R))*)(\{else\}(?<else>((?:(?!\{\/?each).)|(?R))*))?\{\/each\}/ms' => function ($m) {
                 $inner = View::compileTemplate($m['inner']);
                 $arg   = View::compileExpression($m['arg']);

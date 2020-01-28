@@ -30,7 +30,7 @@ class Controller
 
         $ctx = new ViewContext();
         $ctx->menu = [
-            ['url' => '#', 'title' => 'Hash'],
+            ['url' => '#', 'title' => 'Hash', 'active' => true],
             ['url' => '~', 'title' => 'Tilde', 'tags' => ['home'], 'emblems' => ['~']],
         ];
 
