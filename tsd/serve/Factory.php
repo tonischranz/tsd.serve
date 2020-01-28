@@ -186,3 +186,15 @@ class Injection
         return $con ? $this->type->newInstanceArgs($args) : new $type();
     }
 }
+
+class InjectionContext
+{
+    /** @var string */
+    public $name;
+
+    /** @var string */
+    public $fullname;
+
+    /** @var string */
+    public $plugin;
+}
