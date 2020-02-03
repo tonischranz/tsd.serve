@@ -14,6 +14,7 @@ abstract class ViewEngine
         if ($result instanceof AccessDeniedException) $result = new ErrorResult($ctx, $result, 403);
         if ($result instanceof NotFoundException) $result = new ErrorResult($ctx, $result, 404);
         if ($result instanceof \Exception) $result = new ErrorResult($ctx, $result->getMessage(), 500);
+        if ($result instanceof \Error) $result = new ErrorResult($ctx, $result->getMessage(), 500);
         if (!($result instanceof Result)) $result = new DataResult($result);
 
         http_response_code($result->getStatusCode());

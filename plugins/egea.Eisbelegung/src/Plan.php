@@ -7,13 +7,7 @@ use tsd\serve\DB;
 
 class Plan
 {
-    /** @var DB */
-    private $db;
-
-    function __construct(DB $db)
-    {
-        $this->db = $db;
-    }
+    private DB $db;
 
     function getEvents(int $rink, int $date)
     {
@@ -24,5 +18,10 @@ class Plan
             'date' => ['>=', $date],
             'date' => ['<', $date + 86400]
         ]);
+    }
+
+    function dumpDBConfig()
+    {
+        var_dump($this->db);
     }
 }

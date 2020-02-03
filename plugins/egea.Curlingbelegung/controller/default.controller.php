@@ -5,19 +5,14 @@ use tsd\serve\Controller;
 
 class defaultController extends Controller
 {
-    /** @var Plan */
-    private $plan;
-
-    function __construct(Plan $plan)
-    {
-        $this->plan = $plan;
-    }
+    private Plan $plan;
 
     function showIndex()
     {
         $date = time();
 
-        var_dump($this);
+        $this->plan->dumpDBConfig();
+        //var_dump($this->plan);
 
         $events = $this->plan->getEvents(5, $date);
 

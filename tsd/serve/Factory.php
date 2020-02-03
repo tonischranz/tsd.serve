@@ -24,13 +24,13 @@ class Factory
     //function createAll($type, )
     //function createA($type, $$)
 
-    function create(string $type, string $name = '', InjectionContext $ctx = null)
+    function create(string $type, string $name = '', ?InjectionContext $ctx = null)
     {
-        $in = $this->getInjection($type, $name);
-        return $in->inject($name, $ctx ?? new InjectionContext(), $this);
+        $in = $this->getInjection($type, $name, $ctx);
+        return $in->inject($this);
     }
 
-    function getInjection(string $type, string $name)
+    function getInjection(string $type, string $name, ?InjectionContext $ctx)
     {
         $plugin = '';
 
@@ -59,16 +59,22 @@ class Factory
 
         $config = array_key_exists($name, $this->config) ?
             $this->config[$name] : [];
+        $nconfig = $ctx ? (array_key_exists("$ctx->plugin.$name", $this->config) ?
+            $this->config["$ctx->plugin.$name"] : []) : [];
+        $fnconfig = $ctx ? (array_key_exists("$ctx->fullname.$name", $this->config) ?
+            $this->config["$ctx->fullname.$name"] : []) : [];
+
+        $config = array_merge_recursive($config, $nconfig, $fnconfig);
 
         if ($t->isAbstract()) {
-            if ($config && isset($config['mode'])) {
-                $t = $this->getImplementation($t, $plugin, $config['mode']);
+            if ($config && isset($config['_mode'])) {
+                $t = $this->getImplementation($t, $plugin, $config['_mode']);
             } else {
                 $t = $this->getImplementation($t, $plugin);
             }
         }
 
-        return new Injection($t, $plugin, $config);
+        return new Injection($t, $plugin, $name, $ctx, $config);
     }
 
     function getImplementation(\ReflectionClass $type, string &$plugin, string $mode = null)
@@ -137,53 +143,55 @@ class Injection
 {
     private \ReflectionClass $type;
 
+    private ?InjectionContext $ctx;
+
     private string $plugin;
 
     private array $config;
 
+    private string $name;
 
-    function __construct(\ReflectionClass $type, string $plugin, array $config = [])
+
+    function __construct(\ReflectionClass $type, string $plugin, string $name, ?InjectionContext $ctx, array $config = [])
     {
+        $this->name = $name;
         $this->type = $type;
         $this->plugin = $plugin;
         $this->config = $config;
+        $this->ctx = $ctx;
     }
 
-    function inject(string $name, InjectionContext $ctx, Factory $factory)
+    function inject(Factory $factory)
     {
         $con = $this->type->getConstructor();
         $par = $con ? $con->getParameters() : [];
         $args = [];
+        $ctx = $this->ctx ?? new InjectionContext();
 
         $myctx = new InjectionContext();
-        $myctx->name = $name;
-        $myctx->fullname = $ctx ? "$ctx->fullname.$name" : $name;
+        $myctx->name = $this->name;
+        $myctx->fullname = $ctx ? "$ctx->fullname.$this->name" : $this->name;
         $myctx->plugin = $this->plugin;
 
         foreach ($par as $p) {
-            if ($p->isArray() && $p->name == '_config' && $name)
+            if ($p->isArray() && $p->name == '_config' && $this->name)
                 $args[] = $this->config;
             else if ($p->hasType() && !$p->isArray() && !$p->getType()->isBuiltIn()) {
                 $args[] = $factory->create($p->getType()->getName(), $p->getName(), $myctx);
             } else if (isset($this->config[$p->name]))
                 $args[] = $this->config[$p->name];
             else if ($p->name == '_name')
-                $args[] = $name;
+                $args[] = $this->name;
             else if ($p->name == '_plugin')
                 $args[] = $ctx->plugin;
             else if ($p->name == '_fullname')
                 $args[] = $myctx->fullname;
             else if ($p->isDefaultValueAvailable())
                 $args[] = $p->getDefaultValue();
-            //else if ($p->isArray())
-            //    $args[] = [];
-            //else
-            //    $args[] = null;
         }
 
         $type = $this->type->name;
         $obj = new $type(...$args);
-        //$obj =  $con ? $this->type->newInstanceArgs($args) : new $this->type->newInstanceWithoutConstructor();
 
         foreach ($this->type->getProperties() as $p) {
             unset($val);
@@ -193,7 +201,7 @@ class Injection
             else if (isset($this->config[$p->name]))
                 $val = $this->config[$p->name];
             else if ($p->name == '_name')
-                $val = $name;
+                $val = $this->name;
             else if ($p->name == '_plugin')
                 $val = $ctx->plugin;
             else if ($p->name == '_fullname')

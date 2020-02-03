@@ -103,6 +103,8 @@ class App
             $result = $this->getResult($route, $data);
         } catch (\Exception $e) {
             $result = $e;
+        } catch (\Error $e) {
+            $result = $e;
         }
 
         $this->view_engine->render($result, $accept);
