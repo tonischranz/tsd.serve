@@ -2,6 +2,8 @@
 
 namespace tsd\serve;
 
+use function PHPSTORM_META\type;
+
 /**
  * The Application
  * 
@@ -19,23 +21,12 @@ class App
      */
     const PLUGINS = 'plugins';
 
-    /** 
-     * the Router
-     * @var Router $router
-     */
-    private $router;
 
-    /**
-     * the View Engine
-     * @var ViewEngine $view_engine 
-     */
-    private $view_engine;
+    private Router $router;
 
-    /**
-     * the Membership Provider
-     * @var \tsd\serve\Membership $member
-     */
-    private $member;
+    private ViewEngine $view_engine;
+
+    private Membership $member;
 
     /**
      * Creates a new Instance
@@ -51,7 +42,7 @@ class App
 
         $plugins = scandir(App::PLUGINS);
 
-        $factory = new Factory($config, preg_grep('/^\.\w/', $plugins));
+        $factory = new Factory($config, $plugins);
 
         $this->router = new Router($factory, $plugins);
         $this->member = $factory->create('tsd\serve\Membership', 'member');
@@ -105,12 +96,14 @@ class App
      */
     protected function serveRequest(string $method, string $host, string $path, array $data, $accept)
     {
-        $i = \strpos($path, '?');
-        $route = $this->router->getRoute($host, $method, \substr($path, 0, $i > 0 ? $i : \strlen($path)));
-
         try {
+            $i = \strpos($path, '?');
+            $route = $this->router->getRoute($host, $method, \substr($path, 0, $i > 0 ? $i : \strlen($path)));
+
             $result = $this->getResult($route, $data);
         } catch (\Exception $e) {
+            $result = $e;
+        } catch (\Error $e) {
             $result = $e;
         }
 
@@ -133,6 +126,14 @@ class App
         $route->fill($data);
 
         return $route->follow();
+    }
+}
+
+class Exception extends \Exception
+{
+    function __construct($m)
+    {
+        parent::__construct($m);
     }
 }
 

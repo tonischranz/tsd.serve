@@ -8,8 +8,8 @@ namespace tsd\serve;
  */
 interface Membership
 {
-  function isAnonymous () : bool;
-  function isInGroup (string $group):bool;
+  function isAnonymous(): bool;
+  function isInGroup(string $group): bool;
 }
 
 /**
@@ -18,33 +18,27 @@ interface Membership
  */
 class InstallMembership implements Membership
 {
-  private $password;
+  private string $password;
 
-  function __construct (array $config)
-  {
-    if (isset($config['password']))
-      $this->password = $config['password'];
-  }
-
-  public function isAnonymous () : bool
+  public function isAnonymous(): bool
   {
     return !isset($_SESSION['logged_in']);
   }
 
-  public function isInGroup ($group) : bool
+  public function isInGroup($group): bool
   {
     if ($this->isAnonymous()) return false;
     if ($group == 'developer') return true;
     return false;
   }
 
-  public function login (string $username, string $password)
+  public function login(string $username, string $password)
   {
     if ($username == 'install' && $password == $this->password)
-      $_SESSION['logged_in']=true;
+      $_SESSION['logged_in'] = true;
   }
 
-  public function logout ()
+  public function logout()
   {
     session_destroy();
   }

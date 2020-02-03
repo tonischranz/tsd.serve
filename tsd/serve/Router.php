@@ -204,13 +204,13 @@ class Router
 
 abstract class Route
 {
-    private $controlller;
+    private $controller;
     private $methodInfo;
     protected $data;
 
-    function __construct(Controller $controlller, \ReflectionMethod $methodInfo, array $data)
+    function __construct(Controller $controller, \ReflectionMethod $methodInfo, array $data)
     {
-        $this->controlller = $controlller;
+        $this->controller = $controller;
         $this->methodInfo = $methodInfo;
         $this->data = $data;
     }
@@ -226,13 +226,14 @@ abstract class Route
         foreach ($pinfos as $pi) {
             if (count($params) <= $n) {
                 //todo: Model validation
+                //todo: param with default value
                 $params[] = key_exists($pi->name, $this->data) ? $this->data[$pi->name] : $this->data[$n];
             }
 
             $n++;
         }
 
-        return $this->methodInfo->invokeArgs($this->controlller, $params);
+        return $this->methodInfo->invokeArgs($this->controller, $params);
     }
 
     function checkPermission(Membership $member)

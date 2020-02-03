@@ -1,39 +1,76 @@
-body { 
-    color:#ddd; 
-    background-color:#222; 
-    font-family: myfont, sans-serif; 
+body {
+  color: #ddd;
+  background-color: #222;
+  font-family: myfont, sans-serif;
 }
 
-a, a:visited {
-    text-decoration: none;
-    color:#088;
+body > main {
+  padding-bottom: 5em;
 }
 
-a:active, a:hover{
-    text-decoration:#ddd underline;
+body > footer {
+  background-color: #000;
 }
 
-button{
-    border: thin solid transparent;
-    background-color: #088;
-    color: #ddd;
-    font-weight: bold;
+table.xdebug-error td {
+  background-color: #000;
 }
 
-button:hover{
-    border: thin solid #ddd;
+table.xdebug-error th {
+  background-color: #eee;
+  color: #222;
 }
 
-h1 a, h1 a:visited {
-    color:#ddd;
+table.xdebug-error th > span {
+  float: left;
 }
 
-h1 a:hover, h1 a:active {
-    color:#088;
-    text-decoration: none;
+footer > font[size="1"] {
+  display: block;
+  background-color: #000;
+  overflow-x: auto;
+}
+
+footer pre.xdebug-var-dump {
+  background-color: #000;
+  padding: 0.5em;
+  overflow-x: auto;
+}
+
+a,
+a:visited {
+  text-decoration: none;
+  color: #088;
+}
+
+a:active,
+a:hover {
+  text-decoration: #ddd underline;
+}
+
+button {
+  border: thin solid transparent;
+  background-color: #088;
+  color: #ddd;
+  font-weight: bold;
+}
+
+button:hover {
+  border: thin solid #ddd;
+}
+
+h1 a,
+h1 a:visited {
+  color: #ddd;
+}
+
+h1 a:hover,
+h1 a:active {
+  color: #088;
+  text-decoration: none;
 }
 
 @font-face {
-    font-family: myfont;
-    src: url(font.ttf);
-  }
+  font-family: myfont;
+  src: url(font.ttf);
+}
