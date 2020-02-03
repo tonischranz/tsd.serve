@@ -1,30 +1,26 @@
 {
-    "db": {
-        "host": "p:localhost",
-        "username": "developer",
-        "password": "(0uldB3G3n3r@73dBu7!$n'7@(7u@11y",
-        "database": "serve_development"
-    },
-    "member": {
-        "mode": "install",
-        "password": "L3tsG04IT"
-    },
-    "lang": [
-        "de",
-        "en",
-        "fr"
-    ],
-    "domains": {
-        "serve.local": true,
-        "tsd.oof": "www",
-        "www.tsd.oof": "www",
-        "admin.tsd.oof": "admin"
-    },
-    "errors": {
-        "mode": "email",
-        "to": "toni.schranz@gmail.com"
-    },
-    "cache": {
-        "mode": "apcu"
-    }
+  "db": {
+    "host": "localhost",
+    "username": "developer",
+    "password": "(0uldB3G3n3r@73dBu7!$n'7@(7u@11y",
+    "database": "serve_development"
+  },
+  "member": {
+    "_mode": "install",
+    "password": "L3tsG04IT"
+  },
+  "lang": ["de", "en", "fr"],
+  "domains": {
+    "serve.local": true,
+    "tsd.oof": "www",
+    "www.tsd.oof": "www",
+    "admin.tsd.oof": "admin"
+  },
+  "errors": {
+    "_mode": "email",
+    "to": "toni.schranz@gmail.com"
+  },
+  "cache": {
+    "_mode": "apcu"
+  }
 }

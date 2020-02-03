@@ -10,8 +10,9 @@ namespace tsd\serve;
 class Controller
 {
 
-    public $name;
-    public $basePath;
+    protected string $_name;
+    protected string $_plugin;
+    //public $basePath;
 
     /*  function __construct ()
   {

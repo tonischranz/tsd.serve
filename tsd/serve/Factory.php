@@ -2,8 +2,8 @@
 
 namespace tsd\serve;
 
-use ReflectionClass;
-use ReflectionType;
+use \ReflectionClass;
+use \ReflectionType;
 
 /**
  * The Factory
@@ -12,8 +12,8 @@ use ReflectionType;
  */
 class Factory
 {
-    private $config;
-    private $plugins;
+    private array $config;
+    private array $plugins;
 
     function __construct(array $config, array $plugins)
     {
@@ -135,15 +135,12 @@ class Factory
 
 class Injection
 {
-    /** @var \ReflectionClass */
-    private $type;
+    private \ReflectionClass $type;
 
-    /** @var string */
-    private $plugin;
+    private string $plugin;
 
+    private array $config;
 
-    /** @var array */
-    private $config;
 
     function __construct(\ReflectionClass $type, string $plugin, array $config = [])
     {
@@ -164,37 +161,58 @@ class Injection
         $myctx->plugin = $this->plugin;
 
         foreach ($par as $p) {
-            if ($p->isArray() && $p->name == 'config' && $name)
+            if ($p->isArray() && $p->name == '_config' && $name)
                 $args[] = $this->config;
-            else if ($p->hasType() && !$p->isArray() && !$p->getType()->isBuiltIn())
+            else if ($p->hasType() && !$p->isArray() && !$p->getType()->isBuiltIn()) {
                 $args[] = $factory->create($p->getType()->getName(), $p->getName(), $myctx);
-            else if (isset($this->config[$p->name]))
+            } else if (isset($this->config[$p->name]))
                 $args[] = $this->config[$p->name];
-            else if ($p->name == 'name')
+            else if ($p->name == '_name')
                 $args[] = $name;
-            else if ($p->name == 'plugin')
+            else if ($p->name == '_plugin')
                 $args[] = $ctx->plugin;
-            else if ($p->name == 'fullname')
+            else if ($p->name == '_fullname')
                 $args[] = $myctx->fullname;
-            else if ($p->isArray())
-                $args[] = [];
-            else
-                $args[] = null;
+            else if ($p->isDefaultValueAvailable())
+                $args[] = $p->getDefaultValue();
+            //else if ($p->isArray())
+            //    $args[] = [];
+            //else
+            //    $args[] = null;
         }
 
         $type = $this->type->name;
-        return $con ? $this->type->newInstanceArgs($args) : new $type();
+        $obj = new $type(...$args);
+        //$obj =  $con ? $this->type->newInstanceArgs($args) : new $this->type->newInstanceWithoutConstructor();
+
+        foreach ($this->type->getProperties() as $p) {
+            unset($val);
+
+            if ($p->hasType() && !$p->getType()->isBuiltIn())
+                $val = $factory->create($p->getType()->getName(), $p->getName(), $myctx);
+            else if (isset($this->config[$p->name]))
+                $val = $this->config[$p->name];
+            else if ($p->name == '_name')
+                $val = $name;
+            else if ($p->name == '_plugin')
+                $val = $ctx->plugin;
+            else if ($p->name == '_fullname')
+                $val = $myctx->fullname;
+
+            if (isset($val)) {
+                $p->setAccessible(true);
+                $p->setValue($obj, $val);
+            }
+        }
+        return $obj;
     }
 }
 
 class InjectionContext
 {
-    /** @var string */
-    public $name;
+    public string $name = '';
 
-    /** @var string */
-    public $fullname;
+    public string $fullname = '';
 
-    /** @var string */
-    public $plugin;
+    public string $plugin = '';
 }

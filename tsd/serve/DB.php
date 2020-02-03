@@ -54,12 +54,12 @@ interface DB
  */
 class MysqlDB implements DB
 {
-    private $_con;
-    private $prefix;
-    private $host;
-    private $database;
-    private $username;
-    private $password;
+    private ?\mysqli $_con;
+    private string $prefix;
+    private string $host;
+    private string $database;
+    private string $username;
+    private string $password;
 
     #region private functions
 
@@ -157,14 +157,14 @@ class MysqlDB implements DB
 
     #endregion
 
-    function __construct(string $plugin, string $host, string $username, string $password, string $database)
+    function __construct(?string $_plugin/*, string $host, string $username, string $password, string $database*/)
     {
-        $this->prefix = $plugin ? "$plugin." : '';
+        $this->prefix = $_plugin ? "$_plugin." : '';
         //$this->con = new \mysqli($host, $username, $password, $database);
-        $this->host = $host;
+        /*$this->host = $host;
         $this->database = $database;
         $this->username = $username;
-        $this->password = $password;
+        $this->password = $password;*/
     }
 
     function read($query)

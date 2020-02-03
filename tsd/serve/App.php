@@ -21,23 +21,12 @@ class App
      */
     const PLUGINS = 'plugins';
 
-    /** 
-     * the Router
-     * @var Router $router
-     */
-    private $router;
 
-    /**
-     * the View Engine
-     * @var ViewEngine $view_engine 
-     */
-    private $view_engine;
+    private Router $router;
 
-    /**
-     * the Membership Provider
-     * @var \tsd\serve\Membership $member
-     */
-    private $member;
+    private ViewEngine $view_engine;
+
+    private Membership $member;
 
     /**
      * Creates a new Instance
@@ -53,7 +42,7 @@ class App
 
         $plugins = scandir(App::PLUGINS);
 
-        $factory = new Factory($config, $plugins /*preg_grep('/^\.\w/', $plugins)*/);
+        $factory = new Factory($config, $plugins);
 
         $this->router = new Router($factory, $plugins);
         $this->member = $factory->create('tsd\serve\Membership', 'member');
