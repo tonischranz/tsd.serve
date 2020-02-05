@@ -132,7 +132,7 @@ class MysqlDB implements DB
 
     private function prefixTable(string $table)
     {
-        return "$this->prefix$table";
+        return "`$this->prefix$table`";
     }
 
     private function con(): \mysqli
@@ -145,7 +145,7 @@ class MysqlDB implements DB
 
             $con = new \mysqli($host, $user, $pw, $db);
 
-            if ($con) throw new Exception("MySQL connection to $user@$host failed.", 1);
+            if ($con->connect_errno) throw new Exception("MySQL connection to $user@$host failed.", 1);
 
             $con->set_charset('utf8');
 
@@ -207,7 +207,7 @@ class MysqlDB implements DB
         $vals = $this->buildValues($values);
 
         $q = 'INSERT INTO ';
-        $q .= $this->prefixTable($table);;
+        $q .= $this->prefixTable($table);
         $q .= ' (';
         $q .= join(',', $fields);
         $q .= ' ) VALUES (';
@@ -226,7 +226,7 @@ class MysqlDB implements DB
         $params = $this->buildConditions($cond);
 
         $q = 'UPDATE ';
-        $q .= $this->prefixTable($table);;
+        $q .= $this->prefixTable($table);
         $q .= ' SET ';
         $q .= join(' ,', $vals);
         $q .= ' WHERE ';

@@ -11,14 +11,19 @@ class defaultController extends Controller
     {
         $date = time();
 
-        $this->plan->dumpDBConfig();
-        //var_dump($this->plan);
-
-        $events = $this->plan->getEvents(5, $date);
-
-        return $this->view([
+        try
+        {
+            $events = $this->plan->getEvents(5, $date);
+           
+            return $this->view([
             'events' => $events,
             'date' => $date
         ]);
+        }
+        catch(\Exception $e)
+        {
+            var_dump($this->plan);
+            throw $e;
+        }
     }
 }
