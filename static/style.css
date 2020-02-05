@@ -22,6 +22,16 @@ table.xdebug-error th {
 }
 
 table.xdebug-error th > span {
+  visibility: hidden;
+  margin-right: -1.6em;
+}
+
+table.xdebug-error th > span::before {
+  content: "⚠";
+  visibility: visible;
+  background-color: red;
+  padding: 0.2em 0.6em;
+  margin: 0.1em;
   float: left;
 }
 

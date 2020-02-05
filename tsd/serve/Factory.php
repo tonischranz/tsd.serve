@@ -37,6 +37,7 @@ class Factory
         //if (!class_exists($type)) {
         $parts = explode('\\', $type);
         $plugin = '';
+        $found = false;
         $ramaining = $parts;
 
         foreach ($parts as $p) {
@@ -48,11 +49,14 @@ class Factory
             if (in_array($plugin, $this->plugins)) {
                 $filename = App::PLUGINS . "/$plugin/src/" . join('/', $ramaining) . '.php';
                 if (file_exists($filename)) {
+                    $found = true;
                     require_once $filename;
                     break;
                 }
             }
         }
+
+        if (!$found) $plugin = '';
         //}
 
         $t = new \ReflectionClass($type);
@@ -193,7 +197,10 @@ class Injection
         $type = $this->type->name;
         $obj = new $type(...$args);
 
-        foreach ($this->type->getProperties() as $p) {
+        foreach ($this->type->getProperties($args ? 
+            \ReflectionProperty::IS_PUBLIC | \ReflectionProperty::IS_PROTECTED : 
+            \ReflectionProperty::IS_PUBLIC | \ReflectionProperty::IS_PROTECTED | \ReflectionProperty::IS_PRIVATE)
+             as $p) {
             unset($val);
 
             if ($p->hasType() && !$p->getType()->isBuiltIn())
