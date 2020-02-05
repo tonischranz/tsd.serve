@@ -1,11 +1,9 @@
 <?php
 
 use tsd\serve\Controller;
-use tsd\serve\DB;
 
 class defaultController extends Controller
 {
-  private DB $db;
 
   function showIndex ()
   {
