@@ -10,6 +10,67 @@
     <main>
       <h1><a href="/">❦</a> [title]</h1>
       <p>{text}</p>
+      <form action="register" method="POST">
+        <div class="fg">
+          <div>
+            <label>[Name]</label>
+            <input type="text" name="name" value="{ name}" required />
+            <span>{ @errors.name}</span>
+          </div>
+          <div>
+            <label>[EMail]</label>
+            <input type="email" name="email" value="{ email}" required />
+            <span>{ @errors.email}<br />adgsdfg</span>
+            <span>{ @errors.email}<br />adgsdfg</span>
+            <span>{ @errors.email}<br />adgsdfg</span>
+          </div>
+          <div>
+            <label>[Tel]</label>
+            <input type="tel" name="tel" value="{ tel}" />
+            <span>{@ errors.tel}</span>
+          </div>
+          <div>
+            <label>[Adr]</label>
+            <input type="text" name="adr" value="{ adr}" />
+            <textarea></textarea>
+            <span>{@ errors.adr}</span>
+          </div>
+          <div>
+            <label>[Plz]</label>
+            <input type="number" name="plz" value="{ plz}" />
+            <select>
+              <option>asdf</option>
+              <option>asdf</option>
+              <option>asdf</option>
+              <option>asdf</option>
+              <option>asdf</option>
+              <option>asdf</option>
+            </select>
+            <span>{@ errors.plz}</span>
+          </div>
+          <div>
+            <label>[Ort]</label>
+            <input type="text" name="ort" value="{ ort}" />
+            <span>{@ errors.ort}</span>
+          </div>
+          <div>
+            <label>[Geb]</label>
+            <input type="date" name="date" value="1980-1-1" />
+            <span>{@ errors.ort}</span>
+          </div>
+          <div>
+            <label>[Anrede]</label>
+            <div>
+              <input type="radio" name="ort" value="{ ort}" /><label>Herr</label>
+              <input type="radio" name="ort" value="{ ort}" /><label>Frau</label>
+              <input type="radio" name="ort" value="{ ort}" /><label>Firma</label>
+            </div>
+
+            <span>{@ errors.ort}</span>
+          </div>
+        </div>
+        <button type="submit">OK</button>
+      </form>
     </main>
   </body>
 </html>

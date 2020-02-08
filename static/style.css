@@ -1,16 +1,63 @@
-body {
-  color: #ddd;
-  background-color: #222;
-  font-family: myfont, sans-serif;
+/**********************************************************/
+/* ⚒ tsd.serve                                           */
+/**********************************************************/
+
+@media screen and (min-width: 64em) {
+  html {
+    display: flex;
+    justify-content: center;
+  }
+  html > body {
+    width: 60em;
+  }
 }
 
 body > main {
   padding-bottom: 5em;
 }
 
-body > footer {
-  background-color: #000;
+/************************************************************/
+/* fg                                                       */
+/************************************************************/
+
+.fg {
+  display: flex;
+  flex-wrap: wrap;
 }
+
+.fg > * {
+  padding-right: 1em;
+  padding-bottom: 1.5em;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.fg > * > * {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.5em;
+}
+
+@media screen and (min-width: 36em) {
+  .fg > * {
+    width: 50%;
+  }
+}
+
+@media screen and (min-width: 56em) {
+  .fg > * {
+    width: 33.3%;
+  }
+}
+
+/********************************************************/
+/* End fg                                               */
+/********************************************************/
+
+/**********************************************/
+/** DEBUG                                     */
+/**********************************************/
 
 table.xdebug-error td {
   background-color: #000;
@@ -47,6 +94,20 @@ footer pre.xdebug-var-dump {
   overflow-x: auto;
 }
 
+/**********************************************/
+/** End DEBUG                                 */
+/**********************************************/
+
+body {
+  color: #ddd;
+  background-color: #222;
+  font-family: myfont, sans-serif;
+}
+
+body > footer {
+  background-color: #000;
+}
+
 a,
 a:visited {
   text-decoration: none;
@@ -78,6 +139,14 @@ h1 a:hover,
 h1 a:active {
   color: #088;
   text-decoration: none;
+}
+
+input,
+select,
+textarea {
+  background-color: #000;
+  color: #eee;
+  border: 1pt solid #333;
 }
 
 @font-face {
