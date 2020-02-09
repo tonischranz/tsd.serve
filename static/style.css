@@ -16,6 +16,39 @@ body > main {
   padding-bottom: 5em;
 }
 
+body > header {
+  font-size: 4em;
+  display: flex;
+  /*position: relative;*/
+  background-color: #000;
+}
+
+.menu {
+  /*position: absolute;*/
+  margin: 0;
+  display: flex;
+  flex-direction: row-reverse;
+  flex: auto;
+}
+
+.menu > li {
+  visibility: hidden;
+}
+
+.menu:before {
+  content: "X☰";
+  visibility: visible;
+}
+
+.menu.open:before {
+  content: "X≡";
+  visibility: visible;
+}
+
+.menu.open > li {
+  visibility: visible;
+}
+
 /************************************************************/
 /* fg                                                       */
 /************************************************************/

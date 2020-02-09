@@ -1,6 +1,17 @@
 $(function() {
   console.log("test");
 
+  /*if (!Modernizr.inputtypes.date) {
+    $(".menu")
+      .after("<span>☰</span>")
+      .next()
+      .on("click", function() {
+        $(this)
+          .prev()
+          .toggleClass("open");
+      });
+  }*/
+
   if (!Modernizr.inputtypes.date) {
     console.log("fix");
 
@@ -26,4 +37,8 @@ $(function() {
       if ($(this).prop("readonly")) alt.datepicker("destroy");
     });
   }
+
+  $(document).on("click", ".menu", function() {
+    $(this).toggleClass("open");
+  });
 });
