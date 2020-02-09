@@ -132,7 +132,7 @@ class MysqlDB implements DB
 
     private function prefixTable(string $table)
     {
-        return "`$this->prefix$table`";
+        return strstr($table, '.') ?"`$this->prefix$table`":$table;
     }
 
     private function con(): \mysqli
