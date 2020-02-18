@@ -243,7 +243,7 @@ class View
         ob_end_clean();
 
         $m   = [];
-        $exp = '#<\s*title.*?>(?<title>.*)<\s*/title.*?>(?<head>.*)<\s*/head.*?>.*<\s*body.*?>(?<content>.*)<\s*/body.*>#ims';
+        $exp = '#<\s*title.*?>(?<title>.*)<\s*/title.*?>(?<head>.*)<\s*/head.*?>.*<\s*body.*?>.*<\s*main.*?>(?<content>.*)<\s*/main.*>.*<\s*/body.*>#ims';
 
         if (preg_match($exp, $html, $m)) {
             $layoutData = [
