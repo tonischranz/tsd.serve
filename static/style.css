@@ -4,11 +4,29 @@
 
 @media screen and (min-width: 64em) {
   html {
+    /*display: flex;
+    justify-content: center;*/
+  }
+
+  html > body > * {
+    width: 100%;
     display: flex;
     justify-content: center;
+    flex-direction: column;
   }
-  html > body {
+
+  html > body > * > * {
     width: 60em;
+    margin: auto;
+  }
+
+  html > body > header {
+    width: 100%;
+  }
+
+  html > body > header > * {
+    width: 60rem;
+    margin: auto;
   }
 }
 
@@ -16,9 +34,12 @@ body > main {
   padding-bottom: 5em;
 }
 
+body > header > * {
+  display: flex;
+}
+
 body > header {
   font-size: 4em;
-  display: flex;
   /*position: relative;*/
   background-color: #000;
 }
@@ -136,6 +157,25 @@ footer pre.xdebug-var-dump {
   background-color: #000;
   padding: 0.5em;
   overflow-x: auto;
+  padding-bottom: 1.5em;
+}
+
+footer pre.xdebug-var-dump > * {
+  padding-left: 1.5em;
+}
+
+footer pre.xdebug-var-dump > small:first-child {
+  background-color: #111;
+  padding: 1em;
+  display: block;
+}
+
+body > main > footer .center table {
+  color: #222;
+}
+
+body > main > footer .center h2 {
+  color: #ddd;
 }
 
 /**********************************************/
@@ -147,9 +187,9 @@ footer pre.xdebug-var-dump {
 /**********************************************/
 
 body {
-  color: #ddd;
-  background-color: #222;
-  font-family: myfont, sans-serif;
+  color: #ddd !important;
+  background-color: #222 !important;
+  font-family: myfont, sans-serif !important;
 }
 
 body > footer {
@@ -157,9 +197,11 @@ body > footer {
 }
 
 a,
-a:visited {
+a:visited,
+a:link {
   text-decoration: none;
   color: #088;
+  background: none !important;
 }
 
 a:active,

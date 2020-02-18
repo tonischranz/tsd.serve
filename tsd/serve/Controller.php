@@ -33,9 +33,16 @@ class Controller
         $ctx->menu = [
             ['url' => '#', 'title' => 'Hash', 'active' => true],
             ['url' => '~', 'title' => 'Tilde', 'tags' => ['home'], 'emblems' => ['~']],
+            ['url' => 'info', 'title' => 'Info', 'emblems' => ['i']],
         ];
 
         return new ViewResult($this->basePath . '/views/' . $this->name . "/$view", $data, $ctx);
+    }
+
+    protected function message(string $message, ?string $url = null)
+    {
+        $ctx = new ViewContext();
+        return new MessageResult($ctx, "views/info", $message, $url);
     }
 
     protected function redirect($url)

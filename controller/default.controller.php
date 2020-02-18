@@ -15,6 +15,12 @@ class defaultController extends Controller
       return $this->view (['amt' => $amt * 2]);
   }
 
+  function showInfo()
+  {
+    phpinfo();
+    return $this->message("phpinfo()");
+  }
+
   function show (array $names)
   {
     echo "<br>--- DUMP --- \n";
