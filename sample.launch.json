@@ -1,0 +1,19 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Launch server",
+      "type": "php",
+      "request": "launch",
+      "program": "${workspaceRoot}/serve.php",
+      "runtimeArgs": [
+        "-dxdebug.remote_enable=On",
+        "-dxdebug.remote_autostart=On",
+        "-S",
+        "127.0.0.1:8000"
+      ],
+      "cwd": "${workspaceRoot}",
+      "port": 9000
+    }
+  ]
+}
