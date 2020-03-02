@@ -19,13 +19,26 @@
     width: 100%;
   }
 
-  html > body > header > * {
+  html > body > header > nav {
     width: 60rem;
     margin: auto;
   }
 }
 
+@media screen and (min-width: 32rem) {
+  body > header > nav > ul > li.menu.open > ul,
+  body > header > nav > ul > li.menu:hover > ul {
+    left: auto !important;
+    bottom: auto !important;
+    width: 30rem;
+  }
+  body > header > nav > ul > li.menu {
+    position: relative;
+  }
+}
+
 body > main {
+  padding-top: 5em;
   padding-bottom: 5em;
 }
 
@@ -35,34 +48,81 @@ body > header > * {
 
 body > header {
   font-size: 4em;
-  /*position: relative;*/
   background-color: #000;
+  position: static;
 }
 
-.menu {
-  /*position: absolute;*/
-  margin: 0;
+body > header > nav > ul {
   display: flex;
-  flex-direction: row-reverse;
-  flex: auto;
+  width: 100%;
 }
 
-.menu > li {
-  visibility: hidden;
+body > header > nav > ul > li:first-child {
+  margin-right: auto;
 }
 
-.menu:before {
-  content: "X☰";
-  visibility: visible;
+body > header > nav > ul > li.menu::before {
+  content: "≡" !important;
 }
 
-.menu.open:before {
-  content: "X≡";
-  visibility: visible;
+body > header > nav ul {
+  margin: 0;
+  list-style: none;
+  padding-left: 0;
 }
 
-.menu.open > li {
-  visibility: visible;
+body > header > nav > ul > li.menu.open > ul,
+body > header > nav > ul > li.menu:hover > ul {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  display: block;
+}
+
+body > header > nav > ul > li.menu.open > ul::before,
+body > header > nav > ul > li.menu:hover > ul::before {
+  content: "x";
+  display: block;
+  text-align: right;
+}
+
+body > header > nav ul > li.menu {
+  background: black;
+}
+
+body > header > nav ul > li.menu > ul {
+  display: none;
+}
+
+body > header > nav ul > li > aside {
+  float: right;
+}
+
+body > header > nav ul > li > aside small {
+  line-height: 0.5em;
+  font-size: 0.3em;
+  display: block;
+}
+
+body > header > nav ul > li.menu::before {
+  content: "⏵";
+}
+
+body > header > nav ul > li.menu.open::before,
+body > header > nav ul > li.menu:hover::before {
+  content: "⏷";
+}
+
+body > header > nav ul > li.menu.open > ul,
+body > header > nav ul > li.menu:hover > ul {
+  display: block;
+  background-color: black;
+  font-size: 0.8em;
+}
+
+body > header > nav ul > li.menu.open > ul {
+  border: thick solid #ddd;
 }
 
 /************************************************************/

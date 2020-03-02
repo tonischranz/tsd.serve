@@ -32,8 +32,19 @@ class Controller
         $ctx = new ViewContext();
         $ctx->menu = [
             ['url' => '#', 'title' => 'Hash', 'active' => true],
-            ['url' => '~', 'title' => 'Tilde', 'tags' => ['home'], 'emblems' => ['~']],
-            ['url' => 'info', 'title' => 'Info', 'emblems' => ['i']],
+            ['url' => '~', 'title' => 'Tilde', 'tags' => ['home', 'userdir', 'private'], 'emblems' => ['~']],
+            ['url' => 'info', 'title' => '⚒Info', 'emblems' => ['ℹ']],
+             ['url' => '#', 'title' => 'Hash', 'active' => true],
+               ['url' => '#', 'title' => 'Hash', 'active' => true],
+                ['url' => '#', 'title' => 'Hash', 'active' => true],
+                 ['url' => '#', 'title' => 'Hash', 'active' => true],
+                 ['url' => '#', 'title' => '# Hash', 'active' => true],
+                 ['url' => '#', 'title' => '#Hash', 'active' => true, 'menu'=>[
+                    ['url' => '#', 'title' => 'Hash', 'active' => true],
+                    ['url' => '#', 'title' => '# Hash', 'active' => true],
+                    ['url' => '#', 'title' => '#Hash', 'active' => true],
+                 ]],
+                 ['url' => '#', 'title' => 'Hash', 'active' => true],
         ];
 
         return new ViewResult($this->basePath . '/views/' . $this->name . "/$view", $data, $ctx);
