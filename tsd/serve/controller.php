@@ -12,12 +12,6 @@ class Controller
 
     protected string $_name;
     protected string $_plugin;
-    //public $basePath;
-
-    /*  function __construct ()
-  {
-
-  }*/
 
     protected function view($data = null, string $view = null)
     {
@@ -47,18 +41,34 @@ class Controller
                  ['url' => '#', 'title' => 'Hash', 'active' => true],
         ];
 
-        return new ViewResult($this->basePath . '/views/' . $this->name . "/$view", $data, $ctx);
+        // _plugin?App::PLUGINS : ....
+
+        return new ViewResult($this->name . "/$view", $data, $this->_plugin, $ctx);
+
+        //return new ViewResult($this->basePath . '/views/' . $this->name . "/$view", $data, $ctx);
     }
 
     protected function message(string $message, ?string $url = null)
     {
         $ctx = new ViewContext();
-        return new MessageResult($ctx, "views/info", $message, $url);
+        return new MessageResult($ctx, "info", $message, $url);
     }
 
     protected function redirect($url)
     {
         return new RedirectResult($url);
+    }
+
+    static function error($result, $code)
+    {
+        $ctx = new ViewContext();
+        
+        return new ErrorResult($ctx, $result, $code);
+    }
+
+    static function data($result)
+    {
+        return new DataResult($result);
     }
 }
 
@@ -108,22 +118,29 @@ class RedirectResult extends ResultBase
 
 class ViewResult extends ResultBase implements IViewResult
 {
-    private $_view;
-    private $_ctx;
+    private string $_view;
+    private ViewContext $_ctx;
+    private string $_plugin;
 
-    function __construct(string $view, $data, ViewContext $ctx = null, $statuscode = 200)
+    function __construct(string $view, $data, string $plugin = '', ViewContext $ctx = null, $statuscode = 200)
     {
         parent::__construct($data, $statuscode);
         $this->_ctx = $ctx ?? new ViewContext();
         $this->_view = $view;
+        $this->_plugin = $plugin;
     }
 
-    function view()
+    function view() : string
     {
         return $this->_view;
     }
 
-    function ctx()
+    function plugin() : string
+    {
+        return $this->_plugin;
+    }
+
+    function ctx() : ViewContext
     {
         return $this->_ctx;
     }
@@ -133,7 +150,7 @@ class MessageResult extends ViewResult
 {
     function __construct(ViewContext $ctx, $type, $message, $code = 200, $url = null)
     {
-        parent::__construct($type, ["message" => $message, "url" => $url], $ctx, $code);
+        parent::__construct($type, ["message" => $message, "url" => $url], '', $ctx, $code);
     }
 }
 
@@ -141,7 +158,7 @@ class ErrorResult extends MessageResult
 {
     function __construct(ViewContext $ctx, $message, int $code = 500)
     {
-        parent::__construct($ctx, 'views/error', $message, $code);
+        parent::__construct($ctx, 'error', $message, $code);
     }
 }
 
@@ -149,7 +166,7 @@ class SucessResult extends MessageResult
 {
     function __construct(ViewContext $ctx, $message, $url = null)
     {
-        parent::__construct($ctx, 'views/sucess', $message, 200, $url);
+        parent::__construct($ctx, 'sucess', $message, 200, $url);
     }
 }
 

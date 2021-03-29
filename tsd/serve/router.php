@@ -62,6 +62,10 @@ class Router
             $c = $this->createController('default');
         }
 
+        if (!$c) {
+            return new NoRoute();
+        }
+
         for ($i = 0; $i < $cutoff; $i++) \array_shift($parts);
         $methodPath = \implode('/', $parts);
 
@@ -194,8 +198,8 @@ class Router
         $ctx->plugin = $plugin;
 
         $c = $this->factory->create($ctrlName, $name, $ctx);
-        $c->name = $name;
-        $c->basePath = $path;
+        /*$c->name = $name;
+        $c->basePath = $path;*/
 
         return $c;
     }
@@ -283,5 +287,26 @@ class PostRoute extends Route
     function fill(array $data)
     {
         $this->data = array_merge($this->data, $data['_POST'], $data);
+    }
+}
+
+class NoRoute extends Route
+{
+    function __construct()
+    {        
+    }
+
+    function fill(array $data)
+    {        
+    }
+
+    function follow()
+    {
+        throw new NotFoundException();
+    }
+
+    function checkPermission(Membership $member)
+    {
+        return true;
     }
 }

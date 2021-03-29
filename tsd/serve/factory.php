@@ -47,7 +47,7 @@ class Factory
             else $plugin .= ".$p";
 
             if (in_array($plugin, $this->plugins)) {
-                $filename = App::PLUGINS . "/$plugin/src/" . join('/', $ramaining) . '.php';
+                $filename = '.'.App::PLUGINS . "/$plugin/src/" . join('/', $ramaining) . '.php';
                 if (file_exists($filename)) {
                     $found = true;
                     require_once $filename;
@@ -108,7 +108,7 @@ class Factory
         }
 
         foreach ($this->plugins as $p) {
-            $Directory = new \RecursiveDirectoryIterator(App::PLUGINS . "/$p/src");
+            $Directory = new \RecursiveDirectoryIterator('.'.App::PLUGINS . "/$p/src");
             $Iterator = new \RecursiveIteratorIterator($Directory);
             $Regex = new \RegexIterator($Iterator, '/^.+\.php$/i', \RecursiveRegexIterator::GET_MATCH);
 

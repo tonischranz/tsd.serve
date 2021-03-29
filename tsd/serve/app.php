@@ -2,8 +2,6 @@
 
 namespace tsd\serve;
 
-use function PHPSTORM_META\type;
-
 /**
  * The Application
  * 
@@ -40,7 +38,7 @@ class App
         else
             $config = [];
 
-        $plugins = scandir(App::PLUGINS);
+        $plugins = scandir('.'.App::PLUGINS);
 
         $factory = new Factory($config, $plugins);
 

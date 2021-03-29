@@ -9,13 +9,13 @@ abstract class ViewEngine
 {
     function render($result, $accept)
     {
-        $ctx = new ViewContext();
+        //$ctx = new ViewContext();
 
-        if ($result instanceof AccessDeniedException) $result = new ErrorResult($ctx, $result, 403);
-        if ($result instanceof NotFoundException) $result = new ErrorResult($ctx, $result, 404);
-        if ($result instanceof \Exception) $result = new ErrorResult($ctx, $result->getMessage(), 500);
-        if ($result instanceof \Error) $result = new ErrorResult($ctx, $result->getMessage(), 500);
-        if (!($result instanceof Result)) $result = new DataResult($result);
+        if ($result instanceof AccessDeniedException) $result = Controller::error($result, 403);
+        if ($result instanceof NotFoundException) $result = Controller::error($result, 404);
+        if ($result instanceof \Exception) $result = Controller::error($result->getMessage(), 500);
+        if ($result instanceof \Error) $result = Controller::error($result->getMessage(), 500);
+        if (!($result instanceof Result)) $result = Controller::data($result);
 
         http_response_code($result->getStatusCode());
         $headers = $result->getHeaders();
@@ -49,8 +49,9 @@ abstract class ViewEngine
 
 interface IViewResult
 {
-    function view();
-    function ctx();
+    function view() : string;
+    function plugin() : string;
+    function ctx() : ViewContext;
     function data();
 }
 
@@ -68,11 +69,12 @@ class ViewContext
  */
 class ServeViewEngine extends ViewEngine
 {
-    const VIEWS = '.';
+    const VIEWS = 'views';
 
     function renderView(IViewResult $result)
     {
-        $v = new View(ServeViewEngine::VIEWS . '/' . $result->view());
+        //$v = new View(ServeViewEngine::VIEWS . '/' . $result->view());
+        $v = new View($result->view(), $result->plugin());
         $v->render($result->data(), $result->ctx());
     }
 }
@@ -80,11 +82,13 @@ class ServeViewEngine extends ViewEngine
 class View
 {
     private $path;
+    private $plugin;
     private $labels;
 
-    function __construct(string $path)
+    function __construct(string $path, string $plugin = '')
     {
         $this->path   = $path . '.html';
+        $this->plugin = $plugin;
         $this->labels = Labels::create($path);
     }
 
@@ -101,7 +105,7 @@ class View
 
     protected function load()
     {
-        return View::loadTemplate($this->path);
+        return View::loadTemplate($this->path, $this->plugin);
     }
 
     protected function localize($template)
@@ -109,9 +113,89 @@ class View
         return View::localizeTemplate($template, $this->labels);
     }
 
-    private static function loadTemplate($path)
+    private static function loadTemplate($path, $plugin)    
     {
-        return file_get_contents($path);
+        $basePath = $plugin ? '.' . DIRECTORY_SEPARATOR . App::PLUGINS . DIRECTORY_SEPARATOR . $plugin . DIRECTORY_SEPARATOR . ServeViewEngine::VIEWS : '.' . DIRECTORY_SEPARATOR .  ServeViewEngine::VIEWS;
+        $alternateBasePath = $plugin ? '.' . DIRECTORY_SEPARATOR . ServeViewEngine::VIEWS . DIRECTORY_SEPARATOR . App::PLUGINS . DIRECTORY_SEPARATOR . $plugin : '';
+
+        $viewPath = $alternateBasePath ? $alternateBasePath . DIRECTORY_SEPARATOR . $path : $basePath . DIRECTORY_SEPARATOR . $path;
+
+        if (!file_exists($viewPath) && $alternateBasePath) $viewPath = $basePath . DIRECTORY_SEPARATOR . $path;
+
+        if (!file_exists($viewPath))
+        {
+            if ($path == 'error.html') return <<<'EOError'
+            <!DOCTYPE html>
+            <html>
+              <head>
+                <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+                <title>[title]</title>
+                <style type="text/css"></style>
+              </head>
+            
+              <body>
+                <main>
+                  <h1><a href="/">⚒</a> Fehler</h1>
+                  <p>{message}</p>
+                </main>
+              </body>
+            </html>
+            EOError;
+
+            if ($path == 'layout.html') return <<<'EOLayout'
+            <!doctype html>
+            <html>
+            
+            <head>
+                <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+                <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+                <title>{title} - [title]</title>
+
+                <style type="text/css">
+                    body { color:#ddd; background-color:#222; font-family: sans-serif; }
+                    a, a:visited { text-decoration: none; color:#088; }
+                    a:active, a:hover { text-decoration:#ddd underline; }        
+                    button {  border: thin solid #888; background-color: #000; background-image: radial-gradient(farthest-corner at -10% -10%, #000, #000, #111, #444); color: #ddd; font-weight: bold; font-size: 2em; border-radius: .5em; padding:.25em 1em; outline:none; }
+                    button:hover { border: thin solid #888; background-image: radial-gradient(farthest-corner at 110% 110%, #000, #111, #222, #888); }
+                    button:active { background-image: radial-gradient(farthest-corner at -10% -10%, #000, #000, #111, #444); }
+                    h1 { font-size: 5rem; }
+                    div.gap { height: 2em; }
+                    div#content { margin:auto; width:32em; }
+                    input, input:focus { color:#ddd; background-color:#222; border-style:solid; border-radius: .5em; padding:.25em; font-size: 1.5em; width:100%; outline:none; text-align:right; padding-right: 1em;}
+                    input::placeholder { text-align:left;font-size:.8em; }
+                    input:focus::placeholder {font-size:.6em; }
+                    input[type=checkbox] {width:auto; margin-right:.7em;}
+                    div.right {text-align: right;}
+                    span.error {color:#a00;}
+                    div {margin-top: .5em;}
+                </style>
+
+                <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+
+                {head}
+            </head>
+
+            <body>
+                <header>
+                <nav>
+                </nav>
+                </header>
+                <main>
+                {content}
+                <footer class="debug">
+                    {debug}
+                </footer>
+                </main>
+                <footer>
+                tsd.serve
+                </footer>
+            </body>
+            </html>
+            EOLayout;
+        }
+
+        return file_get_contents($viewPath);
     }
 
     private static function localizeTemplate(string $template, Label $labels)
@@ -267,7 +351,7 @@ class Layout extends View
 
     public function __construct()
     {
-        parent::__construct('./views/layout');
+        parent::__construct('layout');
     }
 
     public function render($data, $ctx)
