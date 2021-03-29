@@ -139,7 +139,7 @@ class AccessDeniedException extends \Exception
 {
     function __construct()
     {
-        parent::__construct("Zugriff verweigert!");
+        parent::__construct("access denied!");
     }
 }
 
@@ -147,6 +147,6 @@ class NotFoundException extends \Exception
 {
     function __construct()
     {
-        parent::__construct("Nicht gefunden!");
+        parent::__construct("not found!");
     }
 }

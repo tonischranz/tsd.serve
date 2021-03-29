@@ -129,13 +129,13 @@ class View
             <html>
               <head>
                 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-                <title>[title]</title>
+                <title>error</title>
                 <style type="text/css"></style>
               </head>
             
               <body>
                 <main>
-                  <h1><a href="/">⚒</a> Fehler</h1>
+                  <h1>💥 error</h1>
                   <p>{message}</p>
                 </main>
               </body>
@@ -150,7 +150,7 @@ class View
                 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
                 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-                <title>{title} - [title]</title>
+                <title>{title} - tsd.serve</title>
 
                 <style type="text/css">
                     body { color:#ddd; background-color:#222; font-family: sans-serif; }
