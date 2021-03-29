@@ -1,5 +1,0 @@
-RewriteEngine On
-
-#
-RewriteCond "%{REQUEST_URI}" "!=/serve.php"
-RewriteRule "^(.*)" "/serve.php" [L]
