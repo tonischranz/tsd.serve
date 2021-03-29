@@ -43,7 +43,7 @@ class Controller
 
         // _plugin?App::PLUGINS : ....
 
-        return new ViewResult($this->name . "/$view", $data, $this->_plugin, $ctx);
+        return new ViewResult($this->_name . DIRECTORY_SEPARATOR . $view, $data, $this->_plugin, $ctx);
 
         //return new ViewResult($this->basePath . '/views/' . $this->name . "/$view", $data, $ctx);
     }

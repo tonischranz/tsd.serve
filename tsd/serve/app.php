@@ -56,9 +56,6 @@ class App
             $_SERVER['REDIRECT_URL'] :
             urldecode($_SERVER['REQUEST_URI']);
 
-        if (\stripos($url, '/static/') === 0)
-            return false;
-
         ob_start();
 
         try {

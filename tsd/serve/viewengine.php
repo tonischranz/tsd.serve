@@ -115,8 +115,8 @@ class View
 
     private static function loadTemplate($path, $plugin)    
     {
-        $basePath = $plugin ? '.' . DIRECTORY_SEPARATOR . App::PLUGINS . DIRECTORY_SEPARATOR . $plugin . DIRECTORY_SEPARATOR . ServeViewEngine::VIEWS : '.' . DIRECTORY_SEPARATOR .  ServeViewEngine::VIEWS;
-        $alternateBasePath = $plugin ? '.' . DIRECTORY_SEPARATOR . ServeViewEngine::VIEWS . DIRECTORY_SEPARATOR . App::PLUGINS . DIRECTORY_SEPARATOR . $plugin : '';
+        $basePath = $plugin ? '.' . App::PLUGINS . DIRECTORY_SEPARATOR . $plugin . DIRECTORY_SEPARATOR . ServeViewEngine::VIEWS : '.' . ServeViewEngine::VIEWS;
+        $alternateBasePath = $plugin ? '.' . ServeViewEngine::VIEWS . DIRECTORY_SEPARATOR . App::PLUGINS . DIRECTORY_SEPARATOR . $plugin : '';
 
         $viewPath = $alternateBasePath ? $alternateBasePath . DIRECTORY_SEPARATOR . $path : $basePath . DIRECTORY_SEPARATOR . $path;
 

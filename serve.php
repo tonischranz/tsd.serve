@@ -35,6 +35,10 @@ if (PHP_SAPI == 'cli') {
         echo "\n";
     }
 } else {
-    // run the App
-    return App::serve();
+
+    $url = $_SERVER['REQUEST_URI'];
+
+    if (file_exists('.' . urldecode($url)) && $url != '/') return false;
+
+    App::serve();
 }

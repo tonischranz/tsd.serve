@@ -9,6 +9,11 @@ namespace tsd\serve;
  */
 class Router
 {
+    /**
+     * Controller directory name
+     */
+    const CONTROLLER = 'controller';
+
     private $factory;
     private $plugins;
 
@@ -181,9 +186,10 @@ class Router
 
     private function createController(string $name, string $plugin = '') //, string $namespace = '')
     {
-        $path = $plugin ? (App::PLUGINS . "/$plugin") : '.';
+        //$path = $plugin ? (App::PLUGINS . "/$plugin") : '.';
+        $path = $plugin ? '.' . App::PLUGINS . DIRECTORY_SEPARATOR . $plugin . DIRECTORY_SEPARATOR . Router::CONTROLLER : '.' . Router::CONTROLLER;
 
-        $fileName = "$path/controller/$name.controller.php";
+        $fileName = $path . DIRECTORY_SEPARATOR . $name . '.php';
         $ctrlName = $name . 'Controller';
 
         if (!file_exists($fileName)) {

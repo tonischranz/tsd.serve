@@ -1,0 +1,7 @@
+{
+  "member": {
+    "users": {
+      "dev": {"groups":["admin", "developer"]}
+    }    
+  }
+}

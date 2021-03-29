@@ -12,6 +12,7 @@ class defaultController extends Controller
   function showFoo ()
   {
     var_dump($_SERVER);
+    var_dump($this);
       return $this->view (['text' => 'Foo']);
   }
 
