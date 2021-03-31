@@ -6,6 +6,7 @@ use DOMDocument;
 use DOMElement;
 use DOMNode;
 use DOMText;
+use DOMXPath;
 use SimpleXMLElement;
 
 /**
@@ -64,6 +65,7 @@ class ViewContext
     public $menu;
     public $error;
     public $member;
+    public $title;
 }
 
 
@@ -95,16 +97,49 @@ class View
         $this->labels = Labels::create($path);
     }
 
-    function render($data, $ctx)
+    function render($data, ViewContext $ctx)
     {
-        $template = $this->compile($this->localize($this->load()));
-        //echo $template;
-        View::run($template, $data, $ctx);
+        $template = $this->compile();
+        $layout = new Layout($this->plugin);
+        $layoutTemplate = $layout->compile();
+
+        $t = new DOMDocument;
+        $o = new DOMDocument;
+        //$s = new SimpleXMLElement($template);
+
+        //$t->strictErrorChecking = false;
+        libxml_use_internal_errors(true);
+        $t->loadHTML($template);
+        $o->loadHTML($layoutTemplate);
+
+        $title = $t->getElementsByTagName('title')[0]->textContent;
+        $x = new DOMXPath($t);
+        $xL = new DOMXPath($o);
+        $links = $x->query('head/link');
+        $styles = $x->query('head/style');
+        $scripts = $x->query('head/script');
+        $main = $x->query('body/main')[0];
+
+        $lBody = $o->getElementsByTagName('body')[0];
+        $lOldMain = $xL->query('body/main')[0];
+        $lMain = $o->importNode($main, true);
+        $lBody->replaceChild($lMain, $lOldMain);
+
+        $lHead = $o->getElementsByTagName('head')[0];
+
+        foreach($links as $h) $lHead->appendChild($o->importNode($h, true));
+        foreach($styles as $h) $lHead->appendChild($o->importNode($h, true));
+        foreach($scripts as $h) $lHead->appendChild($o->importNode($h, true));
+        
+
+        $ctx->title = $title;
+        
+        View::run(preg_replace('/PUBLIC.*/', '>', $o->saveHTML(), 1), $data, $ctx);
     }
 
-    protected function compile($template)
+    public function compile()
     {
-        return View::compileTemplate($template);
+        return View::compileTemplate($this->localize($this->load()));
     }
 
     protected function load()
@@ -340,7 +375,7 @@ class View
                 foreach ($t->childNodes as $c) View::copyNode($c, $o, $n, $l);
                 break;
             case XML_CDATA_SECTION_NODE:
-                View::copyCData($t, $o, $p);
+                View::copyText($t, $o, $p, $l);
             case XML_TEXT_NODE:
                 View::copyText($t, $o, $p, $l);
                 break;
@@ -354,11 +389,6 @@ class View
             if ($e->nodeName == 'input' && $a->name == 'placeholder') $a->value = View::localizeText($a->value, $l);
             if ($e->nodeName == 'img' && $a->name == 'alt') $a->value = View::localizeText($a->value, $l);
         }
-    }
-
-    private static function copyCData(DOMNode $d, DOMDocument $o, DOMElement $p)
-    {
-        //$o->createCDATASection( $d->data);
     }
 
     private static function copyText(DOMText $t, DOMDocument $o, DOMElement $p, Label $l)
@@ -390,16 +420,20 @@ class View
         foreach ($ctx as $k => $v) $$k = $v;
 
         $debug = ob_get_contents();
+
+        eval('?>' . $view . '<?php');
+
+        /*$debug = ob_get_contents();
         ob_clean();
         ob_start();
         eval('?>' . $view . '<?php');
         $html  = ob_get_contents();
         ob_end_clean();
 
-        $m   = [];
+        $m   = [];*/
         $exp = '#<\s*title.*?>(?<title>.*)<\s*/title.*?>(?<head>.*)<\s*/head.*?>.*<\s*body.*?>.*<\s*main.*?>(?<content>.*)<\s*/main.*>.*<\s*/body.*>#ims';
 
-        if (preg_match($exp, $html, $m)) {
+        /*if (preg_match($exp, $html, $m)) {
             $layoutData = [
                 'title'   => $m['title'], 'head'    => $m['head'],
                 'content' => $m['content'],
@@ -412,19 +446,19 @@ class View
             echo 'Regex Content Lookup failed';
             echo $html;
             echo $debug;
-        }
+        }*/
     }
 }
 
 class Layout extends View
 {
 
-    public function __construct()
+    public function __construct(string $plugin = '')
     {
-        parent::__construct('layout');
+        parent::__construct('layout', $plugin);
     }
 
-    public function render($data, $ctx)
+    /*public function render($data, $ctx)
     {
         $template = $this->compile($this->localize($this->load()));
 
@@ -441,7 +475,7 @@ class Layout extends View
         eval('?>' . $view . '<?php');
 
         unset($d);
-    }
+    }*/
 }
 
 
