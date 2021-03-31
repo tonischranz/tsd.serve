@@ -109,6 +109,8 @@ class View
 
         //$t->strictErrorChecking = false;
         libxml_use_internal_errors(true);
+        //$t->substituteEntities = false;
+        //$o->substituteEntities = false;
         $t->loadHTML($template);
         $o->loadHTML($layoutTemplate);
 
@@ -134,7 +136,16 @@ class View
 
         $ctx->title = $title;
         
-        View::run(preg_replace('/PUBLIC.*/', '>', $o->saveHTML(), 1), $data, $ctx);
+
+        $to = preg_replace('/\&lt;\?php/', '<?php', $o->saveHTML());
+        $to = preg_replace('/\?\&gt;/', '?>', $to);
+        $to = preg_replace('/\&amp;/', '&', $to); //todo: replace existing &amp;s before compiling with &#38;
+
+        //todo: cache
+
+        //echo $to;
+
+        View::run(preg_replace('/PUBLIC.*/', '>', $to, 1), $data, $ctx);
     }
 
     public function compile()
@@ -266,6 +277,8 @@ class View
 
         //$t->strictErrorChecking = false;
         libxml_use_internal_errors(true);
+        //$t->substituteEntities = false;
+        //$o->substituteEntities = false;
         $t->loadHTML($template);
 
         View::copyNode($t, $o, $o, $labels);
@@ -375,7 +388,7 @@ class View
                 foreach ($t->childNodes as $c) View::copyNode($c, $o, $n, $l);
                 break;
             case XML_CDATA_SECTION_NODE:
-                View::copyText($t, $o, $p, $l);
+                View::copyCData($t, $o, $p);
             case XML_TEXT_NODE:
                 View::copyText($t, $o, $p, $l);
                 break;
@@ -391,13 +404,16 @@ class View
         }
     }
 
+    private static function copyCData(DOMText $t, DOMDocument $o, DOMElement $p)
+    {
+        $p->appendChild($o->createCDATASection($t->data));
+    }
+
+
     private static function copyText(DOMText $t, DOMDocument $o, DOMElement $p, Label $l)
     {
         if ($t->isElementContentWhitespace()) return;
-        if ($p->nodeName == 'style' || $p->nodeName == 'script')
-        {
-            $p->appendChild($o->createCDATASection($t->data));
-        }
+        if ($p->nodeName == 'style' || $p->nodeName == 'script') return;
         else
         {
             //todo: MD
@@ -420,6 +436,7 @@ class View
         foreach ($ctx as $k => $v) $$k = $v;
 
         $debug = ob_get_contents();
+        ob_clean();
 
         eval('?>' . $view . '<?php');
 
