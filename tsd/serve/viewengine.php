@@ -32,7 +32,15 @@ abstract class ViewEngine
         if ($accept == 'text/xml') $this->renderXml($result);
 
         if ($result instanceof ViewResult) {
-            $this->renderView($result);
+            try {
+                $this->renderView($result);
+            } catch (\Exception $e) {
+                http_response_code(500);
+                $this->renderView(Controller::error($e->getMessage(), 500));
+            } catch (\Error $e) {
+                http_response_code(500);
+                $this->renderView(Controller::error($e->getMessage(), 500));
+            }
         }
     }
 
@@ -53,9 +61,9 @@ abstract class ViewEngine
 
 interface IViewResult
 {
-    function view() : string;
-    function plugin() : string;
-    function ctx() : ViewContext;
+    function view(): string;
+    function plugin(): string;
+    function ctx(): ViewContext;
     function data();
 }
 
@@ -104,7 +112,7 @@ class View
 
         $t = new DOMDocument;
         $o = new DOMDocument;
-        
+
         libxml_use_internal_errors(true);
         $t->loadHTML($template);
         $o->loadHTML($layoutTemplate);
@@ -124,17 +132,16 @@ class View
 
         $lHead = $o->getElementsByTagName('head')[0];
 
-        foreach($links as $h) $lHead->appendChild($o->importNode($h, true));
-        foreach($styles as $h) $lHead->appendChild($o->importNode($h, true));
-        foreach($scripts as $h) $lHead->appendChild($o->importNode($h, true));
-        
+        foreach ($links as $h) $lHead->appendChild($o->importNode($h, true));
+        foreach ($styles as $h) $lHead->appendChild($o->importNode($h, true));
+        foreach ($scripts as $h) $lHead->appendChild($o->importNode($h, true));
+
 
         $ctx->title = $title;
-        
+
 
         $to = preg_replace('/\&lt;\?php/', '<?php', $o->saveHTML());
         $to = preg_replace('/\?\&gt;/', '?>', $to);
-        $to = preg_replace('/\&amp;/', '&', $to); //todo: replace existing &amp;s before compiling with &#38;
 
         //todo: cache
 
@@ -158,17 +165,19 @@ class View
         return View::localizeTemplate($template, $this->labels);
     }
 
-    private static function loadTemplate($path, $plugin)    
+    private static function loadTemplate($path, $plugin)
     {
-        $basePath = $plugin ? '.' . App::PLUGINS . DIRECTORY_SEPARATOR . $plugin . DIRECTORY_SEPARATOR . ServeViewEngine::VIEWS : '.' . ServeViewEngine::VIEWS;
+        $noPluginBasePath = '.' . ServeViewEngine::VIEWS;
+        $basePath = $plugin ? '.' . App::PLUGINS . DIRECTORY_SEPARATOR . $plugin . DIRECTORY_SEPARATOR . ServeViewEngine::VIEWS : $noPluginBasePath;
         $alternateBasePath = $plugin ? '.' . ServeViewEngine::VIEWS . DIRECTORY_SEPARATOR . App::PLUGINS . DIRECTORY_SEPARATOR . $plugin : '';
 
         $viewPath = $alternateBasePath ? $alternateBasePath . DIRECTORY_SEPARATOR . $path : $basePath . DIRECTORY_SEPARATOR . $path;
 
         if (!file_exists($viewPath) && $alternateBasePath) $viewPath = $basePath . DIRECTORY_SEPARATOR . $path;
 
-        if (!file_exists($viewPath))
-        {
+        if (!file_exists($viewPath)) $viewPath = $noPluginBasePath . DIRECTORY_SEPARATOR . $path;
+
+        if (!file_exists($viewPath)) {
             if ($path == 'error.html') return <<<'EOError'
             <!DOCTYPE html>
             <html>
@@ -195,7 +204,7 @@ class View
                 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
                 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-                <title>{title} - tsd.serve</title>
+                <title>{@title} - tsd.serve</title>
 
                 <style type="text/css">
                     body { color:#ddd; background-color:#222; font-family: sans-serif; }
@@ -218,7 +227,6 @@ class View
 
                 <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
 
-                {head}
             </head>
 
             <body>
@@ -227,11 +235,10 @@ class View
                 </nav>
                 </header>
                 <main>
-                {content}
-                <footer class="debug">
-                    {debug}
-                </footer>
                 </main>
+                <footer class="debug">
+                    {@debug}
+                </footer>
                 <footer>
                 tsd.serve
                 </footer>
@@ -245,9 +252,9 @@ class View
 
     private static function localizeTemplate(string $template, Label $labels)
     {
-          $t = new DOMDocument;
+        $t = new DOMDocument;
         $o = new DOMDocument;
-  
+
         libxml_use_internal_errors(true);
         $t->loadHTML($template);
 
@@ -268,7 +275,7 @@ class View
 
         $name = substr($parts[0], 1);
 
-        $o = $parts[0][0] == '@' ? "\$$name" : "\$d['$parts[0]']";
+        $o = str_split($parts[0])[0] == '@' ? "\$$name" : "\$d['$parts[0]']";
         array_shift($parts);
         foreach ($parts as $p) {
             $o .= "['$p']";
@@ -292,23 +299,23 @@ class View
         return $o;
     }
 
-    private static function compileTemplate($template) : string
+    private static function compileTemplate($template): string
     {
         $patterns = [
             '/\{each\s+(?<arg>\@?\w[\.\|\w]*)\s*\}(?<inner>((?:(?!\{\/?each).)|(?R))*)(\{else\}(?<else>((?:(?!\{\/?each).)|(?R))*))?\{\/each\}/ms' => function ($m) {
                 $inner = View::compileTemplate($m['inner']);
                 $arg   = View::compileExpression($m['arg']);
-                return "<?php if (isset($arg) && $arg) { array_push(\$s, \$d); foreach($arg as \$d) { ?>$inner<?php } \$d=array_pop(\$s); } ?>";
+                return "<?php if (@$arg) { array_push(\$s, \$d); foreach($arg as \$d) { ?>$inner<?php } \$d=array_pop(\$s); } ?>";
             },
             '/\{if\s+(?<arg>\@?\w[\.\|\w]*)\s*\}(?<inner>((?:(?!\{\/?if).)|(?R))*)(\{else\}(?<else>((?:(?!\{\/?if).)|(?R))*))?\{\/if\}/ms' => function ($m) {
                 $inner = View::compileTemplate($m['inner']);
                 $arg   = View::compileExpression($m['arg']);
-                return "<?php if (isset($arg) && $arg) { ?>$inner<?php } ?>";
+                return "<?php if (@$arg) { ?>$inner<?php } ?>";
             },
             '/\{with\s+(?<arg>\@?\w[\.\|\w]*)\s*\}(?<inner>((?:(?!\{\/?if).)|(?R))*)\{\/with\}/ms' => function ($m) {
                 $inner = View::compileTemplate($m['inner']);
                 $arg   = View::compileExpression($m['arg']);
-                return "<?php if (isset($arg) && $arg && array_push(\$s, $arg)) { ?>$inner<?php } \$d=array_pop(\$s) ?>";
+                return "<?php if (@$arg) { array_push(\$s, $arg); ?>$inner<?php } \$d=array_pop(\$s); ?>";
             },
             '/\{((\@?[a-zA-Z_]\w*(\.\w+)*(\|\w+)*)|\.)\s*\}/' => function ($m) {
                 $o = View::compileOutput($m[1]);
@@ -316,13 +323,12 @@ class View
             },
         ];
 
-        return preg_replace_callback_array($patterns, $template, -1);        
+        return preg_replace_callback_array($patterns, $template, -1);
     }
 
     private static function copyNode(DOMNode $t, DOMDocument $o, DOMNode $p, Label $l)
     {
-        switch ($t->nodeType)
-        {
+        switch ($t->nodeType) {
             case XML_HTML_DOCUMENT_NODE:
                 View::copyNode($t->documentElement, $o, $o, $l);
                 break;
@@ -342,8 +348,7 @@ class View
 
     private static function localizeAttributes(DOMElement $e, Label $l)
     {
-        foreach ($e->attributes as $a)
-        {
+        foreach ($e->attributes as $a) {
             if ($e->nodeName == 'input' && $a->name == 'placeholder') $a->value = View::localizeText($a->value, $l);
             if ($e->nodeName == 'img' && $a->name == 'alt') $a->value = View::localizeText($a->value, $l);
         }
@@ -359,14 +364,13 @@ class View
     {
         if ($t->isElementContentWhitespace()) return;
         if ($p->nodeName == 'style' || $p->nodeName == 'script') return;
-        else
-        {
+        else {
             //todo: MD
             $p->appendChild($o->createTextNode(View::localizeText($t->wholeText, $l)));
         }
     }
 
-    private static function localizeText (string $s, Label $l)
+    private static function localizeText(string $s, Label $l)
     {
         return $s;
         //todo: localize!
