@@ -2,7 +2,7 @@
 
 const CONFIG_FILE = '.config.json';
 const SERVE_FILE = '.tsd.serve.php';
-const SERVE_URL = 'https://github.com/tonischranz/tsd.serve/archive/master.zip'; // https://tsd.ovh/serve
+const SERVE_URL = 'https://tsd.ovh/serve';
 const ADMIN_URL = 'https://github.com/tonischranz/serve.admin/archive/master.zip'; // https://tsd.ovh/serve.admin
 
 function rrmdir($dir) { 
