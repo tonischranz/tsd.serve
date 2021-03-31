@@ -82,82 +82,140 @@ class ViewContext
  */
 class ServeViewEngine extends ViewEngine
 {
+    const CACHED_VIEWS = '.cached_views.php';
+    const CACHED_DIR = '.cached_views';
+    const CACHE_DURATION = 30;
     const VIEWS = 'views';
+
+    public static array $cached_views = array();
+
+    function __construct()
+    {
+        if (file_exists(ServeViewEngine::CACHED_VIEWS)) include ServeViewEngine::CACHED_VIEWS;
+        if (!is_dir(ServeViewEngine::CACHED_DIR)) mkdir(ServeViewEngine::CACHED_DIR);
+    }
+
+    private static function writeCacheFile()
+    {
+        file_put_contents(ServeViewEngine::CACHED_VIEWS, ["<?php\n", "use tsd\serve\ServeViewEngine;\n", 'ServeViewEngine::$cached_views = [']);
+
+        foreach (ServeViewEngine::$cached_views as $k => $v)
+            file_put_contents(ServeViewEngine::CACHED_VIEWS, "'$k'=>['$v[0]','$v[1]'],", FILE_APPEND);
+
+        file_put_contents(ServeViewEngine::CACHED_VIEWS, '];', FILE_APPEND);
+    }
 
     function renderView(IViewResult $result)
     {
-        $v = new View($result->view(), $result->plugin());
-        $v->render($result->data(), $result->ctx());
+        $plugin = $result->plugin();
+        $view = $result->view();
+        $key = $plugin ? $plugin . '-' . str_replace('/', '.', $view) : str_replace('/', '.', $view);
+        $cached_view = '';
+        $view_file = '';
+        $v = null;
+        $ctx = $result->ctx();
+        
+        if (array_key_exists($key, ServeViewEngine::$cached_views)) {
+            $md5 = ServeViewEngine::$cached_views[$key][0];
+            $timestamp = ServeViewEngine::$cached_views[$key][1];
+
+            if ($timestamp + ServeViewEngine::CACHE_DURATION < time()) {
+                $v = new View($view, $plugin);
+                $md5 = $v->md5();
+            }
+            $cached_view = "$key.$md5.php";
+        }
+
+        if ($cached_view && file_exists(ServeViewEngine::CACHED_VIEWS . DIRECTORY_SEPARATOR . $cached_view)) {
+            $view_file = ServeViewEngine::CACHED_VIEWS . DIRECTORY_SEPARATOR . $cached_view;
+        } else {
+            if (!$v) $v = new View($view, $plugin);
+            
+            $template = $v->compile();
+            $layout = new Layout($plugin);
+            $layoutTemplate = $layout->compile();
+
+            $t = new DOMDocument;
+            $o = new DOMDocument;
+
+            libxml_use_internal_errors(true);
+            $t->loadHTML($template);
+            $o->loadHTML($layoutTemplate);
+
+            $title = $t->getElementsByTagName('title')[0]->textContent;
+            $x = new DOMXPath($t);
+            $xL = new DOMXPath($o);
+            $links = $x->query('head/link');
+            $styles = $x->query('head/style');
+            $scripts = $x->query('head/script');
+            $main = $x->query('body/main')[0];
+
+            $lBody = $o->getElementsByTagName('body')[0];
+            $lOldMain = $xL->query('body/main')[0];
+            $lMain = $o->importNode($main, true);
+            $lBody->replaceChild($lMain, $lOldMain);
+
+            $lHead = $o->getElementsByTagName('head')[0];
+
+            foreach ($links as $h) $lHead->appendChild($o->importNode($h, true));
+            foreach ($styles as $h) $lHead->appendChild($o->importNode($h, true));
+            foreach ($scripts as $h) $lHead->appendChild($o->importNode($h, true));
+
+
+            $ctx->title = $title;
+
+
+            $to = preg_replace('/\&lt;\?php/', '<?php', $o->saveHTML());
+            $to = preg_replace('/\?\&gt;/', '?>', $to);
+            $to = preg_replace('/PUBLIC.*/', '>', $to, 1);
+
+            //cache
+            $md5 = $v->md5();
+            $view_file = ServeViewEngine::CACHED_DIR . DIRECTORY_SEPARATOR . "$key.$md5.php";
+            file_put_contents($view_file, $to);
+            ServeViewEngine::$cached_views[$key] = [$md5, time()];
+            ServeViewEngine::writeCacheFile();
+        }
+
+        ServeViewEngine::run($view_file, $result->data(), $ctx);
+    }
+
+    private static function run(string $view, array $data, ViewContext $ctx)
+    {
+        $d     = $data;
+        $model = $data;
+        $s  = [];
+        foreach ($ctx as $k => $v) $$k = $v;
+
+        $debug = ob_get_contents();
+        ob_clean();
+
+        include $view;
     }
 }
 
 class View
 {
-    private $path;
-    private $plugin;
-    private $labels;
+    private Label $labels;
+    private string $template;
+    private string $md5;
 
     function __construct(string $path, string $plugin = '')
     {
-        $this->path   = $path . '.html';
-        $this->plugin = $plugin;
         $this->labels = Labels::create($path);
+
+        $this->template = View::loadTemplate($path . '.html', $plugin);
+        $this->md5 = md5($this->template);
     }
 
-    function render($data, ViewContext $ctx)
+    public function md5(): string
     {
-        $template = $this->compile();
-        $layout = new Layout($this->plugin);
-        $layoutTemplate = $layout->compile();
-
-        $t = new DOMDocument;
-        $o = new DOMDocument;
-
-        libxml_use_internal_errors(true);
-        $t->loadHTML($template);
-        $o->loadHTML($layoutTemplate);
-
-        $title = $t->getElementsByTagName('title')[0]->textContent;
-        $x = new DOMXPath($t);
-        $xL = new DOMXPath($o);
-        $links = $x->query('head/link');
-        $styles = $x->query('head/style');
-        $scripts = $x->query('head/script');
-        $main = $x->query('body/main')[0];
-
-        $lBody = $o->getElementsByTagName('body')[0];
-        $lOldMain = $xL->query('body/main')[0];
-        $lMain = $o->importNode($main, true);
-        $lBody->replaceChild($lMain, $lOldMain);
-
-        $lHead = $o->getElementsByTagName('head')[0];
-
-        foreach ($links as $h) $lHead->appendChild($o->importNode($h, true));
-        foreach ($styles as $h) $lHead->appendChild($o->importNode($h, true));
-        foreach ($scripts as $h) $lHead->appendChild($o->importNode($h, true));
-
-
-        $ctx->title = $title;
-
-
-        $to = preg_replace('/\&lt;\?php/', '<?php', $o->saveHTML());
-        $to = preg_replace('/\?\&gt;/', '?>', $to);
-
-        //todo: cache
-
-        //echo $to;
-
-        View::run(preg_replace('/PUBLIC.*/', '>', $to, 1), $data, $ctx);
+        return $this->md5;
     }
 
     public function compile()
     {
-        return View::compileTemplate($this->localize($this->load()));
-    }
-
-    protected function load()
-    {
-        return View::loadTemplate($this->path, $this->plugin);
+        return View::compileTemplate($this->localize($this->template));
     }
 
     protected function localize($template)
@@ -359,7 +417,6 @@ class View
         $p->appendChild($o->createCDATASection($t->data));
     }
 
-
     private static function copyText(DOMText $t, DOMDocument $o, DOMElement $p, Label $l)
     {
         if ($t->isElementContentWhitespace()) return;
@@ -375,19 +432,6 @@ class View
         return $s;
         //todo: localize!
         //return $l->getLabel($s);
-    }
-
-    private static function run(string $view, array $data, ViewContext $ctx)
-    {
-        $d     = $data;
-        $model = $data;
-        $s  = [];
-        foreach ($ctx as $k => $v) $$k = $v;
-
-        $debug = ob_get_contents();
-        ob_clean();
-
-        eval('?>' . $view . '<?php');
     }
 }
 
