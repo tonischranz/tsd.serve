@@ -7,7 +7,6 @@ use DOMElement;
 use DOMNode;
 use DOMText;
 use DOMXPath;
-use SimpleXMLElement;
 
 /**
  * @Implementation tsd\serve\ServeViewEngine
@@ -105,12 +104,8 @@ class View
 
         $t = new DOMDocument;
         $o = new DOMDocument;
-        //$s = new SimpleXMLElement($template);
-
-        //$t->strictErrorChecking = false;
+        
         libxml_use_internal_errors(true);
-        //$t->substituteEntities = false;
-        //$o->substituteEntities = false;
         $t->loadHTML($template);
         $o->loadHTML($layoutTemplate);
 
@@ -250,35 +245,10 @@ class View
 
     private static function localizeTemplate(string $template, Label $labels)
     {
-        /*$patterns          = [
-            '#\[(?<name>/?\w+\s*\([,\s\w]+\)):\s*\{(?<args>.*)\}\s*\]#' =>
-            function ($m) use ($labels) {
-                $params_pattern = '#\((.*?)\)#';
-                $params_matches = [];
-                if (!preg_match($params_pattern, $m['name'], $params_matches))
-                    return false;
-
-                $params         = $params_matches[1];
-                $o = "{label $params with $m[args]}" . $labels->getLabel($m['name']) . '{/label}';
-                return $o;
-            },
-            '#\[(/?\w+)\s*\]#' => function ($m) use ($labels) {
-                return $labels->getLabel($m[1]);
-            }
-        ];
-
-        $o = preg_replace_callback_array($patterns, $template, -1);
-
-        return $o;*/
-
-        $t = new DOMDocument;
+          $t = new DOMDocument;
         $o = new DOMDocument;
-        //$s = new SimpleXMLElement($template);
-
-        //$t->strictErrorChecking = false;
+  
         libxml_use_internal_errors(true);
-        //$t->substituteEntities = false;
-        //$o->substituteEntities = false;
         $t->loadHTML($template);
 
         View::copyNode($t, $o, $o, $labels);
@@ -322,34 +292,9 @@ class View
         return $o;
     }
 
-    /*private static function compileLabel($label)
-    {
-        $pattern = '#\{(\$?\w+(\.\w+)*(\|\w+)*)\s*?\}#';
-
-        return '?>' . preg_replace_callback($pattern, function ($m) {
-            $o = View::compileOutput($m[1]);
-            return "<?php echo $o; ?>";
-        }, $label);
-    }*/
-
     private static function compileTemplate($template) : string
     {
         $patterns = [
-            /*'/\{label\s*(?<params>[,\w\s]+)\s+with\s+(?<args>.*?)\}(?<label>.*?)\{\/label\}/' => function ($m) {
-                $args   = [];
-                $i      = 0;
-                $params = explode(',', $m['params']);
-                $arg_ex = explode(',', $m['args']);
-                foreach ($arg_ex as $a) {
-                    $exp    = View::compileExpression($a);
-                    $args[] = "'$params[$i]'=>$exp";
-                    $i++;
-                }
-
-                $as       = implode(',', $args);
-                $label    = addslashes(View::compileLabel($m['label']));
-                return "<?php call_user_func(function(\$d){ eval('$label'); }, [$as]); ?>";
-            },*/
             '/\{each\s+(?<arg>\@?\w[\.\|\w]*)\s*\}(?<inner>((?:(?!\{\/?each).)|(?R))*)(\{else\}(?<else>((?:(?!\{\/?each).)|(?R))*))?\{\/each\}/ms' => function ($m) {
                 $inner = View::compileTemplate($m['inner']);
                 $arg   = View::compileExpression($m['arg']);
@@ -439,31 +384,6 @@ class View
         ob_clean();
 
         eval('?>' . $view . '<?php');
-
-        /*$debug = ob_get_contents();
-        ob_clean();
-        ob_start();
-        eval('?>' . $view . '<?php');
-        $html  = ob_get_contents();
-        ob_end_clean();
-
-        $m   = [];*/
-        $exp = '#<\s*title.*?>(?<title>.*)<\s*/title.*?>(?<head>.*)<\s*/head.*?>.*<\s*body.*?>.*<\s*main.*?>(?<content>.*)<\s*/main.*>.*<\s*/body.*>#ims';
-
-        /*if (preg_match($exp, $html, $m)) {
-            $layoutData = [
-                'title'   => $m['title'], 'head'    => $m['head'],
-                'content' => $m['content'],
-                'debug'   => $debug
-            ];
-
-            $layout = new Layout();
-            $layout->render(array_merge($data, $layoutData), $ctx);
-        } else {
-            echo 'Regex Content Lookup failed';
-            echo $html;
-            echo $debug;
-        }*/
     }
 }
 
@@ -474,25 +394,6 @@ class Layout extends View
     {
         parent::__construct('layout', $plugin);
     }
-
-    /*public function render($data, $ctx)
-    {
-        $template = $this->compile($this->localize($this->load()));
-
-        Layout::renderInt($template, $data, $ctx);
-    }
-
-    private static function renderInt($view, $data, ViewContext $ctx)
-    {
-        $d = $data;
-        $s = [];
-        foreach ($ctx as $k => $v) $$k = $v;
-
-//        echo $view;
-        eval('?>' . $view . '<?php');
-
-        unset($d);
-    }*/
 }
 
 
