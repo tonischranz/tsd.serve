@@ -26,7 +26,7 @@
 
     <script src="/script.js"></script>
 
-    <title>{title} - [title]</title>
+    <title>{title} - title</title>
     {head}
   </head>
 
@@ -68,7 +68,7 @@
               {each @menu}
               <li class="{if active}active{/if}">
                 <a href="{url}">{title}</a>
-                {if menu} // lets use recursive partials {>menu menu} {/if}
+                {if menu} // lets use recursive partials {/if}
                 <aside>
                   {each tags}<small>{.}</small>{/each}
                 </aside>

@@ -2,6 +2,12 @@
 
 namespace tsd\serve;
 
+use DOMDocument;
+use DOMElement;
+use DOMNode;
+use DOMText;
+use SimpleXMLElement;
+
 /**
  * @Implementation tsd\serve\ServeViewEngine
  */
@@ -9,8 +15,6 @@ abstract class ViewEngine
 {
     function render($result, $accept)
     {
-        //$ctx = new ViewContext();
-
         if ($result instanceof AccessDeniedException) $result = Controller::error($result, 403);
         if ($result instanceof NotFoundException) $result = Controller::error($result, 404);
         if ($result instanceof \Exception) $result = Controller::error($result->getMessage(), 500);
@@ -73,7 +77,6 @@ class ServeViewEngine extends ViewEngine
 
     function renderView(IViewResult $result)
     {
-        //$v = new View(ServeViewEngine::VIEWS . '/' . $result->view());
         $v = new View($result->view(), $result->plugin());
         $v->render($result->data(), $result->ctx());
     }
@@ -95,6 +98,7 @@ class View
     function render($data, $ctx)
     {
         $template = $this->compile($this->localize($this->load()));
+        //echo $template;
         View::run($template, $data, $ctx);
     }
 
@@ -200,7 +204,7 @@ class View
 
     private static function localizeTemplate(string $template, Label $labels)
     {
-        $patterns          = [
+        /*$patterns          = [
             '#\[(?<name>/?\w+\s*\([,\s\w]+\)):\s*\{(?<args>.*)\}\s*\]#' =>
             function ($m) use ($labels) {
                 $params_pattern = '#\((.*?)\)#';
@@ -219,7 +223,19 @@ class View
 
         $o = preg_replace_callback_array($patterns, $template, -1);
 
-        return $o;
+        return $o;*/
+
+        $t = new DOMDocument;
+        $o = new DOMDocument;
+        //$s = new SimpleXMLElement($template);
+
+        //$t->strictErrorChecking = false;
+        libxml_use_internal_errors(true);
+        $t->loadHTML($template);
+
+        View::copyNode($t, $o, $o, $labels);
+
+        return $o->saveHTML();
     }
 
     private static function compileExpression($exp)
@@ -258,7 +274,7 @@ class View
         return $o;
     }
 
-    private static function compileLabel($label)
+    /*private static function compileLabel($label)
     {
         $pattern = '#\{(\$?\w+(\.\w+)*(\|\w+)*)\s*?\}#';
 
@@ -266,12 +282,12 @@ class View
             $o = View::compileOutput($m[1]);
             return "<?php echo $o; ?>";
         }, $label);
-    }
+    }*/
 
-    private static function compileTemplate($template)
+    private static function compileTemplate($template) : string
     {
         $patterns = [
-            '/\{label\s*(?<params>[,\w\s]+)\s+with\s+(?<args>.*?)\}(?<label>.*?)\{\/label\}/' => function ($m) {
+            /*'/\{label\s*(?<params>[,\w\s]+)\s+with\s+(?<args>.*?)\}(?<label>.*?)\{\/label\}/' => function ($m) {
                 $args   = [];
                 $i      = 0;
                 $params = explode(',', $m['params']);
@@ -285,21 +301,21 @@ class View
                 $as       = implode(',', $args);
                 $label    = addslashes(View::compileLabel($m['label']));
                 return "<?php call_user_func(function(\$d){ eval('$label'); }, [$as]); ?>";
-            },
+            },*/
             '/\{each\s+(?<arg>\@?\w[\.\|\w]*)\s*\}(?<inner>((?:(?!\{\/?each).)|(?R))*)(\{else\}(?<else>((?:(?!\{\/?each).)|(?R))*))?\{\/each\}/ms' => function ($m) {
                 $inner = View::compileTemplate($m['inner']);
                 $arg   = View::compileExpression($m['arg']);
-                return "<?php if (isset($arg) && $arg) { array_push(\$s, \$d); foreach($arg as \$d) {\n$inner\n} \$d=array_pop(\$s); } ?>";
+                return "<?php if (isset($arg) && $arg) { array_push(\$s, \$d); foreach($arg as \$d) { ?>$inner<?php } \$d=array_pop(\$s); } ?>";
             },
             '/\{if\s+(?<arg>\@?\w[\.\|\w]*)\s*\}(?<inner>((?:(?!\{\/?if).)|(?R))*)(\{else\}(?<else>((?:(?!\{\/?if).)|(?R))*))?\{\/if\}/ms' => function ($m) {
                 $inner = View::compileTemplate($m['inner']);
                 $arg   = View::compileExpression($m['arg']);
-                return "<?php if (isset($arg) && $arg) {\n$inner\n} ?>";
+                return "<?php if (isset($arg) && $arg) { ?>$inner<?php } ?>";
             },
             '/\{with\s+(?<arg>\@?\w[\.\|\w]*)\s*\}(?<inner>((?:(?!\{\/?if).)|(?R))*)\{\/with\}/ms' => function ($m) {
                 $inner = View::compileTemplate($m['inner']);
                 $arg   = View::compileExpression($m['arg']);
-                return "<?php if (isset($arg) && $arg && array_push(\$s, $arg)) {\n$inner\n} \$d=array_pop(\$s) ?>";
+                return "<?php if (isset($arg) && $arg && array_push(\$s, $arg)) { ?>$inner<?php } \$d=array_pop(\$s) ?>";
             },
             '/\{((\@?[a-zA-Z_]\w*(\.\w+)*(\|\w+)*)|\.)\s*\}/' => function ($m) {
                 $o = View::compileOutput($m[1]);
@@ -307,9 +323,63 @@ class View
             },
         ];
 
-        $o = preg_replace_callback_array($patterns, $template, -1);
+        return preg_replace_callback_array($patterns, $template, -1);        
+    }
 
-        return '?>' . $o . '<?php ';
+    private static function copyNode(DOMNode $t, DOMDocument $o, DOMNode $p, Label $l)
+    {
+        switch ($t->nodeType)
+        {
+            case XML_HTML_DOCUMENT_NODE:
+                View::copyNode($t->documentElement, $o, $o, $l);
+                break;
+            case XML_ELEMENT_NODE:
+                $n = $o->importNode($t);
+                $n = $p->appendChild($n);
+                View::localizeAttributes($n, $l);
+                foreach ($t->childNodes as $c) View::copyNode($c, $o, $n, $l);
+                break;
+            case XML_CDATA_SECTION_NODE:
+                View::copyCData($t, $o, $p);
+            case XML_TEXT_NODE:
+                View::copyText($t, $o, $p, $l);
+                break;
+        }
+    }
+
+    private static function localizeAttributes(DOMElement $e, Label $l)
+    {
+        foreach ($e->attributes as $a)
+        {
+            if ($e->nodeName == 'input' && $a->name == 'placeholder') $a->value = View::localizeText($a->value, $l);
+            if ($e->nodeName == 'img' && $a->name == 'alt') $a->value = View::localizeText($a->value, $l);
+        }
+    }
+
+    private static function copyCData(DOMNode $d, DOMDocument $o, DOMElement $p)
+    {
+        //$o->createCDATASection( $d->data);
+    }
+
+    private static function copyText(DOMText $t, DOMDocument $o, DOMElement $p, Label $l)
+    {
+        if ($t->isElementContentWhitespace()) return;
+        if ($p->nodeName == 'style' || $p->nodeName == 'script')
+        {
+            $p->appendChild($o->createCDATASection($t->data));
+        }
+        else
+        {
+            //todo: MD
+            $p->appendChild($o->createTextNode(View::localizeText($t->wholeText, $l)));
+        }
+    }
+
+    private static function localizeText (string $s, Label $l)
+    {
+        return $s;
+        //todo: localize!
+        //return $l->getLabel($s);
     }
 
     private static function run(string $view, array $data, ViewContext $ctx)
@@ -322,7 +392,7 @@ class View
         $debug = ob_get_contents();
         ob_clean();
         ob_start();
-        eval($view);
+        eval('?>' . $view . '<?php');
         $html  = ob_get_contents();
         ob_end_clean();
 
@@ -367,7 +437,8 @@ class Layout extends View
         $s = [];
         foreach ($ctx as $k => $v) $$k = $v;
 
-        eval($view);
+//        echo $view;
+        eval('?>' . $view . '<?php');
 
         unset($d);
     }
