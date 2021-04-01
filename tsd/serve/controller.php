@@ -28,17 +28,17 @@ class Controller
             ['url' => '#', 'title' => 'Hash', 'active' => true],
             ['url' => '~', 'title' => 'Tilde', 'tags' => ['home', 'userdir', 'private'], 'emblems' => ['~']],
             ['url' => 'info', 'title' => '⚒Info', 'emblems' => ['ℹ']],
-             ['url' => '#', 'title' => 'Hash', 'active' => true],
-               ['url' => '#', 'title' => 'Hash', 'active' => true],
+            ['url' => '#', 'title' => 'Hash', 'active' => true],
+            ['url' => '#', 'title' => 'Hash', 'active' => true],
+            ['url' => '#', 'title' => 'Hash', 'active' => true],
+            ['url' => '#', 'title' => 'Hash', 'active' => true],
+            ['url' => '#', 'title' => '# Hash', 'active' => true],
+            ['url' => '#', 'title' => '#Hash', 'active' => true, 'menu' => [
                 ['url' => '#', 'title' => 'Hash', 'active' => true],
-                 ['url' => '#', 'title' => 'Hash', 'active' => true],
-                 ['url' => '#', 'title' => '# Hash', 'active' => true],
-                 ['url' => '#', 'title' => '#Hash', 'active' => true, 'menu'=>[
-                    ['url' => '#', 'title' => 'Hash', 'active' => true],
-                    ['url' => '#', 'title' => '# Hash', 'active' => true],
-                    ['url' => '#', 'title' => '#Hash', 'active' => true],
-                 ]],
-                 ['url' => '#', 'title' => 'Hash', 'active' => true],
+                ['url' => '#', 'title' => '# Hash', 'active' => true],
+                ['url' => '#', 'title' => '#Hash', 'active' => true],
+            ]],
+            ['url' => '#', 'title' => 'Hash', 'active' => true],
         ];
 
         // _plugin?App::PLUGINS : ....
@@ -62,13 +62,22 @@ class Controller
     static function error($result, $code)
     {
         $ctx = new ViewContext();
-        
+
         return new ErrorResult($ctx, $result, $code);
     }
 
     static function data($result)
     {
         return new DataResult($result);
+    }
+
+    function name(): string
+    {
+        return $this->_name;
+    }
+    function plugin(): string
+    {
+        return $this->_plugin;
     }
 }
 
@@ -130,17 +139,17 @@ class ViewResult extends ResultBase implements IViewResult
         $this->_plugin = $plugin;
     }
 
-    function view() : string
+    function view(): string
     {
         return $this->_view;
     }
 
-    function plugin() : string
+    function plugin(): string
     {
         return $this->_plugin;
     }
 
-    function ctx() : ViewContext
+    function ctx(): ViewContext
     {
         return $this->_ctx;
     }

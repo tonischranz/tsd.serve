@@ -2,6 +2,8 @@
 
 namespace tsd\serve;
 
+use ReflectionMethod;
+use ReflectionClass;
 /**
  * The Router
  * 
@@ -71,18 +73,16 @@ class Router
             return new NoRoute();
         }
 
-        for ($i = 0; $i < $cutoff; $i++) \array_shift($parts);
-        $methodPath = \implode('/', $parts);
+        for ($i = 0; $i < $cutoff; $i++) array_shift($parts);
+        $methodPath = implode('/', $parts);
 
         $params = [];
         $prefix = $method == 'POST' ? 'do' : ($method == 'GET' ? 'show' : $method);
 
         $methodName = $this->getMethodName($methodPath, $prefix, $params);
 
-        $rc = new \ReflectionClass($c);
+        $rc = new ReflectionClass($c);
 
-        //echo "<br>trying $methodName on <br>";
-        //var_dump ($c);
         $mi = $this->getMethodInfo($rc, $methodName);
 
         if (!$mi) {
@@ -119,7 +119,7 @@ class Router
         return $method == 'POST' ? new PostRoute($c, $mi, $params) : ($method == 'GET' ? new GetRoute($c, $mi, $params) : false);
     }
 
-    private static function getMethodName(string $methodPath, string $prefix, array &$params, array &$pathAlternatives = null)
+    public static function getMethodName(string $methodPath, string $prefix, array &$params, array &$pathAlternatives = null): string
     {
         $parts = explode('/', $methodPath);
         $methodName = $prefix;
@@ -171,9 +171,9 @@ class Router
         return $methodName;
     }
 
-    private static function getMethodInfo(\ReflectionClass $rc, string $name)
+    private static function getMethodInfo(ReflectionClass $rc, string $name)
     {
-        $m = $rc->getMethods(\ReflectionMethod::IS_PUBLIC);
+        $m = $rc->getMethods(ReflectionMethod::IS_PUBLIC);
         $n = strtolower($name);
 
         foreach ($m as $mi) {
@@ -184,7 +184,7 @@ class Router
         return false;
     }
 
-    private function createController(string $name, string $plugin = '') //, string $namespace = '')
+    private function createController(string $name, string $plugin = '')
     {
         //$path = $plugin ? (App::PLUGINS . "/$plugin") : '.';
         $path = $plugin ? '.' . App::PLUGINS . DIRECTORY_SEPARATOR . $plugin . DIRECTORY_SEPARATOR . Router::CONTROLLER : '.' . Router::CONTROLLER;
@@ -204,8 +204,6 @@ class Router
         $ctx->plugin = $plugin;
 
         $c = $this->factory->create($ctrlName, $name, $ctx);
-        /*$c->name = $name;
-        $c->basePath = $path;*/
 
         return $c;
     }
@@ -218,7 +216,7 @@ abstract class Route
     private $methodInfo;
     protected $data;
 
-    function __construct(Controller $controller, \ReflectionMethod $methodInfo, array $data)
+    function __construct(Controller $controller, ReflectionMethod $methodInfo, array $data)
     {
         $this->controller = $controller;
         $this->methodInfo = $methodInfo;
@@ -271,7 +269,7 @@ abstract class Route
 
 class GetRoute extends Route
 {
-    function __construct(Controller $c, \ReflectionMethod $mi, array $data)
+    function __construct(Controller $c, ReflectionMethod $mi, array $data)
     {
         parent::__construct($c, $mi, $data);
     }
@@ -285,7 +283,7 @@ class GetRoute extends Route
 
 class PostRoute extends Route
 {
-    function __construct(Controller $c, \ReflectionMethod $mi, array $params)
+    function __construct(Controller $c, ReflectionMethod $mi, array $params)
     {
         parent::__construct($c, $mi, $params);
     }
@@ -299,11 +297,11 @@ class PostRoute extends Route
 class NoRoute extends Route
 {
     function __construct()
-    {        
+    {
     }
 
     function fill(array $data)
-    {        
+    {
     }
 
     function follow()
