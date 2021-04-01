@@ -162,6 +162,7 @@ class ServeViewEngine extends ViewEngine
             //cache
             $md5 = $v->md5();
             $view_file = ServeViewEngine::CACHED_DIR . DIRECTORY_SEPARATOR . "$key.$md5.php";
+            array_map('unlink', glob(ServeViewEngine::CACHED_DIR . DIRECTORY_SEPARATOR . "$key.*.php"));
             file_put_contents($view_file, $to);
             ServeViewEngine::$cached_views[$key] = [$md5, time()];
             ServeViewEngine::writeCacheFile();
