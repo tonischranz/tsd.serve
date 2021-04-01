@@ -102,7 +102,7 @@ class App
             $result = $e;
         }
 
-        $this->view_engine->render($result, $accept);
+        $this->view_engine->render($result, $route->ctx(), $accept);
     }
 
     /**
@@ -122,6 +122,14 @@ class App
 
         return $route->follow();
     }
+}
+
+class ViewContext
+{
+    public array $menu;
+    public array $member;
+    public string $layoutPlugin = '';
+    public string $title;
 }
 
 class Exception extends \Exception

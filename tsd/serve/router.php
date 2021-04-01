@@ -27,6 +27,7 @@ class Router
 
     function getRoute(string $host, string $method, string $path)
     {
+        $ctx = new ViewContext;
         $parts = explode('/', $path);
 
         $cutoff = 1;
@@ -34,7 +35,7 @@ class Router
         $name = count($parts) > 1 ? $parts[1] : 'default';
 
 
-        if ($name == 'admin') {
+        /*if ($name == 'admin') {
             $plugin = $parts[2];
             $name = count($parts) > 3 ? $parts[3] : 'default';
             $cutoff += 3;
@@ -45,7 +46,12 @@ class Router
             }
 
             $c = $this->createController($name, $plugin);
-        } else if (in_array($name, $this->plugins)) {
+        } else */
+
+        //todo:check for domains, set layoutplugin, plugin
+        //todo:check for plugin/plugin stuff
+
+        if (in_array($name, $this->plugins)) {
             $plugin = $name;
             $name = count($parts) > 2 ? $parts[2] : 'default';
             $cutoff += 2;
@@ -70,7 +76,7 @@ class Router
         }
 
         if (!$c) {
-            return new NoRoute();
+            return new NoRoute($ctx);
         }
 
         for ($i = 0; $i < $cutoff; $i++) array_shift($parts);
@@ -116,7 +122,7 @@ class Router
             }
         }
 
-        return $method == 'POST' ? new PostRoute($c, $mi, $params) : ($method == 'GET' ? new GetRoute($c, $mi, $params) : false);
+        return $method == 'POST' ? new PostRoute($c, $mi, $ctx, $params) : ($method == 'GET' ? new GetRoute($c, $mi, $ctx, $params) : false);
     }
 
     public static function getMethodName(string $methodPath, string $prefix, array &$params, array &$pathAlternatives = null): string
@@ -186,7 +192,6 @@ class Router
 
     private function createController(string $name, string $plugin = '')
     {
-        //$path = $plugin ? (App::PLUGINS . "/$plugin") : '.';
         $path = $plugin ? '.' . App::PLUGINS . DIRECTORY_SEPARATOR . $plugin . DIRECTORY_SEPARATOR . Router::CONTROLLER : '.' . Router::CONTROLLER;
 
         $fileName = $path . DIRECTORY_SEPARATOR . $name . '.php';
@@ -212,12 +217,14 @@ class Router
 
 abstract class Route
 {
-    private $controller;
-    private $methodInfo;
+    private Controller $controller;
+    private ReflectionMethod $methodInfo;
+    private ViewContext $ctx;
     protected $data;
 
-    function __construct(Controller $controller, ReflectionMethod $methodInfo, array $data)
+    function __construct($controller, $methodInfo, ViewContext $ctx, array $data)
     {
+        $this->ctx = $ctx;
         $this->controller = $controller;
         $this->methodInfo = $methodInfo;
         $this->data = $data;
@@ -265,13 +272,18 @@ abstract class Route
 
         return $authorized;
     }
+
+    function ctx() : ViewContext
+    {
+        return $this->ctx;
+    }
 }
 
 class GetRoute extends Route
 {
-    function __construct(Controller $c, ReflectionMethod $mi, array $data)
+    function __construct(Controller $c, ReflectionMethod $mi, ViewContext $ctx, array $data)
     {
-        parent::__construct($c, $mi, $data);
+        parent::__construct($c, $mi, $ctx, $data);
     }
 
     function fill(array $data)
@@ -283,9 +295,9 @@ class GetRoute extends Route
 
 class PostRoute extends Route
 {
-    function __construct(Controller $c, ReflectionMethod $mi, array $params)
+    function __construct(Controller $c, ReflectionMethod $mi, ViewContext $ctx, array $params)
     {
-        parent::__construct($c, $mi, $params);
+        parent::__construct($c, $mi, $ctx, $params);
     }
 
     function fill(array $data)
@@ -296,8 +308,9 @@ class PostRoute extends Route
 
 class NoRoute extends Route
 {
-    function __construct()
+    function __construct(ViewContext $ctx)
     {
+        parent::__construct(null, null, $ctx, array());
     }
 
     function fill(array $data)

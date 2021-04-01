@@ -23,35 +23,13 @@ class Controller
             else if (\preg_match('/^do/', $view) == 1) $view = \strtolower(\substr($view, 2));
         }
 
-        $ctx = new ViewContext();
-        $ctx->menu = [
-            ['url' => '#', 'title' => 'Hash', 'active' => true],
-            ['url' => '~', 'title' => 'Tilde', 'tags' => ['home', 'userdir', 'private'], 'emblems' => ['~']],
-            ['url' => 'info', 'title' => '⚒Info', 'emblems' => ['ℹ']],
-            ['url' => '#', 'title' => 'Hash', 'active' => true],
-            ['url' => '#', 'title' => 'Hash', 'active' => true],
-            ['url' => '#', 'title' => 'Hash', 'active' => true],
-            ['url' => '#', 'title' => 'Hash', 'active' => true],
-            ['url' => '#', 'title' => '# Hash', 'active' => true],
-            ['url' => '#', 'title' => '#Hash', 'active' => true, 'menu' => [
-                ['url' => '#', 'title' => 'Hash', 'active' => true],
-                ['url' => '#', 'title' => '# Hash', 'active' => true],
-                ['url' => '#', 'title' => '#Hash', 'active' => true],
-            ]],
-            ['url' => '#', 'title' => 'Hash', 'active' => true],
-        ];
+        return new ViewResult($this->_name . DIRECTORY_SEPARATOR . $view, $data, $this->_plugin);
 
-        // _plugin?App::PLUGINS : ....
-
-        return new ViewResult($this->_name . DIRECTORY_SEPARATOR . $view, $data, $this->_plugin, $ctx);
-
-        //return new ViewResult($this->basePath . '/views/' . $this->name . "/$view", $data, $ctx);
     }
 
     protected function message(string $message, ?string $url = null)
     {
-        $ctx = new ViewContext();
-        return new MessageResult($ctx, "info", $message, $url);
+        return new MessageResult('info', $message, $url);
     }
 
     protected function redirect($url)
@@ -61,9 +39,7 @@ class Controller
 
     static function error($result, $code)
     {
-        $ctx = new ViewContext();
-
-        return new ErrorResult($ctx, $result, $code);
+        return new ErrorResult($result, $code);
     }
 
     static function data($result)
@@ -128,13 +104,11 @@ class RedirectResult extends ResultBase
 class ViewResult extends ResultBase implements IViewResult
 {
     private string $_view;
-    private ViewContext $_ctx;
     private string $_plugin;
 
-    function __construct(string $view, $data, string $plugin = '', ViewContext $ctx = null, $statuscode = 200)
+    function __construct(string $view, $data, string $plugin = '', $statuscode = 200)
     {
         parent::__construct($data, $statuscode);
-        $this->_ctx = $ctx ?? new ViewContext();
         $this->_view = $view;
         $this->_plugin = $plugin;
     }
@@ -148,34 +122,29 @@ class ViewResult extends ResultBase implements IViewResult
     {
         return $this->_plugin;
     }
-
-    function ctx(): ViewContext
-    {
-        return $this->_ctx;
-    }
 }
 
 class MessageResult extends ViewResult
 {
-    function __construct(ViewContext $ctx, $type, $message, $code = 200, $url = null)
+    function __construct($type, $message, $code = 200, $url = null)
     {
-        parent::__construct($type, ["message" => $message, "url" => $url], '', $ctx, $code);
+        parent::__construct($type, ["message" => $message, "url" => $url], '', $code);
     }
 }
 
 class ErrorResult extends MessageResult
 {
-    function __construct(ViewContext $ctx, $message, int $code = 500)
+    function __construct($message, int $code = 500)
     {
-        parent::__construct($ctx, 'error', $message, $code);
+        parent::__construct('error', $message, $code);
     }
 }
 
 class SucessResult extends MessageResult
 {
-    function __construct(ViewContext $ctx, $message, $url = null)
+    function __construct($message, $url = null)
     {
-        parent::__construct($ctx, 'sucess', $message, 200, $url);
+        parent::__construct('sucess', $message, 200, $url);
     }
 }
 

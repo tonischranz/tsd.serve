@@ -13,7 +13,7 @@ use DOMXPath;
  */
 abstract class ViewEngine
 {
-    function render($result, $accept)
+    function render($result, ViewContext $ctx, string $accept)
     {
         if ($result instanceof AccessDeniedException) $result = Controller::error($result, 403);
         if ($result instanceof NotFoundException) $result = Controller::error($result, 404);
@@ -33,13 +33,13 @@ abstract class ViewEngine
 
         if ($result instanceof ViewResult) {
             try {
-                $this->renderView($result);
+                $this->renderView($result, $ctx);
             } catch (\Exception $e) {
                 http_response_code(500);
-                $this->renderView(Controller::error($e->getMessage(), 500));
+                $this->renderView(Controller::error($e->getMessage(), 500), $ctx);
             } catch (\Error $e) {
                 http_response_code(500);
-                $this->renderView(Controller::error($e->getMessage(), 500));
+                $this->renderView(Controller::error($e->getMessage(), 500), $ctx);
             }
         }
     }
@@ -56,25 +56,15 @@ abstract class ViewEngine
         echo $result->data()->asXML();
     }
 
-    protected abstract function renderView(IViewResult $result);
+    protected abstract function renderView(IViewResult $result, ViewContext $ctx);
 }
 
 interface IViewResult
 {
     function view(): string;
     function plugin(): string;
-    function ctx(): ViewContext;
     function data();
 }
-
-class ViewContext
-{
-    public $menu;
-    public $error;
-    public $member;
-    public $title;
-}
-
 
 
 /**
@@ -105,15 +95,15 @@ class ServeViewEngine extends ViewEngine
         file_put_contents(ServeViewEngine::CACHED_VIEWS, '];', FILE_APPEND);
     }
 
-    function renderView(IViewResult $result)
+    function renderView(IViewResult $result, ViewContext $ctx)
     {
         $plugin = $result->plugin();
         $view = $result->view();
-        $key = $plugin ? $plugin . '-' . str_replace('/', '.', $view) : str_replace('/', '.', $view);
+        $layoutPlugin = $ctx->layoutPlugin;
+        $key = "$layoutPlugin-$plugin-" . str_replace('/', '.', $view);
         $cached_view = '';
         $view_file = '';
         $v = null;
-        $ctx = $result->ctx();
         
         if (array_key_exists($key, ServeViewEngine::$cached_views)) {
             $md5 = ServeViewEngine::$cached_views[$key][0];
