@@ -215,20 +215,18 @@ else
                 install_serve();
             }
         }
+        
+        $cfg = json_decode(file_get_contents(CONFIG_FILE), true);
+
+        if (file_exists(SERVE_FILE) && @$cfg['clean']['serve_md5'])
+        {
+            $md5 = md5_file($serve_url);
+            $update_available = $cfg['clean']['serve_md5'] != $md5;
+        }  
         else
         {
-            if (file_exists(SERVE_FILE) && @$cfg['clean']['serve_md5'])
-            {
-                $md5 = md5_file($serve_url);
-                $cfg = json_decode(file_get_contents(CONFIG_FILE), true);
-                
-                $update_available = $cfg['clean']['serve_md5'] != $md5;
-            }
-            else
-            {
-                $not_installed = true;
-            }
-        }
+            $not_installed = true;
+        }        
     }
     else $login = true;
 }
