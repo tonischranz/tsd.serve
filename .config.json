@@ -3,5 +3,6 @@
     "users": {
       "dev": {"groups":["admin", "developer"]}
     }    
-  }
+  },
+  "router": { "domains": { "localhost:8000": "lorem" }}
 }

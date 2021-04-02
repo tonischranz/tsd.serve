@@ -3,7 +3,11 @@
 namespace tsd\serve;
 
 use \ReflectionClass;
-use \ReflectionType;
+use \ReflectionProperty;
+use \RecursiveDirectoryIterator;
+use \RecursiveIteratorIterator;
+use \RegexIterator;
+use \RecursiveRegexIterator;
 
 /**
  * The Factory
@@ -59,7 +63,7 @@ class Factory
         if (!$found) $plugin = '';
         //}
 
-        $t = new \ReflectionClass($type);
+        $t = new ReflectionClass($type);
 
         $config = array_key_exists($name, $this->config) ?
             $this->config[$name] : [];
@@ -81,7 +85,7 @@ class Factory
         return new Injection($t, $plugin, $name, $ctx, $config);
     }
 
-    function getImplementation(\ReflectionClass $type, string &$plugin, string $mode = null)
+    function getImplementation(ReflectionClass $type, string &$plugin, string $mode = null)
     {
         $doc = $type->getDocComment();
         $matches = [];
@@ -89,7 +93,7 @@ class Factory
         //todo: use plugins to search classes
         if (preg_match_all('/@Implementation\s((\w|\\\)*)/', $doc, $matches) > 0) {
             foreach ($matches[1] as $i) {
-                $itype = new \ReflectionClass($i);
+                $itype = new ReflectionClass($i);
 
                 $idoc = $itype->getDocComment();
                 $imatches = [];
@@ -108,9 +112,9 @@ class Factory
         }
 
         foreach ($this->plugins as $p) {
-            $Directory = new \RecursiveDirectoryIterator('.'.App::PLUGINS . "/$p/src");
-            $Iterator = new \RecursiveIteratorIterator($Directory);
-            $Regex = new \RegexIterator($Iterator, '/^.+\.php$/i', \RecursiveRegexIterator::GET_MATCH);
+            $Directory = new RecursiveDirectoryIterator('.'.App::PLUGINS . "/$p/src");
+            $Iterator = new RecursiveIteratorIterator($Directory);
+            $Regex = new RegexIterator($Iterator, '/^.+\.php$/i', RecursiveRegexIterator::GET_MATCH);
 
             foreach ($Regex as $r) {
                 $c = file_get_contents($r, false, null, 0, 100);
@@ -140,12 +144,17 @@ class Factory
             }
         }
     }
+
+    function plugins() : array
+    {
+        return $this->plugins;
+    }
 }
 
 
 class Injection
 {
-    private \ReflectionClass $type;
+    private ReflectionClass $type;
 
     private ?InjectionContext $ctx;
 
@@ -156,7 +165,7 @@ class Injection
     private string $name;
 
 
-    function __construct(\ReflectionClass $type, string $plugin, string $name, ?InjectionContext $ctx, array $config = [])
+    function __construct(ReflectionClass $type, string $plugin, string $name, ?InjectionContext $ctx, array $config = [])
     {
         $this->name = $name;
         $this->type = $type;
@@ -181,13 +190,17 @@ class Injection
             if ($p->isArray() && $p->name == '_config' && $this->name)
                 $args[] = $this->config;
             else if ($p->hasType() && !$p->isArray() && !$p->getType()->isBuiltIn()) {
-                $args[] = $factory->create($p->getType()->getName(), $p->getName(), $myctx);
+                $name = $p->getType()->getName();
+                if ($name == 'tsd\serve\Factory') $args[] = $factory;
+                else $args[] = $factory->create($name, $p->getName(), $myctx);
             } else if (isset($this->config[$p->name]))
                 $args[] = $this->config[$p->name];
             else if ($p->name == '_name')
                 $args[] = $this->name;
             else if ($p->name == '_plugin')
                 $args[] = $ctx->plugin;
+            else if ($p->name == '_plugins')
+                $args[] = $factory->plugins();
             else if ($p->name == '_fullname')
                 $args[] = $myctx->fullname;
             else if ($p->isDefaultValueAvailable())
@@ -198,8 +211,8 @@ class Injection
         $obj = new $type(...$args);
 
         foreach ($this->type->getProperties($args ? 
-            \ReflectionProperty::IS_PUBLIC | \ReflectionProperty::IS_PROTECTED : 
-            \ReflectionProperty::IS_PUBLIC | \ReflectionProperty::IS_PROTECTED | \ReflectionProperty::IS_PRIVATE)
+            ReflectionProperty::IS_PUBLIC | ReflectionProperty::IS_PROTECTED : 
+            ReflectionProperty::IS_PUBLIC | ReflectionProperty::IS_PROTECTED | ReflectionProperty::IS_PRIVATE)
              as $p) {
             unset($val);
 

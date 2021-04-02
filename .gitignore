@@ -1,2 +1,4 @@
 .ht*
 .cached_*
+/info.php
+/test.php

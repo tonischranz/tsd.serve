@@ -42,7 +42,7 @@ class App
 
         $factory = new Factory($config, $plugins);
 
-        $this->router = new Router($factory, $plugins);
+        $this->router = $factory->create('tsd\serve\Router', 'router');
         $this->member = $factory->create('tsd\serve\Membership', 'member');
         $this->view_engine = $factory->create('tsd\serve\ViewEngine', 'views');
     }

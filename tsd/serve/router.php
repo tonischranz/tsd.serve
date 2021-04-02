@@ -17,12 +17,12 @@ class Router
     const CONTROLLER = 'controller';
 
     private $factory;
-    private $plugins;
-
-    function __construct(Factory $factory, array $plugins)
+    private $_plugins;
+    
+    function __construct(Factory $factory, array $_plugins)
     {
         $this->factory = $factory;
-        $this->plugins = $plugins;
+        $this->_plugins = $_plugins;
     }
 
     function getRoute(string $host, string $method, string $path)
@@ -51,7 +51,7 @@ class Router
         //todo:check for domains, set layoutplugin, plugin
         //todo:check for plugin/plugin stuff
 
-        if (in_array($name, $this->plugins)) {
+        if (in_array($name, $this->_plugins)) {
             $plugin = $name;
             $name = count($parts) > 2 ? $parts[2] : 'default';
             $cutoff += 2;
