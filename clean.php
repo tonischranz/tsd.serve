@@ -77,28 +77,30 @@ function get_serve()
 
     $dir = "serve.$md5/" . SERVE_REPO . '-' . SERVE_BRANCH . '/tsd/serve/';
 
-    $files = array_slice(scandir($dir),2);
+    $files = glob($dir.DIRECTORY_SEPARATOR.'*.php');
 
     file_put_contents(SERVE_FILE, ["<?php\n", "namespace tsd\serve;\n"]);
     $uses = array();
     foreach ($files as $f)
     {
-        $lines = file("$dir/$f");
+        $lines = file($f);
         $before_class = true;
         foreach ($lines as $l)
         {
             if ($before_class)
             {
-                if (preg_match('/^<?php', $l)) continue;
-                if (preg_match('/^\s*$', $l)) continue;
-                if (preg_match('/^\s*namespace\s', $l)) continue;
-                if (preg_match('/^\s*use\s', $l))
+                if (preg_match('/^<\?php/', $l)) continue;
+                if (preg_match('/^\s*namespace\s/', $l)) continue;
+                if (preg_match('/^\s*use\s/', $l))
                 {
                     $lt = trim($l);
                     if (in_array($lt, $uses)) continue;
                     else $uses[]=$lt;
                 }
+                if (preg_match('/^\s*(abstract\s)?class\s/', $l)) $before_class = false;
+                if (preg_match('/^\s*interface\s/', $l)) $before_class = false;
             }
+            if (preg_match('/^\s*$/', $l)) continue;
 
             file_put_contents(SERVE_FILE, $l, FILE_APPEND);
         }

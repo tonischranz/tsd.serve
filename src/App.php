@@ -19,6 +19,7 @@ class App
      */
     const PLUGINS = 'plugins';
 
+    public static array $plugins = [];
 
     private Router $router;
 
@@ -38,12 +39,49 @@ class App
         else
             $config = [];
 
-        $plugins = scandir('.'.App::PLUGINS);
+        $stats = '';
+        $pdirs = glob('.' . App::PLUGINS . DIRECTORY_SEPARATOR . '*', GLOB_ONLYDIR);
+        foreach ($pdirs as $pd) $stats .= stat($pd)['mtime'];
+        $pfiles = glob('.' . App::PLUGINS . DIRECTORY_SEPARATOR . '*' . DIRECTORY_SEPARATOR . 'plugin.json');
+        foreach ($pfiles as $pf) $stats .= stat($pf)['mtime'];
+        $md5 = md5($stats);
 
-        $factory = new Factory($config, $plugins);
+        $cache_file = ".cached_plugins.$md5.php";
+        if (file_exists($cache_file)) include $cache_file;
+        else {
+            foreach ($pdirs as $pd) App::$plugins[basename($pd)] = true;
+            foreach ($pfiles as $pf) {
+                $i = json_decode(file_get_contents($pf), true);
+                $n = basename(dirname($pf));
+                App::$plugins[$n] = [];
+                if (@$i['namespace']) App::$plugins[$n]['namespace'] = $i['namespace'];
+                if (@$i['forceLayout']) App::$plugins[$n]['forceLayout'] = $i['forceLayout'];
+                if (@$i['usePrefix']) App::$plugins[$n]['usePrefix'] = $i['usePrefix'];
+            }
+
+            array_map('unlink', glob(".cached_plugins.*.php"));
+            file_put_contents($cache_file, ["<?php\n", "use tsd\serve\App;\n", 'App::$plugins = [']);
+
+            foreach (App::$plugins as $k => $v) {
+                file_put_contents($cache_file, "'$k'=>", FILE_APPEND);
+                if (is_bool($v)) file_put_contents($cache_file, "$v,", FILE_APPEND);
+                else {
+                    file_put_contents($cache_file, '[', FILE_APPEND);
+                    if (@$v['namespace']) file_put_contents($cache_file, "'namespace'=>'" . $v['namespace'] . "',", FILE_APPEND);
+                    if (@$v['forceLayout']) file_put_contents($cache_file, "'forceLayout'=>" . $v['forceLayout'] . ',', FILE_APPEND);
+                    if (@$v['usePrefix']) file_put_contents($cache_file, "'usePrefix'=>" . $v['usePrefix'] . ',', FILE_APPEND);
+                    file_put_contents($cache_file, '],', FILE_APPEND);
+                }
+            }
+
+            file_put_contents($cache_file, '];', FILE_APPEND);
+        }
+
+
+        $factory = new Factory($config, App::$plugins);
 
         $this->router = $factory->create('tsd\serve\Router', 'router');
-        $this->member = $factory->create('tsd\serve\Membership', 'member');
+        $this->member = $factory->createSingleton('tsd\serve\Membership', 'member');
         $this->view_engine = $factory->create('tsd\serve\ViewEngine', 'views');
     }
 

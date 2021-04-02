@@ -3,19 +3,12 @@
 namespace tsd\serve\config;
 
 use tsd\serve\Controller;
-use tsd\serve\model\Config;
+use tsd\serve\config\Config;
 
 class defaultController extends Controller
 {
 
-  private $cfg;
-
-  function __construct ()
-  {
-    parent::__construct ();
-
-    $this->cfg = new Config();
-  }
+  private Config $cfg;
 
   function showIndex ()
   {
@@ -24,7 +17,7 @@ class defaultController extends Controller
     $db = $c->getDBConfig ();
     $lang = $c->getLanguages ();
 
-    $this->render ('index', ['db' => $db, 'lang' => $lang]);
+    $this->view (['db' => $db, 'lang' => $lang]);
   }
 
   /**
@@ -50,7 +43,7 @@ class defaultController extends Controller
     $l[] = $lang;
     $c->setLanguages ($l);
 
-    $this->message ();
+    $this->message ("");
   }
 
   function doRemoveLanguage ($lang)
@@ -68,17 +61,12 @@ class defaultController extends Controller
 
     $x = array_search ($lang, $l);
 
-    if ($x == 0)
-      $this->error ();
-    if (!$x)
-      $this->error ();
-
     $p = $l[$x - 1];
     $l[$x - 1] = $l[$x];
     $l[$x] = $p;
     $c->setLanguages ($l);
 
-    $this->message ();
+    $this->message ("");
   }
 
   function doMoveLanguageDown ($lang)
@@ -89,16 +77,16 @@ class defaultController extends Controller
     $x = array_search ($lang, $l);
 
     if (!$x)
-      $this->error ();
+      $this->error ("", 200);
     if ($x > (count ($l) - 2))
-      $this->error ();
+      $this->error ("", 500);
 
     $p = $l[$x + 1];
     $l[$x + 1] = $l[$x];
     $l[$x] = $p;
     $c->setLanguages ($l);
 
-    $this->message ();
+    $this->message ("");
   }
 
 }

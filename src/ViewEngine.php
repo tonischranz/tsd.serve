@@ -8,9 +8,6 @@ use \DOMNode;
 use \DOMText;
 use \DOMXPath;
 
-/**
- * @Implementation tsd\serve\ServeViewEngine
- */
 abstract class ViewEngine
 {
     function render($result, ViewContext $ctx, string $accept)
@@ -58,14 +55,6 @@ abstract class ViewEngine
 
     protected abstract function renderView(IViewResult $result, ViewContext $ctx);
 }
-
-interface IViewResult
-{
-    function view(): string;
-    function plugin(): string;
-    function data();
-}
-
 
 /**
  * @Default

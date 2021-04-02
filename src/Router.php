@@ -17,12 +17,10 @@ class Router
     const CONTROLLER = 'controller';
 
     private $factory;
-    private $_plugins;
     
-    function __construct(Factory $factory, array $_plugins)
+    function __construct(Factory $factory)
     {
         $this->factory = $factory;
-        $this->_plugins = $_plugins;
     }
 
     function getRoute(string $host, string $method, string $path)
@@ -34,24 +32,10 @@ class Router
 
         $name = count($parts) > 1 ? $parts[1] : 'default';
 
-
-        /*if ($name == 'admin') {
-            $plugin = $parts[2];
-            $name = count($parts) > 3 ? $parts[3] : 'default';
-            $cutoff += 3;
-
-            if (!$name) {
-                $name = 'default';
-                $cutoff--;
-            }
-
-            $c = $this->createController($name, $plugin);
-        } else */
-
         //todo:check for domains, set layoutplugin, plugin
         //todo:check for plugin/plugin stuff
 
-        if (in_array($name, $this->_plugins)) {
+        if (array_key_exists($name, App::$plugins)) {
             $plugin = $name;
             $name = count($parts) > 2 ? $parts[2] : 'default';
             $cutoff += 2;
@@ -67,6 +51,7 @@ class Router
                 $c = $this->createController('default', $plugin);
                 $cutoff--;
             }
+            if (!$c) $plugin='';
         } else {
             $c = $this->createController($name);
         }

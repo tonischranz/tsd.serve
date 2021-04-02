@@ -1,6 +1,6 @@
 <?php
-/*
-namespace tsd\serve\model;
+
+namespace tsd\serve\config;
 
 class Config
 {

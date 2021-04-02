@@ -6,26 +6,8 @@ use tsd\serve\App;
  * Main PHP File
  */
 
-// Autoload with default settings
-spl_autoload_register();
-
-// Autoload from Composer
-# include 'vendor/autoload.php';
-
-
-
-// Having issues? wanna check your php env?
-# phpinfo();
-
 // wanna see errors?
 ini_set('display_errors', 'On');
-
-// type autoloading issues?
-# function trace_autoload($name) {var_dump ($name);}
-# spl_autoload_register('trace_autoload', true, true);
-
-# function fail_autoload($name){echo "Not Found: $name <br />";}
-# spl_autoload_register('fail_autoload');
 
 if (PHP_SAPI == 'cli') {
     if ($argc == 1) {
@@ -35,6 +17,11 @@ if (PHP_SAPI == 'cli') {
         echo "\n";
     }
 } else {
+
+    spl_autoload_register(function($name){
+        $parts = explode('\\', $name);
+        if (count($parts) == 3 && $parts[0] == 'tsd' && $parts[1] == 'serve') include 'src' . DIRECTORY_SEPARATOR . $parts[2] . '.php';
+    });
 
     $url = $_SERVER['REQUEST_URI'];
 

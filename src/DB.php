@@ -6,7 +6,6 @@ namespace tsd\serve;
  * CRUD interaction with a SQL database
  *
  * @author Toni Schhranz
- * @Implementation tsd\serve\MysqlDB
  */
 
 interface DB

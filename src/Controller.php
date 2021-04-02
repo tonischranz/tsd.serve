@@ -12,6 +12,7 @@ class Controller
 
     protected string $_name;
     protected string $_plugin;
+    protected Membership $_member;
 
     protected function view($data = null, string $view = null)
     {
@@ -24,7 +25,6 @@ class Controller
         }
 
         return new ViewResult($this->_name . DIRECTORY_SEPARATOR . $view, $data, $this->_plugin);
-
     }
 
     protected function message(string $message, ?string $url = null)
@@ -55,6 +55,26 @@ class Controller
     {
         return $this->_plugin;
     }
+}
+
+class LoginController extends Controller
+{
+    function showIndex(string $returnUrl)
+    {
+        return $this->view(['returnUrl'=>$returnUrl], 'login');
+    }
+
+    function doIndex(string $username, string $password, string $returnUrl)
+    {
+        if ($this->_member->login($username, $password)) $this->redirect(urldecode($returnUrl));
+
+        $this->view(['returnUrl'=>$returnUrl, 'error'=>true], 'login');
+    }
+}
+
+class StaticController
+{
+
 }
 
 interface Result
