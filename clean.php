@@ -217,7 +217,7 @@ else
         }
         else
         {
-            if (file_exists(SERVE_FILE))
+            if (file_exists(SERVE_FILE) && @$cfg['clean']['serve_md5'])
             {
                 $md5 = md5_file($serve_url);
                 $cfg = json_decode(file_get_contents(CONFIG_FILE), true);
