@@ -86,7 +86,7 @@ class MysqlDB implements DB
                 if ($v[0] == '!') {
                     if (\is_null($v[1])) $params[] = "$k IS NOT NULL";
                     else if (\is_int($v[1]) || \is_float($v[1])) $params[] = "$k!={$v[1]}";
-                    else if (\is_string($v[1])) $params[] = "$k='" . \mysqli_escape_string(DB::$con, $v[1]) . "'";
+                    else if (\is_string($v[1])) $params[] = "$k='" . \mysqli_escape_string($this->_con, $v[1]) . "'";
                 }
             } else if (\is_string($v)) $params[] = "$k='" . \mysqli_escape_string($this->con, $v) . "'";
         }

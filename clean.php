@@ -2,8 +2,15 @@
 
 const CONFIG_FILE = '.config.json';
 const SERVE_FILE = '.tsd.serve.php';
-const SERVE_URL = 'https://tsd.ovh/serve';
-const ADMIN_URL = 'https://github.com/tonischranz/serve.admin/archive/master.zip'; // https://tsd.ovh/serve.admin
+
+const SERVE_BASE = 'https://github.com/tonischranz';
+const SERVE_REPO = 'tsd.serve';
+const SERVE_BRANCH = 'next';
+const ADMIN_REPO = 'serve.admin';
+const ADMIN_BRANCH = 'master';
+
+$serve_url = SERVE_BASE . '/' . SERVE_REPO . '/archive/' . SERVE_BRANCH .'.zip';
+$admin_url = SERVE_BASE . '/' . ADMIN_REPO . '/archive/' . ADMIN_BRANCH .'.zip';
 
 function rrmdir($dir) { 
     if (is_dir($dir)) { 
@@ -46,10 +53,12 @@ function install_serve($modules)
 
 function get_serve()
 {
-    $md5 = md5_file(SERVE_URL);
+    global $serve_url;
+
+    $md5 = md5_file($serve_url);
 
     $z = "serve.$md5.zip";
-    $h = fopen(SERVE_URL, 'rb');
+    $h = fopen($serve_url, 'rb');
     $o = fopen($z, 'wb');
 
     while ($h && $o && !feof($h))
@@ -66,12 +75,33 @@ function get_serve()
     $zip->extractTo("serve.$md5");
     $zip->close();
 
-    $files = array_slice(scandir("serve.$md5/tsd.serve-master/tsd/serve/"),2);
+    $dir = "serve.$md5/" . SERVE_REPO . '-' . SERVE_BRANCH . '/tsd/serve/';
+
+    $files = array_slice(scandir($dir),2);
 
     file_put_contents(SERVE_FILE, ["<?php\n", "namespace tsd\serve;\n"]);
+    $uses = array();
     foreach ($files as $f)
     {
-        file_put_contents(SERVE_FILE, array_slice(file("serve.$md5/tsd.serve-master/tsd/serve/$f"), 4), FILE_APPEND);
+        $lines = file("$dir/$f");
+        $before_class = true;
+        foreach ($lines as $l)
+        {
+            if ($before_class)
+            {
+                if (preg_match('/^<?php', $l)) continue;
+                if (preg_match('/^\s*$', $l)) continue;
+                if (preg_match('/^\s*namespace\s', $l)) continue;
+                if (preg_match('/^\s*use\s', $l))
+                {
+                    $lt = trim($l);
+                    if (in_array($lt, $uses)) continue;
+                    else $uses[]=$lt;
+                }
+            }
+
+            file_put_contents(SERVE_FILE, $l, FILE_APPEND);
+        }
     }
 
     $cfg = json_decode(file_get_contents(CONFIG_FILE), true);
@@ -265,7 +295,7 @@ else
                 <input type="text" name="username" placeholder="username" required />
             </div>
             <div>
-                <input type="password" name="pw" placeholder="password" required />
+                <input type="password" name="pw" placeholder="password" />
             </div>
             <div class="right">
                 <button type="submit" name="action" value="login">login</button>

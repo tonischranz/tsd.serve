@@ -2,11 +2,11 @@
 
 namespace tsd\serve;
 
-use DOMDocument;
-use DOMElement;
-use DOMNode;
-use DOMText;
-use DOMXPath;
+use \DOMDocument;
+use \DOMElement;
+use \DOMNode;
+use \DOMText;
+use \DOMXPath;
 
 /**
  * @Implementation tsd\serve\ServeViewEngine

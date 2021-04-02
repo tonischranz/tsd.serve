@@ -23,6 +23,8 @@ class Factory
     {
         $this->config = $config;
         $this->plugins = $plugins;
+
+        var_dump(get_included_files());
     }
 
     //function createAll($type, )
