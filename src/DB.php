@@ -55,9 +55,9 @@ class MysqlDB implements DB
 {
     private ?\mysqli $_con = null;
     private string $prefix;
-    public string $host = '';
+    public string $host = 'localhost';
     public string $database = '';
-    public string $username = '';
+    public string $username = 'root';
     public string $password = '';
 
     #region private functions

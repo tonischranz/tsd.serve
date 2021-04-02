@@ -39,14 +39,27 @@ function create_config($username, $pw)
     file_put_contents(CONFIG_FILE, json_encode($config));
 }
 
-function install_serve($modules)
+function update_config()
+{
+    $cfg = json_decode(file_get_contents(CONFIG_FILE), true);
+    
+    if (!@$cfg['clean']['key'])
+    {
+        $key = str_replace('+', '_', base64_encode(random_bytes(128)));
+        $cfg['clean']['key'] = $key;
+        file_put_contents(CONFIG_FILE, json_encode($cfg));
+    }
+}
+
+function install_serve($modules = [])
 {
     get_serve();
 
+    if (file_exists('index.php')) rename ('index.php', 'index.php.orig');
     file_put_contents('index.php', ["<?php\n", 'include \'' . SERVE_FILE . "';\n", "use tsd\serve\App;\n", "return App::serve();\n"]);
 
-    mkdir('.plugins');
-    mkdir('.views');
+    if (!is_dir('.plugins')) mkdir('.plugins');
+    if (!is_dir('.views')) mkdir('.views');
     
     //install modules
 }
@@ -75,7 +88,7 @@ function get_serve()
     $zip->extractTo("serve.$md5");
     $zip->close();
 
-    $dir = "serve.$md5/" . SERVE_REPO . '-' . SERVE_BRANCH . '/tsd/serve/';
+    $dir = "serve.$md5/" . SERVE_REPO . '-' . SERVE_BRANCH . '/src/';
 
     $files = glob($dir.DIRECTORY_SEPARATOR.'*.php');
 
@@ -119,6 +132,9 @@ function get_serve()
 $fresh = !file_exists(CONFIG_FILE);
 $auth = false;
 $login = false;
+$not_installed = false;
+$update_available = false;
+$config_no_key = false;
 
 if ($fresh)
 {
@@ -160,9 +176,16 @@ else
         {
             $username = $_POST['username'];            
             
-            if (@$config['member']['users']["$username"])
+            if (@$config['member']['users'][$username])
             {
-                if (password_verify($_POST['pw'], $config['member']['users']["$username"]['password'])) $auth = true;
+                if (password_verify($_POST['pw'], $config['member']['users'][$username]['password']))
+                {
+                    if (@$config['member']['users'][$username]['groups'])
+                    {
+                        if (in_array('admin', $config['member']['users'][$username]['groups'])) $auth = true;
+                        else $error_insufficient_permissions = true;
+                    }
+                }
                 else $error_bad_password = true;
             }
             else $error_bad_user = true;            
@@ -184,12 +207,27 @@ else
         {
             if ($_POST['action'] == 'update')
             {
-
+                get_serve();
+            }
+            else if ($_POST['action'] == 'install')
+            {
+                if ($config_no_key) update_config();
+                install_serve();
             }
         }
         else
         {
-            //check md5
+            if (file_exists(SERVE_FILE))
+            {
+                $md5 = md5_file($serve_url);
+                $cfg = json_decode(file_get_contents(CONFIG_FILE), true);
+                
+                $update_available = $cfg['clean']['serve_md5'] != $md5;
+            }
+            else
+            {
+                $not_installed = true;
+            }
         }
     }
     else $login = true;
@@ -302,14 +340,52 @@ else
             <div class="right">
                 <button type="submit" name="action" value="login">login</button>
             </div>
+            <div>
+                <?php if (@$error_bad_key): ?><span class="error">bad key, please check it again or use username/password</span><?php endif; ?>
+                <?php if (@$error_bad_password): ?><span class="error">bad username/password, please check it again</span><?php endif; ?>
+                <?php if (@$error_insufficient_permissions): ?><span class="error">you were logged in successfully, but don't have enough permissions</span><?php endif; ?>
+            </div>
         </form>
 
         <?php endif ?>
 
         <?php if ($auth): ?>
 
-        logged in
+        <?php if ($not_installed): ?>
+            <h2>clean install available</h2>
+        <p>
+            Looks like you don't have installed tsd.serve with clean yet. But you do have a config file, maybe from a development environment?
+        </p>
+        <p>
+            You can install it for production purposes with this tool now, if you want.
+        </p>
+        <form method="post" action="<?php echo $_SERVER['PHP_SELF'] ?>">
+            <div class="gap"></div>
+            <div class="right">
+                <button type="submit" name="action" value="install">install</button>
+            </div>
+        </form>
 
+        <?php elseif ($update_available): ?>
+            <h2>update available</h2>
+        <p>
+            There is a new version of tsd.serve available.
+        </p>
+        <form method="post" action="<?php echo $_SERVER['PHP_SELF'] ?>">
+            <div class="gap"></div>
+            <div class="right">
+                <button type="submit" name="action" value="update">install</button>
+            </div>
+        </form>
+
+        <?php else: ?>
+            <h2>tsd.serve is up to date</h2>
+        <p>
+            There is nothing to do.
+        </p>
+                
+        <?php endif ?>
+        
         <?php endif ?>
 
     </div>
