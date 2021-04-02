@@ -78,7 +78,7 @@ class App
         }
 
 
-        $factory = new Factory($config, App::$plugins);
+        $factory = new Factory($config);
 
         $this->router = $factory->create('tsd\serve\Router', 'router');
         $this->member = $factory->createSingleton('tsd\serve\Membership', 'member');

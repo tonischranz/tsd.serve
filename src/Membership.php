@@ -7,6 +7,7 @@ interface Membership
   function isAnonymous(): bool;
   function isInGroup(string $group): bool;
   public function login(string $username, string $password) : bool;
+  public function logout();
 }
 
 /**
@@ -15,6 +16,7 @@ interface Membership
 class DefaulMembership implements Membership
 {
   private Session $_session;
+  private array $users;
 
   public function isAnonymous(): bool
   {
@@ -30,11 +32,12 @@ class DefaulMembership implements Membership
 
   public function login(string $username, string $password) : bool
   {
-    if ($username == 'install' && $password == $this->password)
+    if (array_key_exists($username, $this->users))
     {
-      $this->_session->set('logged_in', true);
-      return true;
+      if (array_key_exists('password', $this->users[$username]))
+        return password_verify($password, $this->users[$username]['password']);            
     }
+   
     return false;
   }
 

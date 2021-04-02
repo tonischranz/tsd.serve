@@ -23,6 +23,7 @@ class Factory
     function __construct(array $config)
     {
         $this->config = $config;
+        $this->singletons['tsd\\serve\\Factory'] = $this;
 
         spl_autoload_register(function ($name) {
             $parts = explode('\\', $name);
@@ -232,9 +233,7 @@ class Injection
             if ($p->isArray() && $p->name == '_config' && $this->name)
                 $args[] = $this->config;
             else if ($p->hasType() && !$p->isArray() && !$p->getType()->isBuiltIn()) {
-                $name = $p->getType()->getName();
-                if ($name == 'tsd\serve\Factory') $args[] = $factory;
-                else $args[] = $factory->create($name, $p->getName(), $myctx);
+                $args[] = $factory->create($p->getType()->getName(), $p->getName(), $myctx);
             } else if (isset($this->config[$p->name]))
                 $args[] = $this->config[$p->name];
             else if ($p->name == '_name')
@@ -259,7 +258,7 @@ class Injection
             unset($val);
 
             if ($p->hasType() && !$p->getType()->isBuiltIn())
-                $val = $factory->create($p->getType()->getName(), $p->getName(), $myctx);
+                $name = $val = $factory->create($p->getType()->getName(), $p->getName(), $myctx);
             else if (isset($this->config[$p->name]))
                 $val = $this->config[$p->name];
             else if ($p->name == '_name')

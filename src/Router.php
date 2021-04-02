@@ -16,49 +16,132 @@ class Router
      */
     const CONTROLLER = 'controller';
 
-    private $factory;
+    private Factory $factory;
+    private array $domains = [];
     
-    function __construct(Factory $factory)
-    {
-        $this->factory = $factory;
-    }
 
     function getRoute(string $host, string $method, string $path)
     {
-        $ctx = new ViewContext;
+        $plugin = '';
+        $layoutPlugin = '';
+        $hostPlugin = '';
+        $oldPlugin = '';
+        $overrideName = '';
+                
         $parts = explode('/', $path);
 
         $cutoff = 1;
 
         $name = count($parts) > 1 ? $parts[1] : 'default';
 
-        //todo:check for domains, set layoutplugin, plugin
-        //todo:check for plugin/plugin stuff
+        if (array_key_exists($host, $this->domains) && array_key_exists($this->domains[$host], App::$plugins))
+        {
+            $hostPlugin = $this->domains[$host];
+            
+            $plugin = $hostPlugin;
+            $layoutPlugin = $hostPlugin;
+            $oldPlugin = $hostPlugin;            
+        }
 
-        if (array_key_exists($name, App::$plugins)) {
+        if ($name == "_login")
+        {
+            $c = $this->injectController('tsd\\serve\\LoginController', '_login');
+        }
+
+        if ($name == "_static")
+        {
+            $c = $this->injectController('tsd\\serve\\StaticController', '_static');
+        }
+
+        if (array_key_exists($name, App::$plugins)) 
+        {
             $plugin = $name;
-            $name = count($parts) > 2 ? $parts[2] : 'default';
+
+            if ($hostPlugin && @App::$plugins[$hostPlugin]['overridePluginController'])
+            {
+                $overrideName = $hostPlugin;
+            }
+            
+            $name = count($parts) > 2 ? $parts[2] : 'default';                
+            
             $cutoff += 2;
 
             if ($name == '') {
                 $name = 'default';
                 $cutoff--;
             }
+            
+            if (!$layoutPlugin || @App::$plugins[$plugin]['forceLayout'])
+            {
+                $layoutPlugin = $plugin;
+            }
 
+            if (array_key_exists($name, App::$plugins)) 
+            {
+                $oldPlugin = $plugin;
+                $plugin = $name;
+
+                if ($oldPlugin && @App::$plugins[$oldPlugin]['overridePluginController'])
+                {
+                    $overrideName = $oldPlugin;
+                }
+            
+                $name = count($parts) > 3 ? $parts[3] : 'default';                
+            
+                $cutoff++;
+
+                if ($name == '') {
+                    $name = 'default';
+                    $cutoff--;
+                }
+            
+                if (!$layoutPlugin || @App::$plugins[$plugin]['forceLayout'])
+                {
+                    $layoutPlugin = $plugin;
+                }
+            }
+            else if ($overrideName)
+            {
+                $overrideName = '';
+            }
+
+            if ($overrideName)
+            {
+                $c = $this->createController($overrideName, $plugin);
+
+                if (!$c) {
+                    $c = $this->createController('default', $oldPlugin);
+                    $cutoff--;
+                }
+            }
+            else
+            {
+                $c = $this->createController($name, $plugin);
+                if (!$c) {
+                    $c = $this->createController('default', $plugin);
+                    $cutoff--;
+                }
+            }
+            
+            if (!$c) $plugin='';
+        } else if ($plugin)
+        {
             $c = $this->createController($name, $plugin);
-
+                
             if (!$c) {
                 $c = $this->createController('default', $plugin);
-                $cutoff--;
             }
-            if (!$c) $plugin='';
-        } else {
+        }
+        else
+        {
             $c = $this->createController($name);
         }
-
         if (!$c) {
             $c = $this->createController('default');
         }
+
+        $ctx = new ViewContext;
+        $ctx->layoutPlugin = $layoutPlugin;
 
         if (!$c) {
             return new NoRoute($ctx);
@@ -89,8 +172,7 @@ class Router
                 }
             }
             if (!$mi) {
-                echo "No method found for $methodPath";
-                //Controller::error (404, "Not Found", "Keine passende Methode ($methodName) gefunden.");
+                return new NoRoute($ctx);
             }
         }
 
@@ -188,12 +270,17 @@ class Router
 
         require_once $fileName;
 
+        return $this->injectController($ctrlName, $name, $plugin);
+    }
+
+    private function injectController($cname, $name, $plugin = '')
+    {
         $ctx = new InjectionContext();
         $ctx->name = 'serve';
         $ctx->fullname = "tsd.serve";
         $ctx->plugin = $plugin;
 
-        $c = $this->factory->create($ctrlName, $name, $ctx);
+        $c = $this->factory->create($cname, $name, $ctx);
 
         return $c;
     }

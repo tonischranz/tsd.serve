@@ -55,10 +55,10 @@ class MysqlDB implements DB
 {
     private ?\mysqli $_con = null;
     private string $prefix;
-    public string $host;
-    public string $database;
-    public string $username;
-    public string $password;
+    public string $host = '';
+    public string $database = '';
+    public string $username = '';
+    public string $password = '';
 
     #region private functions
 
@@ -136,7 +136,7 @@ class MysqlDB implements DB
 
     private function con(): \mysqli
     {
-        if (!$this->_con) {
+        if (null == $this->_con) {
             $host = $this->host;
             $user = $this->username;
             $pw = $this->password;

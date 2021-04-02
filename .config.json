@@ -1,7 +1,8 @@
 {
   "member": {
     "users": {
-      "dev": {"groups":["admin", "developer"]}
+      "dev": {"password":"$2y$10$Kvig9wTTiEwEGuyLYvyThOycPqjLgnX8g7fQ5DTtduhEq793wwcy2","groups":["admin","clean"]},
+      "ed": {"password":"$2y$10$xNqXDtfLb.Ky5ntUHEdBLOa3ZKTvyN4MlvqhIZokwm7AWrDob12RK","groups":["editor"]}
     }    
   },
   "router": { "domains": { "localhost:8000": "lorem" }}

@@ -57,26 +57,6 @@ class Controller
     }
 }
 
-class LoginController extends Controller
-{
-    function showIndex(string $returnUrl)
-    {
-        return $this->view(['returnUrl'=>$returnUrl], 'login');
-    }
-
-    function doIndex(string $username, string $password, string $returnUrl)
-    {
-        if ($this->_member->login($username, $password)) $this->redirect(urldecode($returnUrl));
-
-        $this->view(['returnUrl'=>$returnUrl, 'error'=>true], 'login');
-    }
-}
-
-class StaticController
-{
-
-}
-
 interface Result
 {
     function data();
