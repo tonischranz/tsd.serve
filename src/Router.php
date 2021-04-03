@@ -293,12 +293,12 @@ class Router
 
 abstract class Route
 {
-    private Controller $controller;
-    private ReflectionMethod $methodInfo;
+    private ?Controller $controller;
+    private ?ReflectionMethod $methodInfo;
     private ViewContext $ctx;
-    protected $data;
+    protected array $data = [];
 
-    function __construct($controller, $methodInfo, ViewContext $ctx, array $data)
+    function __construct($controller, $methodInfo, ViewContext $ctx, array $data = [])
     {
         $this->ctx = $ctx;
         $this->controller = $controller;
@@ -386,7 +386,7 @@ class NoRoute extends Route
 {
     function __construct(ViewContext $ctx)
     {
-        parent::__construct(null, null, $ctx, array());
+        parent::__construct(null, null, $ctx);
     }
 
     function fill(array $data)
