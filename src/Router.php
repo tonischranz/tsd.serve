@@ -264,6 +264,10 @@ class Router
         $fileName = $path . DIRECTORY_SEPARATOR . $name . '.php';
         $ctrlName = $name . 'Controller';
 
+        $namespace = @App::$plugins[$plugin]['namespace'];
+
+        if ($namespace) $ctrlName = "$namespace\\$ctrlName";
+
         if (!file_exists($fileName)) {
             return false;
         }
