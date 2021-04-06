@@ -134,6 +134,9 @@ class App
             $route = $this->router->getRoute($host, $method, \substr($path, 0, $i > 0 ? $i : \strlen($path)));
 
             $result = $this->getResult($route, $data);
+        } catch (AccessDeniedException $e)
+        {
+            $result = $this->member->isAnonymous() ? Controller::redirect('/_login?returnUrl=' . urlencode($path)) : $e;
         } catch (\Exception $e) {
             $result = $e;
         } catch (\Error $e) {

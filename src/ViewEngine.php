@@ -160,7 +160,7 @@ class ServeViewEngine extends ViewEngine
         ServeViewEngine::run($view_file, $result->data(), $ctx);
     }
 
-    private static function run(string $view, array $data, ViewContext $ctx)
+    private static function run(string $view, ?array $data, ViewContext $ctx)
     {
         $d     = $data;
         $model = $data;
@@ -233,6 +233,40 @@ class View
               </body>
             </html>
             EOError;
+
+            if ($path == 'login.html') return <<<'EOLogin'
+            <!DOCTYPE html>
+            <html>
+              <head>
+                <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+                <title>error</title>
+                <style type="text/css"></style>
+              </head>
+            
+              <body>
+                <main>
+                  <form method="post" action="/_login">
+                  <div>
+                    <input type="hidden" name="returnUrl" value="{returnUrl}" />
+                    </div>
+                    <div>
+                    <input type="text" name="username" placeholder="username" />
+                    </div>
+                    <div>
+                    <input type="password" name="password" placeholder="password" />
+                    </div>
+                    <div class="gap">
+                    {if error}
+                    <span class="error">wrong username / password</span>
+                    {/if}
+                    </div>
+                    <div class="right">
+                    <button type="submit">login</button>
+                    </div
+                </main>
+              </body>
+            </html>
+            EOLogin;
 
             if ($path == 'layout.html') return <<<'EOLayout'
             <!doctype html>

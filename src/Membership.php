@@ -26,7 +26,11 @@ class DefaulMembership implements Membership
   public function isInGroup($group): bool
   {
     if ($this->isAnonymous()) return false;
-    if ($group == 'developer') return true;
+
+    $username = $this->_session->get('logged_in');
+    if (array_key_exists('groups', $this->users[$username]))
+      if (in_array($group, $this->users[$username]['groups'])) return true;  
+
     return false;
   }
 
@@ -35,7 +39,10 @@ class DefaulMembership implements Membership
     if (array_key_exists($username, $this->users))
     {
       if (array_key_exists('password', $this->users[$username]))
-        return password_verify($password, $this->users[$username]['password']);            
+      {
+        $this->_session->set('logged_in', $username);
+        return password_verify($password, $this->users[$username]['password']);
+      }
     }
    
     return false;

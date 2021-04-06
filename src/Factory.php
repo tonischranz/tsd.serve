@@ -8,6 +8,7 @@ use \RecursiveDirectoryIterator;
 use \RecursiveIteratorIterator;
 use \RegexIterator;
 use \RecursiveRegexIterator;
+use ReflectionNamedType;
 
 /**
  * The Factory
@@ -230,11 +231,22 @@ class Injection
         $myctx->plugin = $ctx->plugin;
 
         foreach ($par as $p) {
-            if ($p->isArray() && $p->name == '_config' && $this->name)
-                $args[] = $this->config;
-            else if ($p->hasType() && !$p->isArray() && !$p->getType()->isBuiltIn()) {
-                $args[] = $factory->create($p->getType()->getName(), $p->getName(), $myctx);
-            } else if (isset($this->config[$p->name]))
+            if ($p->getType() instanceof ReflectionNamedType)
+            {                    
+                $pt = $p->getType();
+                
+                if ($pt->getName() == 'array' && $p->name == '_config' && $this->name)
+                {
+                    $args[] = $this->config;
+                    continue;
+                }
+                else if (!$pt->isBuiltIn()) 
+                {
+                    $args[] = $factory->create($pt->getName(), $p->getName(), $myctx);
+                    continue;
+                }
+         }
+         if (isset($this->config[$p->name]))
                 $args[] = $this->config[$p->name];
             else if ($p->name == '_name')
                 $args[] = $this->name;
@@ -257,9 +269,9 @@ class Injection
             as $p) {
             unset($val);
 
-            if ($p->hasType() && !$p->getType()->isBuiltIn())
-                $name = $val = $factory->create($p->getType()->getName(), $p->getName(), $myctx);
-            else if (isset($this->config[$p->name]))
+            if ($p->hasType() && $p->getType() instanceof ReflectionNamedType && !$p->getType()->isBuiltIn())
+                $val = $factory->create($p->getType()?->getName(), $p->getName(), $myctx);
+            if (isset($this->config[$p->name]))
                 $val = $this->config[$p->name];
             else if ($p->name == '_name')
                 $val = $this->name;

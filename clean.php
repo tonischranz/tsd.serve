@@ -9,6 +9,8 @@ const SERVE_BRANCH = 'next';
 const ADMIN_REPO = 'serve.admin';
 const ADMIN_BRANCH = 'main';
 
+const EXTENSIONS = ['dom', 'openssl', 'session', 'mysqli'];
+
 $serve_url = SERVE_BASE . '/' . SERVE_REPO . '/archive/' . SERVE_BRANCH . '.zip';
 $admin_url = SERVE_BASE . '/' . ADMIN_REPO . '/archive/' . ADMIN_BRANCH . '.zip';
 
@@ -53,7 +55,7 @@ function create_config($username, $pw)
         'clean' =>  ['key' => $key],
         'member' =>  ['users' => ["$username" => [
             'password' => password_hash($pw, PASSWORD_DEFAULT),
-            'groups' => ['admin', 'clean']
+            'groups' => ['admin', 'developer']
         ]]]
     ];
     file_put_contents(CONFIG_FILE, json_encode($config));
@@ -188,6 +190,8 @@ $not_installed = false;
 $update_available = false;
 $admin_update_available = false;
 $config_no_key = false;
+$extensions_ok = false;
+$missing_extensions = [];
 
 if ($fresh) {
     if (@$_POST['action'] == 'install') {

@@ -27,12 +27,12 @@ class Controller
         return new ViewResult($this->_name . DIRECTORY_SEPARATOR . $view, $data, $this->_plugin);
     }
 
-    protected function message(string $message, ?string $url = null)
+    static function message(string $message, ?string $url = null)
     {
         return new MessageResult('info', $message, $url);
     }
 
-    protected function redirect($url)
+    static function redirect($url)
     {
         return new RedirectResult($url);
     }
@@ -97,7 +97,7 @@ class RedirectResult extends ResultBase
 {
     function __construct($location)
     {
-        parent::__construct($location, 302);
+        parent::__construct($location, 302, ["Location: $location"]);
     }
 }
 

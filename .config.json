@@ -1,7 +1,7 @@
 {
   "member": {
     "users": {
-      "dev": {"password":"$2y$10$Kvig9wTTiEwEGuyLYvyThOycPqjLgnX8g7fQ5DTtduhEq793wwcy2","groups":["admin","clean"]},
+      "dev": {"password":"$2y$10$Kvig9wTTiEwEGuyLYvyThOycPqjLgnX8g7fQ5DTtduhEq793wwcy2","groups":["admin", "developer"]},
       "ed": {"password":"$2y$10$xNqXDtfLb.Ky5ntUHEdBLOa3ZKTvyN4MlvqhIZokwm7AWrDob12RK","groups":["editor"]}
     }    
   },

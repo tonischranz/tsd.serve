@@ -6,19 +6,19 @@ class LoginController extends Controller
 {
     function showIndex(string $returnUrl)
     {
-        return $this->view(['returnUrl'=>$returnUrl], 'login');
+        return new ViewResult('login', ['returnUrl'=>$returnUrl]);
     }
 
     function doIndex(string $username, string $password, string $returnUrl)
     {
-        if ($this->_member->login($username, $password)) $this->redirect(urldecode($returnUrl));
+        if ($this->_member->login($username, $password)) return $this->redirect(urldecode($returnUrl));
 
-        $this->view(['returnUrl'=>$returnUrl, 'error'=>true], 'login');
+        return new ViewResult('login', ['returnUrl'=>$returnUrl, 'error'=>true]);        
     }
 
     function doLogout(string $returnUrl)
     {
         $this->_member->logout();
-        $this->view(['returnUrl'=>$returnUrl], 'logout');
+        return new ViewResult('logout', ['returnUrl'=>$returnUrl]);
     }
 }

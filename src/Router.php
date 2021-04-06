@@ -4,6 +4,7 @@ namespace tsd\serve;
 
 use \ReflectionMethod;
 use \ReflectionClass;
+
 /**
  * The Router
  * 
@@ -18,7 +19,7 @@ class Router
 
     private Factory $factory;
     private array $domains = [];
-    
+
 
     function getRoute(string $host, string $method, string $path)
     {
@@ -27,117 +28,106 @@ class Router
         $hostPlugin = '';
         $oldPlugin = '';
         $overrideName = '';
-                
+        $c = null;
+
         $parts = explode('/', $path);
 
         $cutoff = 1;
 
         $name = count($parts) > 1 ? $parts[1] : 'default';
 
-        if (array_key_exists($host, $this->domains) && array_key_exists($this->domains[$host], App::$plugins))
-        {
+        if (array_key_exists($host, $this->domains) && array_key_exists($this->domains[$host], App::$plugins)) {
             $hostPlugin = $this->domains[$host];
-            
+
             $plugin = $hostPlugin;
             $layoutPlugin = $hostPlugin;
-            $oldPlugin = $hostPlugin;            
+            $oldPlugin = $hostPlugin;
         }
 
-        if ($name == "_login")
-        {
+        if ($name == "_login") {
             $c = $this->injectController('tsd\\serve\\LoginController', '_login');
+            $cutoff ++;
         }
 
-        if ($name == "_static")
-        {
+        if ($name == "_static") {
             $c = $this->injectController('tsd\\serve\\StaticController', '_static');
+            $cutoff ++;
         }
 
-        if (array_key_exists($name, App::$plugins)) 
-        {
-            $plugin = $name;
+        if (!$c) {
 
-            if ($hostPlugin && @App::$plugins[$hostPlugin]['overridePluginController'])
-            {
-                $overrideName = $hostPlugin;
-            }
-            
-            $name = count($parts) > 2 ? $parts[2] : 'default';                
-            
-            $cutoff += 2;
-
-            if ($name == '') {
-                $name = 'default';
-                $cutoff--;
-            }
-            
-            if (!$layoutPlugin || @App::$plugins[$plugin]['forceLayout'])
-            {
-                $layoutPlugin = $plugin;
-            }
-
-            if (array_key_exists($name, App::$plugins)) 
-            {
-                $oldPlugin = $plugin;
+            if (array_key_exists($name, App::$plugins)) {
                 $plugin = $name;
 
-                if ($oldPlugin && @App::$plugins[$oldPlugin]['overridePluginController'])
-                {
-                    $overrideName = $oldPlugin;
+                if ($hostPlugin && @App::$plugins[$hostPlugin]['overridePluginController']) {
+                    $overrideName = $hostPlugin;
                 }
-            
-                $name = count($parts) > 3 ? $parts[3] : 'default';                
-            
-                $cutoff++;
+
+                $name = count($parts) > 2 ? $parts[2] : 'default';
+
+                $cutoff += 2;
 
                 if ($name == '') {
                     $name = 'default';
                     $cutoff--;
                 }
-            
-                if (!$layoutPlugin || @App::$plugins[$plugin]['forceLayout'])
-                {
+
+                if (!$layoutPlugin || @App::$plugins[$plugin]['forceLayout']) {
                     $layoutPlugin = $plugin;
                 }
-            }
-            else if ($overrideName)
-            {
-                $overrideName = '';
-            }
 
-            if ($overrideName)
-            {
-                $c = $this->createController($overrideName, $plugin);
+                if (array_key_exists($name, App::$plugins)) {
+                    $oldPlugin = $plugin;
+                    $plugin = $name;
 
-                if (!$c) {
-                    $c = $this->createController('default', $oldPlugin);
-                    $cutoff--;
+                    if ($oldPlugin && @App::$plugins[$oldPlugin]['overridePluginController']) {
+                        $overrideName = $oldPlugin;
+                    }
+
+                    $name = count($parts) > 3 ? $parts[3] : 'default';
+
+                    $cutoff++;
+
+                    if ($name == '') {
+                        $name = 'default';
+                        $cutoff--;
+                    }
+
+                    if (!$layoutPlugin || @App::$plugins[$plugin]['forceLayout']) {
+                        $layoutPlugin = $plugin;
+                    }
+                } else if ($overrideName) {
+                    $overrideName = '';
                 }
-            }
-            else
-            {
+
+                if ($overrideName) {
+                    $c = $this->createController($overrideName, $plugin);
+
+                    if (!$c) {
+                        $c = $this->createController('default', $oldPlugin);
+                        $cutoff--;
+                    }
+                } else {
+                    $c = $this->createController($name, $plugin);
+                    if (!$c) {
+                        $c = $this->createController('default', $plugin);
+                        $cutoff--;
+                    }
+                }
+
+                if (!$c) $plugin = '';
+            } else if ($plugin) {
                 $c = $this->createController($name, $plugin);
+
                 if (!$c) {
                     $c = $this->createController('default', $plugin);
-                    $cutoff--;
                 }
+            } else {
+                $c = $this->createController($name);
             }
-            
-            if (!$c) $plugin='';
-        } else if ($plugin)
-        {
-            $c = $this->createController($name, $plugin);
-                
             if (!$c) {
-                $c = $this->createController('default', $plugin);
+                $c = $this->createController('default');
             }
-        }
-        else
-        {
-            $c = $this->createController($name);
-        }
-        if (!$c) {
-            $c = $this->createController('default');
         }
 
         $ctx = new ViewContext;
@@ -349,7 +339,7 @@ abstract class Route
         return $authorized;
     }
 
-    function ctx() : ViewContext
+    function ctx(): ViewContext
     {
         return $this->ctx;
     }
