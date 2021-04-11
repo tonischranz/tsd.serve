@@ -121,7 +121,9 @@ class ServeViewEngine extends ViewEngine
             $t->loadHTML($template);
             $o->loadHTML($layoutTemplate);
 
-            $title = $t->getElementsByTagName('title')[0]->textContent;
+            $title = $t->getElementsByTagName('title')[0]->C14N();
+            $title = str_replace(['<title>', '</title>'], '', $title);
+            $title = str_replace('??>', '?>', $title);
             $x = new DOMXPath($t);
             $xL = new DOMXPath($o);
             $links = $x->query('head/link');
@@ -141,10 +143,11 @@ class ServeViewEngine extends ViewEngine
             foreach ($scripts as $h) $lHead->appendChild($o->importNode($h, true));
 
 
-            $ctx->title = $title;
+            /*$ctx->title = $title;*/
+            $to = $o->saveHTML();
+            $to = preg_replace('/<\?php echo @\$title; \?>/', $title, $to);
 
-
-            $to = preg_replace('/\&lt;\?php/', '<?php', $o->saveHTML());
+            $to = preg_replace('/\&lt;\?php/', '<?php', $to);
             $to = preg_replace('/\?\&gt;/', '?>', $to);
             $to = preg_replace('/%20/', ' ', $to);
             $to = preg_replace('/%24/', '$', $to);
@@ -166,7 +169,7 @@ class ServeViewEngine extends ViewEngine
     {
         $d     = $data;
         $model = $data;
-        $s  = [];
+        $s  = [$d];
         foreach ($ctx as $k => $v) $$k = $v;
 
         $debug = ob_get_contents();
@@ -592,8 +595,7 @@ class View
             },
             '/\{((\@?[a-zA-Z_]\w*(\.\w+)*(\|\w+)*)|\.)\s*\}/' => function ($m) {
                 $o = View::compileOutput($m[1]);
-                //return "<?php if (isset($o)) echo $o;
-                return "<?php echo @$o; ?>";
+                return "<?php echo @$o; ?>";                
             },
         ];
 
