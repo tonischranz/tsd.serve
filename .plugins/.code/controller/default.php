@@ -11,6 +11,7 @@ class DefaultController extends Controller
   /**
    * @SecurityGroup developer
    */
+  #[SecurityGroup('developer')]
   function showIndex ()
   {    
     return $this->view();

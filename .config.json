@@ -1,9 +1,1 @@
-{
-  "member": {
-    "users": {
-      "dev": {"password":"$2y$10$Kvig9wTTiEwEGuyLYvyThOycPqjLgnX8g7fQ5DTtduhEq793wwcy2","groups":["admin", "developer"]},
-      "ed": {"password":"$2y$10$xNqXDtfLb.Ky5ntUHEdBLOa3ZKTvyN4MlvqhIZokwm7AWrDob12RK","groups":["editor"]}
-    }    
-  },
-  "router": { "domains": { "localhost:8000": "lorem" }}
-}
+{"member":{"users":{"dev":{"password":"$2y$10$6vhAUYY07M41IHhx0iRK9OYsuxSjGtIC91UTBhtxCtWEAZ\/m1MO2O","groups":["admin","developer"],"fullname":"Developer","email":"dev@tsd.ovh"},"ed":{"password":"$2y$10$xNqXDtfLb.Ky5ntUHEdBLOa3ZKTvyN4MlvqhIZokwm7AWrDob12RK","groups":["editor"]}}},"router":{"domains":{"localhost:8000":"lorem"}}}

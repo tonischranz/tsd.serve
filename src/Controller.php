@@ -32,6 +32,11 @@ class Controller
         return new MessageResult('info', $message, $url);
     }
 
+    static function success(string $message, ?string $url = null)
+    {
+        return new SuccessResult($message, $url);
+    }
+
     static function redirect($url)
     {
         return new RedirectResult($url);
@@ -140,11 +145,11 @@ class ErrorResult extends MessageResult
     }
 }
 
-class SucessResult extends MessageResult
+class SuccessResult extends MessageResult
 {
     function __construct($message, $url = null)
     {
-        parent::__construct('sucess', $message, 200, $url);
+        parent::__construct('success', $message, 200, $url);
     }
 }
 

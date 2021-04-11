@@ -166,7 +166,7 @@ class Router
             }
         }
 
-        foreach ($parts as $p) {
+        /*foreach ($parts as $p) {
             if (is_numeric($p)) {
                 $params[] = $p;
             } else {
@@ -177,7 +177,7 @@ class Router
                     $params[] = $sp;
                 }
             }
-        }
+        }*/
 
         return $method == 'POST' ? new PostRoute($c, $mi, $ctx, $params) : ($method == 'GET' ? new GetRoute($c, $mi, $ctx, $params) : false);
     }
@@ -307,8 +307,9 @@ abstract class Route
         foreach ($pinfos as $pi) {
             if (count($params) <= $n) {
                 //todo: Model validation
-                //todo: param with default value
-                $params[] = key_exists($pi->name, $this->data) ? $this->data[$pi->name] : $this->data[$n];
+                if (key_exists($pi->name, $this->data)) $params[] = $this->data[$pi->name];
+                else if (key_exists($n, $this->data)) $params[] = $this->data[$n];
+                else if ($pi->isDefaultValueAvailable()) $params[] = $pi->getDefaultValue();
             }
 
             $n++;
@@ -319,7 +320,7 @@ abstract class Route
 
     function checkPermission(Membership $member)
     {
-        $doc = $this->methodInfo->getDocComment();
+        /*$doc = $this->methodInfo->getDocComment();
         $matches = [];
         $authorized = true;
 
@@ -333,6 +334,19 @@ abstract class Route
                 if ($member->isInGroup($g)) {
                     $authorized = true;
                 }
+            }
+        }*/
+
+        $att = $this->methodInfo->getAttributes();
+        $authorized = true;
+
+        foreach ($att as $a)
+        {
+            if ($a->getName() == 'tsd\serve\SecurityUser') return !$member->isAnonymous();
+            if ($a->getName() == 'tsd\serve\SecurityGroup')
+            {
+                $authorized = false;
+                if ($member->isInGroup($a->name)) return true;
             }
         }
 

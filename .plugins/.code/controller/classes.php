@@ -1,6 +1,7 @@
 <?php
 
 use tsd\serve\Controller;
+use tsd\serve\SecurityGroup;
 
 class ClassesController extends Controller
 {
@@ -8,6 +9,7 @@ class ClassesController extends Controller
     /**
     @SecurityGroup developer
    */
+  #[SecurityGroup('developer')]
   function showIndex ($p) : Result
   {
       return $this->show(['tsd', 'serve']);
@@ -15,6 +17,7 @@ class ClassesController extends Controller
   /**
     @SecurityGroup developer
    */
+  #[SecurityGroup('developer')]
   function show ($p) : Result
   {
     $path = implode (DIRECTORY_SEPARATOR, $p);
@@ -38,6 +41,7 @@ class ClassesController extends Controller
   /**
     @SecurityGroup  developer
    */
+  #[SecurityGroup('developer')]
   function doEdit ($path, $content) : Result
   {
     $basepath = 'classes' . DIRECTORY_SEPARATOR . $path;
