@@ -77,19 +77,28 @@ class MysqlDB implements DB
     private function buildConditions($cond)
     {
         $params = [];
-
         foreach ($cond as $k => $v) {
             if (\is_int($v) || \is_float($v)) $params[] = "$k=$v";
             else if (\is_null($v)) $params[] = "$k IS NULL";
             else if (\is_array($v)) {
-                if ($v[0] == '!') {
+                if ($v[0] == '!')
+                {
                     if (\is_null($v[1])) $params[] = "$k IS NOT NULL";
-                    else if (\is_int($v[1]) || \is_float($v[1])) $params[] = "$k!={$v[1]}";
+                    else if (\is_int($v[1]) || \is_float($v[1])) $params[] = "$k!=$v[1]";
                     else if (\is_string($v[1])) $params[] = "$k='" . \mysqli_escape_string($this->_con, $v[1]) . "'";
                 }
+                else if ($v[0] == 'BETWEEN')
+                {
+                    $params[] = "$k $v[0] $v[1] AND $v[2]";
+                }
+                else
+                {
+                    if (\is_null($v[1])) $params[] = "$k IS NULL";
+                    else if (\is_int($v[1]) || \is_float($v[1])) $params[] = "$k $v[0] $v[1]";
+                    else if (\is_string($v[1])) $params[] = "$k $v[0] '" . \mysqli_escape_string($this->_con, $v[1]) . "'";
+                }                
             } else if (\is_string($v)) $params[] = "$k='" . \mysqli_escape_string($this->con, $v) . "'";
         }
-
         return $params;
     }
 
