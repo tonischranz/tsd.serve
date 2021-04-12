@@ -160,3 +160,29 @@ class DataResult extends ResultBase
         parent::__construct($data, 200);
     }
 }
+
+class FileResult extends ResultBase
+{
+    function __construct(string $url, string $mimetype = '')
+    {
+        if ($mimetype) parent::__construct($url, 200, ["Content-Type: $mimetype"]);
+        else parent::__construct($url, 200);
+    }
+}
+
+class Base64FileResult extends FileResult
+{
+    function __construct(string $data, string $mimetype = '')
+    {
+        parent::__construct('data:text/plain;base64,' . $data, $mimetype);
+    }
+}
+
+class TextResult extends ResultBase
+{
+    function __construct(string $data, string $mimetype = '')
+    {
+        if ($mimetype) parent::__construct($data, 200, ["Content-Type: $mimetype"]);
+        else parent::__construct($data, 200);
+    }
+}

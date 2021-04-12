@@ -45,14 +45,18 @@ class Router
             $oldPlugin = $hostPlugin;
         }
 
-        if ($name == "_login") {
+        if ($name == '_login') {
             $c = $this->injectController('tsd\\serve\\LoginController', '_login');
             $cutoff ++;
         }
 
-        if ($name == "_static") {
+        if ($name == '_static') {
             $c = $this->injectController('tsd\\serve\\StaticController', '_static');
             $cutoff ++;
+        }
+
+        if ($name == "favicon.ico") {
+            $c = $this->injectController('tsd\\serve\\StaticController', '_static');            
         }
 
         if (!$c) {

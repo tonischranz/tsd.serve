@@ -39,6 +39,12 @@ abstract class ViewEngine
                 $this->renderView(Controller::error($e->getMessage(), 500), $ctx);
             }
         }
+        else if ($result instanceof FileResult) {
+          readfile($result->data());
+        }
+        else if ($result instanceof TextResult) {
+          echo $result->data();
+        }
     }
 
     private function renderJson(Result $result)
@@ -228,7 +234,6 @@ class View
               <head>
                 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
                 <title>error</title>
-                <style type="text/css"></style>
               </head>
             
               <body>
@@ -246,7 +251,6 @@ class View
               <head>
                 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
                 <title>info</title>
-                <style type="text/css"></style>
               </head>
             
               <body>
@@ -264,7 +268,6 @@ class View
               <head>
                 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
                 <title>success</title>
-                <style type="text/css"></style>
               </head>
             
               <body>
@@ -282,7 +285,6 @@ class View
               <head>
                 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
                 <title>login</title>
-                <style type="text/css"></style>
               </head>
             
               <body>
@@ -316,7 +318,6 @@ class View
               <head>
                 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
                 <title>logout</title>
-                <style type="text/css"></style>
               </head>
             
               <body>
@@ -340,7 +341,6 @@ class View
               <head>
                 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
                 <title>logged out</title>
-                <style type="text/css"></style>
               </head>
             
               <body>
@@ -363,7 +363,6 @@ class View
               <head>
                 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
                 <title>{with fullname}{.}{else}{username}{/with}'s profile</title>
-                <style type="text/css"></style>
               </head>
             
               <body>
@@ -397,7 +396,6 @@ class View
               <head>
                 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
                 <title>change password</title>
-                <style type="text/css"></style>
                 <script>
                 $(function() {
         
@@ -450,37 +448,8 @@ class View
 
                 <title>{#title} - tsd.serve</title>
 
-                <style type="text/css">
-                    html { scrollbar-color: #222 #000; scrollbar-width: thin; }
-                    body::-webkit-scrollbar { width: .3em; }
-                    body::-webkit-scrollbar-track { box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3); }
-                    body::-webkit-scrollbar-thumb { background-color: #222; outline: .2em solid #010; }
-                    body { color:#ddd; background-color:#222; font-family: sans-serif; margin:0; margin-bottom: 1.5em; }
-                    a, a:visited { text-decoration: none; color:#aaa; }
-                    a:active, a:hover { text-decoration:#ddd underline; }        
-                    button {  border: thin solid #888; background-color: #000; background-image: radial-gradient(farthest-corner at -10% -10%, #000, #000, #111, #444); color: #ddd; font-weight: bold; font-size: 2em; border-radius: .5em; padding:.25em 1em; outline:none; }
-                    button:hover { border: thin solid #888; background-image: radial-gradient(farthest-corner at 110% 110%, #000, #111, #222, #888); }
-                    button:active { background-image: radial-gradient(farthest-corner at -10% -10%, #000, #000, #111, #444); }
-                    h1 { font-size: 2.5rem; }
-                    div.gap { height: 2em; }
-                    input, input:focus { color:#ddd; background-color:#222; border-style:solid; border-radius: .5em; padding:.25em; font-size: 1.5em; width:100%; box-sizing:border-box; outline:none; text-align:right; padding-right: 1em;}
-                    input::placeholder { text-align:left;font-size:.8em; }
-                    input:focus::placeholder {font-size:.6em; }
-                    input[type=checkbox] {width:auto; margin-right:.7em;}
-                    div.right {text-align: right;}
-                    span.error {color:#a00;}
-                    div {margin-top: .5em;}
-                    body>header { background-color:#111; }
-                    body>header>nav ul {list-style-type:none; padding-inline-start:0; margin-block-start:0; margin-block-end:0; font-size:4rem;}                    
-                    body>main>*, body>footer>* { overflow-x:auto; scrollbar-color: #000 #111; scrollbar-width: thin; }
-                    body>main *::-webkit-scrollbar, body>footer *::-webkit-scrollbar { width : .3em; height: .3em; }
-                    body>main *::-webkit-scrollbar-track, body>footer *::-webkit-scrollbar-track { box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3); }
-                    body>main *::-webkit-scrollbar-thumb, body>footer *::-webkit-scrollbar-thumb { background-color: #000; outline: .2em solid #010; }
-                    body>footer>pre { padding-bottom: .75em; }
-                    body>footer.sticky { position:fixed; bottom:0; left:0; right:0; padding: .35em; padding-top:.02em; background-color: #0008; }
-                    @media screen and (min-width: 38rem) { body>header>nav, body>main, body>footer{ width: 36rem; margin:auto; } }
-                    @media screen and (min-width: 24rem) and (max-width: 38rem) { body>header>nav, body>main, body>footer{ margin-left:1rem; margin-right:1rem; } }
-                </style>
+                <link rel="icon" type="image/svg+xml" href="/_static/favicon.svg" sizes="any" />
+                <link rel="stylesheet" href="/_static/style.css" />
 
                 <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
 
