@@ -173,7 +173,7 @@ class MysqlDB implements DB
             throw new Exception("MySQL error: $e", 1);
         }
 
-        while ($row = $r->fetch_array($r)) $rows[] = $row;
+        while ($row = $r->fetch_array()) $rows[] = $row;
 
         return $rows;
     }
