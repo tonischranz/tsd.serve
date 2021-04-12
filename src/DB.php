@@ -54,7 +54,7 @@ interface DB
 class MysqlDB implements DB
 {
     private ?\mysqli $_con = null;
-    private string $prefix;
+    protected string $prefix;
     public string $host = 'localhost';
     public string $database = '';
     public string $username = 'root';
