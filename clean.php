@@ -193,6 +193,7 @@ $config_no_key = false;
 $extensions_ok = false;
 $missing_extensions = [];
 
+
 if ($fresh) {
     if (@$_POST['action'] == 'install') {
         $valid = true;
@@ -264,6 +265,8 @@ if ($fresh) {
             if ($_POST['action'] == 'update') {
                 if ($update_available) get_serve();
                 if ($admin_update_available) get_admin();
+                $update_available = false;
+                $admin_update_available = false;
             } else if ($_POST['action'] == 'install') {
                 if ($config_no_key) update_config();
                 install_serve(@$_POST['module'] ? $_POST['module'] : []);
