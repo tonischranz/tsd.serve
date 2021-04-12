@@ -29,6 +29,7 @@ class Router
         $oldPlugin = '';
         $overrideName = '';
         $c = null;
+        $ctx = $this->factory->createSingleton('tsd\\serve\\ViewContext');
 
         $parts = explode('/', $path);
 
@@ -130,7 +131,6 @@ class Router
             }
         }
 
-        $ctx = new ViewContext;
         $ctx->layoutPlugin = $layoutPlugin;
 
         if (!$c) {

@@ -170,7 +170,8 @@ class ViewContext
     public array $menu;
     public array $member;
     public string $layoutPlugin = '';
-    public string $title;
+    public string $debug;
+    public array $data;
 }
 
 class Exception extends \Exception

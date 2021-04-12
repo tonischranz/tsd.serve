@@ -132,7 +132,7 @@ class ServeViewEngine extends ViewEngine
             $main = $x->query('body/main')[0];
 
             $lBody = $o->getElementsByTagName('body')[0];
-            $lOldMain = $xL->query('body/main')[0];
+            $lOldMain = $xL->query('//main')[0];
             $lMain = $o->importNode($main, true);
             $lBody->replaceChild($lMain, $lOldMain);
 
@@ -145,8 +145,8 @@ class ServeViewEngine extends ViewEngine
 
             /*$ctx->title = $title;*/
             $to = $o->saveHTML();
-            $to = preg_replace('/<\?php echo @\$title; \?>/', $title, $to);
-
+            $to = preg_replace('/\{#title\}/', $title, $to);
+            
             $to = preg_replace('/\&lt;\?php/', '<?php', $to);
             $to = preg_replace('/\?\&gt;/', '?>', $to);
             $to = preg_replace('/%20/', ' ', $to);
@@ -167,13 +167,14 @@ class ServeViewEngine extends ViewEngine
 
     private static function run(string $view, ?array $data, ViewContext $ctx)
     {
-        $d     = $data;
-        $model = $data;
-        $s  = [$d];
-        foreach ($ctx as $k => $v) $$k = $v;
-
         $debug = ob_get_contents();
         ob_clean();
+
+        $ctx->debug = $debug;
+        $c = (array)$ctx;
+
+        $d     = $data;
+        $s  = [$d];
 
         include $view;
     }
@@ -447,7 +448,7 @@ class View
                 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
                 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-                <title>{@title} - tsd.serve</title>
+                <title>{#title} - tsd.serve</title>
 
                 <style type="text/css">
                     html { scrollbar-color: #222 #000; scrollbar-width: thin; }
@@ -536,7 +537,7 @@ class View
 
         $name = substr($parts[0], 1);
 
-        $o = str_split($parts[0])[0] == '@' ? "\$$name" : "\$d['$parts[0]']";
+        $o = str_split($parts[0])[0] == '@' ? "\$c['$name']" : "\$d['$parts[0]']";
         array_shift($parts);
         foreach ($parts as $p) {
             $o .= "['$p']";
