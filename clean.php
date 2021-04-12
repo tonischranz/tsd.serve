@@ -9,7 +9,7 @@ const SERVE_BRANCH = 'next';
 const ADMIN_REPO = 'serve.admin';
 const ADMIN_BRANCH = 'main';
 
-const EXTENSIONS = ['dom', 'openssl', 'session', 'mysqli'];
+const EXTENSIONS = ['dom', 'openssl', 'session', "zip", 'mysqli'];
 
 $serve_url = SERVE_BASE . '/' . SERVE_REPO . '/archive/' . SERVE_BRANCH . '.zip';
 $admin_url = SERVE_BASE . '/' . ADMIN_REPO . '/archive/' . ADMIN_BRANCH . '.zip';
@@ -58,7 +58,7 @@ function create_config($username, $pw)
             'groups' => ['admin', 'developer']
         ]]]
     ];
-    file_put_contents(CONFIG_FILE, json_encode($config));
+    file_put_contents(CONFIG_FILE, json_encode($config, JSON_PRETTY_PRINT));
 }
 
 function update_config()
@@ -68,7 +68,7 @@ function update_config()
     if (!@$cfg['clean']['key']) {
         $key = str_replace('+', '_', base64_encode(random_bytes(128)));
         $cfg['clean']['key'] = $key;
-        file_put_contents(CONFIG_FILE, json_encode($cfg));
+        file_put_contents(CONFIG_FILE, json_encode($cfg, JSON_PRETTY_PRINT));
     }
 }
 
@@ -117,7 +117,7 @@ function get_admin()
 
     $cfg = json_decode(file_get_contents(CONFIG_FILE), true);
     $cfg['clean']['admin_md5'] = $md5;
-    file_put_contents(CONFIG_FILE, json_encode($cfg));
+    file_put_contents(CONFIG_FILE, json_encode($cfg, JSON_PRETTY_PRINT));
 
     rrmdir("admin.$md5");
     unlink("admin.$md5.zip");
@@ -175,7 +175,7 @@ function get_serve()
 
     $cfg = json_decode(file_get_contents(CONFIG_FILE), true);
     $cfg['clean']['serve_md5'] = $md5;
-    file_put_contents(CONFIG_FILE, json_encode($cfg));
+    file_put_contents(CONFIG_FILE, json_encode($cfg, JSON_PRETTY_PRINT));
 
     rrmdir("serve.$md5");
     unlink("serve.$md5.zip");

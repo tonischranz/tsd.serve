@@ -59,7 +59,7 @@ class Config
 
   private static function write_data ($path, $data)
   {
-    file_put_contents ($path, json_encode ($data));
+    file_put_contents ($path, json_encode ($data, JSON_PRETTY_PRINT));
   }
 
   static function getConfig(string $name)

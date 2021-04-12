@@ -44,7 +44,7 @@ abstract class ViewEngine
     private function renderJson(Result $result)
     {
         ob_clean();
-        echo json_encode($result->data());
+        echo json_encode($result->data(), JSON_PRETTY_PRINT);
     }
 
     private function renderXml(Result $result)

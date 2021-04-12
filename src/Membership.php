@@ -91,7 +91,7 @@ class DefaulMembership implements Membership
     //todo: lock
     $cfg = json_decode(file_get_contents(App::CONFIG), true);
     $cfg['member']['users'][$username] = $this->users[$username];
-    file_put_contents(App::CONFIG, json_encode($cfg));
+    file_put_contents(App::CONFIG, json_encode($cfg, JSON_PRETTY_PRINT));
   }  
 
   public function isAnonymous(): bool
