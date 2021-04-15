@@ -170,6 +170,7 @@ class ViewContext
     public array $menu;
     public array $member;
     public string $layoutPlugin = '';
+    public string $pluginRoot = '';
     public string $debug;
     public array $data;
 }

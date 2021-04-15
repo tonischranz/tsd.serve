@@ -157,6 +157,8 @@ class ServeViewEngine extends ViewEngine
             $to = preg_replace('/\?\&gt;/', '?>', $to);
             $to = preg_replace('/%20/', ' ', $to);
             $to = preg_replace('/%24/', '$', $to);
+            $to = preg_replace('/%5B/', '[', $to);
+            $to = preg_replace('/%5D/', ']', $to);
             $to = preg_replace('/PUBLIC.*/', '>', $to, 1);
 
             //cache

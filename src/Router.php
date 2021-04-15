@@ -28,6 +28,8 @@ class Router
         $hostPlugin = '';
         $oldPlugin = '';
         $overrideName = '';
+        $pluginRoot = '';
+        $oldPluginRoot = '';
         $c = null;
         $ctx = $this->factory->createSingleton('tsd\\serve\\ViewContext');
 
@@ -63,6 +65,8 @@ class Router
 
             if (array_key_exists($name, App::$plugins)) {
                 $plugin = $name;
+                $pluginRoot = "/$name";
+                $oldPluginRoot = $pluginRoot;
 
                 if ($hostPlugin && @App::$plugins[$hostPlugin]['overridePluginController']) {
                     $overrideName = $hostPlugin;
@@ -84,6 +88,7 @@ class Router
                 if (array_key_exists($name, App::$plugins)) {
                     $oldPlugin = $plugin;
                     $plugin = $name;
+                    $pluginRoot = "$pluginRoot/$name";
 
                     if ($oldPlugin && @App::$plugins[$oldPlugin]['overridePluginController']) {
                         $overrideName = $oldPlugin;
@@ -110,6 +115,7 @@ class Router
 
                     if (!$c) {
                         $c = $this->createController('default', $oldPlugin);
+                        $pluginRoot = $oldPluginRoot;
                         $cutoff--;
                     }
                 } else {
@@ -132,10 +138,12 @@ class Router
             }
             if (!$c) {
                 $c = $this->createController('default');
+                $pluginRoot = '';
             }
         }
 
         $ctx->layoutPlugin = $layoutPlugin;
+        $ctx->pluginRoot = $pluginRoot;
 
         if (!$c) {
             return new NoRoute($ctx);
