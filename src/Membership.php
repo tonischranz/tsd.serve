@@ -6,6 +6,7 @@ interface Membership
 {
   function isAnonymous(): bool;
   function isInGroup(string $group): bool;
+  function getGroups(): array;
   function login(string $username, string $password) : bool;
   function logout();
   function getName() : string;
@@ -31,6 +32,15 @@ class DefaulMembership implements Membership
 
     $username = $this->_session->get('logged_in');
     return $username ?? '';
+  }
+
+  public function getGroups():array
+  {
+    $username = $this->getName();
+    
+    if (array_key_exists('groups', $this->users[$username])) 
+      return $this->users[$username]['groups'];
+    return [];
   }
 
   public function getFullName(): string

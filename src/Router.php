@@ -144,7 +144,7 @@ class Router
 
         $ctx->layoutPlugin = $layoutPlugin;
         $ctx->pluginRoot = $pluginRoot;
-
+        
         if (!$c) {
             return new NoRoute($ctx);
         }
