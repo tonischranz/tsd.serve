@@ -332,23 +332,6 @@ abstract class Route
 
     function checkPermission(Membership $member)
     {
-        /*$doc = $this->methodInfo->getDocComment();
-        $matches = [];
-        $authorized = true;
-
-        if (preg_match('#@SecurityUser#', $doc)) {
-            $authorized = !$member->isAnonymous();
-        }
-
-        if (preg_match_all('#@SecurityGroup\s(\w+)#', $doc, $matches) > 0) {
-            $authorized = false;
-            foreach ($matches[1] as $g) {
-                if ($member->isInGroup($g)) {
-                    $authorized = true;
-                }
-            }
-        }*/
-
         $att = $this->methodInfo->getAttributes();
         $authorized = true;
 
