@@ -178,19 +178,6 @@ class Router
             }
         }
 
-        /*foreach ($parts as $p) {
-            if (is_numeric($p)) {
-                $params[] = $p;
-            } else {
-                $sparts = explode('.', $p);
-
-                foreach ($sparts as $sp) //echo "\nMethod $path\n";
-                {
-                    $params[] = $sp;
-                }
-            }
-        }*/
-
         return $method == 'POST' ? new PostRoute($c, $mi, $ctx, $params) : ($method == 'GET' ? new GetRoute($c, $mi, $ctx, $params) : false);
     }
 
