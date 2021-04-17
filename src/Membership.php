@@ -36,6 +36,8 @@ class DefaulMembership implements Membership
 
   public function getGroups():array
   {
+    if ($this->isAnonymous()) return [];
+
     $username = $this->getName();
     
     if (array_key_exists('groups', $this->users[$username])) 
