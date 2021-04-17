@@ -5,6 +5,8 @@ namespace tsd\serve;
 class StaticController extends Controller
 {
     private ViewContext $ctx;
+    const 
+    MIME_TYPES = ['svg' => 'image/svg+xml', 'css' => 'text/css'];
 
     function show(array $parts)
     {
@@ -14,6 +16,8 @@ class StaticController extends Controller
         $file = '.' . App::PLUGINS . DIRECTORY_SEPARATOR . $plugin . DIRECTORY_SEPARATOR . 'static' . DIRECTORY_SEPARATOR . join(DIRECTORY_SEPARATOR, $parts) . '.' . $ext;
 
         if (!file_exists($file)) throw new NotFoundException;
+
+        if (array_key_exists($ext, StaticController::MIME_TYPES)) return new FileResult($file, StaticController::MIME_TYPES[$ext]);
         
         return new FileResult($file);
     }
