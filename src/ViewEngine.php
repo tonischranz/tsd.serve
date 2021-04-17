@@ -117,7 +117,7 @@ class ServeViewEngine extends ViewEngine
             if (!$v) $v = new View($view, $plugin);
             
             $template = $v->compile();
-            $layout = new Layout($plugin);
+            $layout = new Layout($layoutPlugin);
             $layoutTemplate = $layout->compile();
 
             $t = new DOMDocument;
