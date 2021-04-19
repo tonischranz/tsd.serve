@@ -140,6 +140,7 @@ class MysqlDB implements DB
 
     private function prefixTable(string $table)
     {
+        if (strstr($table, ' ')) return $table; //hack to deal with JOIN, Subqueries and so on
         return strstr($table, '.') ?"`$this->prefix$table`":$table;
     }
 
