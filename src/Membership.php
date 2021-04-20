@@ -39,10 +39,14 @@ class DefaulMembership implements Membership
     if ($this->isAnonymous()) return [];
 
     $username = $this->getName();
+    $o = [];
     
     if (array_key_exists('groups', $this->users[$username])) 
-      return $this->users[$username]['groups'];
-    return [];
+      foreach ($this->users[$username]['groups'] as $g)
+      {
+        $o[$g] = true;
+      }
+    return $o;
   }
 
   public function getFullName(): string
