@@ -248,7 +248,7 @@ class MysqlDB implements DB
 
 
         $this->con()->query($q);
-        return $this->con()->affected_rows == 1;
+        return true;
     }
 
     function delete(string $table, $cond): bool
