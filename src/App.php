@@ -94,7 +94,7 @@ class App
             $_SERVER['REDIRECT_URL'] :
             urldecode($_SERVER['REQUEST_URI']);
 
-        ob_start();
+        ob_start(null, null, PHP_OUTPUT_HANDLER_CLEANABLE | PHP_OUTPUT_HANDLER_REMOVABLE | PHP_OUTPUT_HANDLER_FLUSHABLE);
 
         try {
             $app = new App();
@@ -108,12 +108,10 @@ class App
                     '_POST' => $_POST, '_FILES' => $_FILES
                 ],
                 $_SERVER['HTTP_ACCEPT']
-            );
-
-            ob_flush();
+            );            
         } catch (\Exception $e) {
-            echo "Error $e->message";
-            ob_flush();
+            ob_end_clean();
+            echo "Error $e->message";            
         }
     }
 

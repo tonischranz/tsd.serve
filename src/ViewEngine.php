@@ -49,13 +49,13 @@ abstract class ViewEngine
 
     private function renderJson(Result $result)
     {
-        ob_clean();
+        ob_end_clean();
         echo json_encode($result->data(), JSON_PRETTY_PRINT);
     }
 
     private function renderXml(Result $result)
     {
-        ob_clean();
+        ob_end_clean();
         echo $result->data()->asXML();
     }
 
@@ -176,7 +176,7 @@ class ServeViewEngine extends ViewEngine
     private static function run(string $view, ?array $data, ViewContext $ctx)
     {
         $debug = ob_get_contents();
-        ob_clean();
+        ob_end_clean();
 
         $ctx->debug = $debug;
         $c = (array)$ctx;
