@@ -24,9 +24,8 @@ abstract class ViewEngine
             header($h);
         }
 
-        //todo: better
-        if ($accept == 'application/json') $this->renderJson($result);
-        if ($accept == 'text/xml') $this->renderXml($result);
+        if (strstr($accept,'application/json')) $this->renderJson($result);
+        if (strstr($accept,'text/xml')) $this->renderXml($result);
 
         if ($result instanceof ViewResult) {
             try {
