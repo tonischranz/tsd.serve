@@ -107,7 +107,8 @@ class MysqlDB implements DB
         $params = [];
 
         foreach ($cond as $v) {
-            if (\is_int($v) || \is_float($v)) $params[] = $v;
+            if (\is_null($v)) $params[] = 'NULL';
+            else if (\is_int($v) || \is_float($v)) $params[] = $v;
             else $params[] = "'" . \mysqli_escape_string($this->con(), $v) . "'";
         }
 
