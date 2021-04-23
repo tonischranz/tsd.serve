@@ -350,7 +350,7 @@ class View
                   <p>you have successfully logged out</p>
                   {with returnUrl}
                     <a href="/_login?returnUrl={.}">login again</a>
-                  {else}
+                  {without}
                     <a href="/">return to home</a>
                   {/with}
                 </main>
@@ -544,7 +544,7 @@ class View
                 }
                 return "<?php if (@$arg) { ?>$inner<?php } ?>";
             },
-            '/\{with\s+(?<arg>\@?\w[\.\|\w]*)\s*\}(?<inner>((?:(?!(\{\/with|\{else)).)|(?R))*)(\{else\}(?<else>((?:(?!\{\/with).)|(?R))*))?\{\/with\}/ms' => function ($m) {
+            '/\{with\s+(?<arg>\@?\w[\.\|\w]*)\s*\}(?<inner>((?:(?!(\{\/with|\{without)).)|(?R))*)(\{without\}(?<else>((?:(?!\{\/with).)|(?R))*))?\{\/with\}/ms' => function ($m) {
                 $inner = View::compileTemplate($m['inner']);
                 $arg   = View::compileExpression($m['arg']);
                 if (key_exists('else', $m))
@@ -554,7 +554,7 @@ class View
                 }
                 else return "<?php if (@$arg) { array_push(\$s, $arg); \$d=$arg; ?>$inner<?php array_pop(\$s); \$d=end(\$s); } ?>";
             },
-            '/\{each\s+(?<arg>\@?\w[\.\|\w]*)\s*\}(?<inner>((?:(?!(\{\/each|\{else)).)|(?R))*)(\{else\}(?<else>((?:(?!\{\/each).)|(?R))*))?\{\/each\}/ms' => function ($m) {
+            '/\{each\s+(?<arg>\@?\w[\.\|\w]*)\s*\}(?<inner>((?:(?!(\{\/each|\{none)).)|(?R))*)(\{none\}(?<else>((?:(?!\{\/each).)|(?R))*))?\{\/each\}/ms' => function ($m) {
               $inner = View::compileTemplate($m['inner']);
               $arg   = View::compileExpression($m['arg']);
               if (key_exists('else', $m))
