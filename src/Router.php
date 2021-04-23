@@ -129,9 +129,10 @@ class Router
                 if (!$c) $plugin = '';
             } else if ($plugin) {
                 $c = $this->createController($name, $plugin);
-
+                $cutoff++;
                 if (!$c) {
                     $c = $this->createController('default', $plugin);
+                    $cutoff--;
                 }
             } else {
                 $c = $this->createController($name);
