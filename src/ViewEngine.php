@@ -273,7 +273,7 @@ class View
               </head>
             
               <body>
-                <main>
+                <main class="success">
                   <h1>🛈 success</h1>
                   <p>{message}</p>
                 </main>
