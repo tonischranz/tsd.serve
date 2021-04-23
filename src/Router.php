@@ -329,7 +329,7 @@ abstract class Route
             if ($a->getName() == 'tsd\serve\SecurityGroup')
             {
                 $authorized = false;
-                if ($member->isInGroup($a->name)) return true;
+                if ($member->isInGroup($a->getArguments()[0])) return true;
             }
         }
 
