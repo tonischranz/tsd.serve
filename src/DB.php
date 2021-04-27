@@ -67,7 +67,8 @@ class MysqlDB implements DB
         $params = [];
 
         foreach ($cond as $k => $v) {
-            if (\is_int($v) || \is_float($v)) $params[] = "$k=$v";
+            if (\is_null($v)) $params[] = "$k=NULL";
+            else if (\is_int($v) || \is_float($v)) $params[] = "$k=$v";
             else $params[] = "$k='" . \mysqli_escape_string($this->con(), $v) . "'";
         }
 
