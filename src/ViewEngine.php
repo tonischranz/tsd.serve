@@ -305,7 +305,7 @@ class View
                       {/if}
                     </div>
                     <div class="right">
-                      <button type="submit">go</button>
+                      <input type="submit" value="go" />
                     </div
                   </form>
                 </main>
@@ -328,7 +328,7 @@ class View
                   <form method="post" action="/_login/logout">
                   {with returnUrl}<input type="hidden" name="returnUrl" value="{.}" />{/with}
                     <div class="right">
-                        <button type="submit">yes</button>
+                        <input type="submit" value="yes" />
                     </div
                   </form>
                 </main>
@@ -349,9 +349,9 @@ class View
                   <h1>🔒 logged out</h1>
                   <p>you have successfully logged out</p>
                   {with returnUrl}
-                    <a href="/_login?returnUrl={.}">login again</a>
+                    <a class="nopopup" href="/_login?returnUrl={.}">login again</a>
                   {without}
-                    <a href="/">return to home</a>
+                    <a class="nopopup" href="/">return to home</a>
                   {/with}
                 </main>
               </body>
@@ -380,10 +380,10 @@ class View
                       <input type="email" name="email" placeholder="email" value="{email}" />
                     </div>                   
                     <div class="right">
-                      <button type="submit">save</button>
+                      <input type="submit" value="save" />
                     </div
                     <div>
-                        <a href="password">change password</a>
+                        <a class="nopopup" href="password">change password</a>
                     </div>
                   </form>
                 </main>
@@ -431,7 +431,7 @@ class View
                         <span class="error" style="display:none;" id="err_pwd_mismatch">passwords do not match</span>
                     </div>
                     <div class="right">
-                      <button type="submit">change</button>
+                      <input type="submit" value="change" />
                     </div
                   </form>
                 </main>
