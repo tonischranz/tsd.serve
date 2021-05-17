@@ -59,6 +59,7 @@ class MysqlDB implements DB
     public string $database = '';
     public string $username = 'root';
     public string $password = '';
+    public bool $log = false;
 
     #region private functions
 
@@ -175,6 +176,8 @@ class MysqlDB implements DB
 
     function read($query)
     {
+        if ($this->log) var_dump($query);
+
         $rows = [];
 
         $r = $this->con()->query($query);
@@ -186,6 +189,8 @@ class MysqlDB implements DB
         }
 
         while ($row = $r->fetch_array()) $rows[] = $row;
+
+        if ($this->log) var_dump($rows);
 
         return $rows;
     }
