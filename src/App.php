@@ -2,6 +2,9 @@
 
 namespace tsd\serve;
 
+use DateTime;
+use DateTimeZone;
+
 /**
  * The Application
  * 
@@ -26,6 +29,8 @@ class App
     private ViewEngine $view_engine;
 
     private Membership $member;
+
+    private Time $time;
 
     /**
      * Creates a new Instance
@@ -80,8 +85,10 @@ class App
 
         $factory = new Factory($config);
 
-        $this->router = $factory->create('tsd\serve\Router', 'router');
+        $this->time = $factory->createSingleton('tsd\serve\Time', 'time');
         $this->member = $factory->createSingleton('tsd\serve\Membership', 'member');
+
+        $this->router = $factory->create('tsd\serve\Router', 'router');        
         $this->view_engine = $factory->create('tsd\serve\ViewEngine', 'views');
     }
 
@@ -94,7 +101,7 @@ class App
             $_SERVER['REDIRECT_URL'] :
             urldecode($_SERVER['REQUEST_URI']);
 
-        ob_start(null, null, PHP_OUTPUT_HANDLER_CLEANABLE | PHP_OUTPUT_HANDLER_REMOVABLE | PHP_OUTPUT_HANDLER_FLUSHABLE);
+        ob_start(null, 0, PHP_OUTPUT_HANDLER_CLEANABLE | PHP_OUTPUT_HANDLER_REMOVABLE | PHP_OUTPUT_HANDLER_FLUSHABLE);
 
         try {
             $app = new App();
@@ -173,6 +180,29 @@ class ViewContext
     public string $pluginRoot = '';
     public string $debug;
     public array $data;
+}
+
+class Time
+{
+    private DateTimeZone $tz;
+
+    function __construct(string $timezone, private string $locale)
+    {
+        $this->tz = new DateTimeZone($timezone);
+        date_default_timezone_set($timezone);
+        
+        setlocale(LC_TIME, $locale);
+    }
+
+    function offset(int $d) : int
+    {
+        return $this->tz->getOffset(new DateTime("@$d"));
+    }
+
+    function lc() : string
+    {
+        return $this->locale;
+    }
 }
 
 class Exception extends \Exception
