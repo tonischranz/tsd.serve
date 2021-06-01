@@ -159,7 +159,7 @@ class MysqlDB implements DB
 
             if ($con->connect_errno) throw new Exception("MySQL connection to $user@$host failed.", 1);
 
-            $con->set_charset('utf8');
+            $con->set_charset('utf8mb4');
 
             $this->_con = $con;
         }
