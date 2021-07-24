@@ -92,7 +92,7 @@ class MysqlDB implements DB
                 else if ($v[0] == 'IN')
                 {
                     $l = join(',',$v[1]);
-                    $params[] = "$k IN [$l]"; //could be exploited
+                    $params[] = "$k IN ($l)";
                 }
                 else if ($v[0] == 'BETWEEN')
                 {
