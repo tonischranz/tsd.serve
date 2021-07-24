@@ -118,7 +118,7 @@ class App
             );            
         } catch (\Exception $e) {
             ob_end_clean();
-            echo "Error $e->message";            
+            echo "Error: $e";            
         }
     }
 
@@ -186,7 +186,7 @@ class Time
 {
     private DateTimeZone $tz;
 
-    function __construct(string $timezone, private string $locale)
+    function __construct(string $timezone = "Europe/Zurich", private string $locale = "de_CH.UTF-8")
     {
         $this->tz = new DateTimeZone($timezone);
         date_default_timezone_set($timezone);

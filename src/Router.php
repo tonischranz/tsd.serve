@@ -57,6 +57,11 @@ class Router
             $cutoff ++;
         }
 
+        if ($name == '_info') {
+            $c = $this->injectController('tsd\\serve\\InfoController', '_info');
+            $cutoff ++;
+        }
+
         if ($name == "favicon.ico") {
             $c = $this->injectController('tsd\\serve\\StaticController', '_static');            
         }
