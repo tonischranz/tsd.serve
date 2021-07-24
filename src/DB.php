@@ -89,6 +89,11 @@ class MysqlDB implements DB
                     else if (\is_int($v[1]) || \is_float($v[1])) $params[] = "$k!=$v[1]";
                     else if (\is_string($v[1])) $params[] = "$k='" . \mysqli_escape_string($this->con(), $v[1]) . "'";
                 }
+                else if ($v[0] == 'IN')
+                {
+                    $l = join(',',$v[1]);
+                    $params[] = "$k IN [$l]"; //could be exploited
+                }
                 else if ($v[0] == 'BETWEEN')
                 {
                     $params[] = "$k $v[0] $v[1] AND $v[2]";
