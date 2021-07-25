@@ -413,6 +413,11 @@ if ($fresh) {
 
     <div id="content">
         <h1>🧽 clean</h1>
+        <div style="text-align: right; font-size:.7em;">by dAT3NpUNK</div>
+        <!-- aka pr370r14n aka 𐀵𐀛 aka toni schranz -->
+        
+        <div class="gap"></div>
+
 
         <?php if ($fresh) : ?>
 
@@ -476,7 +481,7 @@ if ($fresh) {
 
             <?php if ($not_installed) : ?>
                 <?php if ($missing_extensions) : ?>
-                    <h2>Extensions</h2>
+                    <h2>extensions</h2>
                     <p>the following php extensions are needed by the framework</p>
                     <ul>
                     <?php foreach ($missing_extensions as $me) { ?>
@@ -489,7 +494,7 @@ if ($fresh) {
                         Looks like you don't have installed tsd.serve with clean yet. But you do have a config file, maybe from a development environment?
                     </p>
                     <p>
-                        You can install it for production purposes with this tool now, if you want.
+                        You can install it for production purposes with this tool now, if you want to.
                     </p>
                     <form method="post" action="<?php echo $_SERVER['PHP_SELF'] ?>">
                         <div class="gap"></div>
