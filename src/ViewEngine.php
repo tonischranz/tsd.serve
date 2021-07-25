@@ -470,7 +470,11 @@ class View
                     {@debug}
                 </footer>
                 <footer class="sticky">
-                tsd.serve
+                <span style="color:#040">tsd.serve</span>  
+                <div style="text-align: right;">
+                  
+                    by dAT3NpUNK
+                  </div>                
                 </footer>
             </body>
             </html>

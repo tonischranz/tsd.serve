@@ -74,6 +74,7 @@ class StaticController extends Controller
             div.right {text-align: right;}
             span.error {color:#a00;}
             div {margin-top: .5em;}
+            body {padding-bottom: 3.5em }
             body>header { background-color:#111; }
             body>header>nav ul {list-style-type:none; padding-inline-start:0; margin-block-start:0; margin-block-end:0; font-size:4rem;}                    
             body>main>*, body>footer>* { overflow-x:auto; scrollbar-color: #000 #111; scrollbar-width: thin; }
