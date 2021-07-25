@@ -9,7 +9,7 @@ const SERVE_BRANCH = 'next';
 const ADMIN_REPO = 'serve.admin';
 const ADMIN_BRANCH = 'main';
 
-const EXTENSIONS = ['dom', 'openssl', 'session', "zip", 'mysqli'];
+const EXTENSIONS = ['dom', 'openssl', 'session', 'zip', 'mysqli'];
 
 $serve_url = SERVE_BASE . '/' . SERVE_REPO . '/archive/' . SERVE_BRANCH . '.zip';
 $admin_url = SERVE_BASE . '/' . ADMIN_REPO . '/archive/' . ADMIN_BRANCH . '.zip';
@@ -192,6 +192,7 @@ $admin_update_available = false;
 $config_no_key = false;
 $extensions_ok = false;
 $missing_extensions = [];
+$ext= [];
 
 
 if ($fresh) {
@@ -259,6 +260,13 @@ if ($fresh) {
             }
         } else {
             $not_installed = true;
+            $ext = get_loaded_extensions();
+            
+            foreach (EXTENSIONS as $et)
+            {
+                if (!in_array($et, $ext))
+                $missing_extensions[]=$et;
+            }
         }
 
         if (@$_POST['action']) {
@@ -467,20 +475,29 @@ if ($fresh) {
         <?php if ($auth) : ?>
 
             <?php if ($not_installed) : ?>
-                <h2>clean install available</h2>
-                <p>
-                    Looks like you don't have installed tsd.serve with clean yet. But you do have a config file, maybe from a development environment?
-                </p>
-                <p>
-                    You can install it for production purposes with this tool now, if you want.
-                </p>
-                <form method="post" action="<?php echo $_SERVER['PHP_SELF'] ?>">
-                    <div class="gap"></div>
-                    <div class="right">
-                        <button type="submit" name="action" value="install">install</button>
-                    </div>
-                </form>
-
+                <?php if ($missing_extensions) : ?>
+                    <h2>Extensions</h2>
+                    <p>the following php extensions are needed by the framework</p>
+                    <ul>
+                    <?php foreach ($missing_extensions as $me) { ?>
+                        <li><?php echo $me; ?></li>
+                    <?php } ?>                    
+                    </ul>
+                <?php else : ?>
+                    <h2>clean install available</h2>
+                    <p>
+                        Looks like you don't have installed tsd.serve with clean yet. But you do have a config file, maybe from a development environment?
+                    </p>
+                    <p>
+                        You can install it for production purposes with this tool now, if you want.
+                    </p>
+                    <form method="post" action="<?php echo $_SERVER['PHP_SELF'] ?>">
+                        <div class="gap"></div>
+                        <div class="right">
+                            <button type="submit" name="action" value="install">install</button>
+                        </div>
+                    </form>
+                <?php endif; ?>
             <?php elseif ($update_available || $admin_update_available) : ?>
                 <h2>update available</h2>
                 <?php if ($update_available) : ?>
