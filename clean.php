@@ -413,8 +413,7 @@ if ($fresh) {
 
     <div id="content">
         <h1>🧽 clean</h1>
-        <div style="text-align: right; font-size:.7em;">by dAT3NpUNK</div>
-        <!-- aka pr370r14n aka 𐀵𐀛 aka toni schranz -->
+        <div style="text-align: right; font-size:.7em;">by&nbsp;&nbsp;&nbsp;&nbsp;Δ@✞εℕᚹⅤᚢᛕ</div>
         
         <div class="gap"></div>
 
