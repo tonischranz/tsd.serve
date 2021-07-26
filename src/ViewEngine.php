@@ -471,10 +471,7 @@ class View
                 </footer>
                 <footer class="sticky">
                 <span style="color:#040">tsd.serve</span>  
-                <div style="text-align: right;">
-                  
-                    by dAT3NpUNK
-                  </div>                
+                <div style="text-align: right;">by&nbsp;&nbsp;&nbsp;&nbsp;Δ@✞εℕᚹⅤᚢᛕ</div>                
                 </footer>
             </body>
             </html>
