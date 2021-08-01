@@ -306,7 +306,7 @@ class FakeDB implements DB
                     }
                 }
 
-                if ($found) return $r;
+                if ($found) return [$r];
             }
         }
         return [];
