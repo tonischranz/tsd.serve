@@ -287,26 +287,33 @@ class MysqlDB implements DB
  */
 class FakeDB implements DB
 {
-    private array $data;
+    private array $data = [];
 
     function select(string $table, array $fields = null, array $cond = null, $order = false, int $limit = 0): array
     {
-        if ($this->data[$table] && $cond)
+        if (key_exists($table, $this->data) && $cond)
         {
-            foreach ($this->data[$table] as $r)
+            if ($cond)
             {
-                $found = false;
-                foreach ($cond as $cn=>$cv)
+                foreach ($this->data[$table] as $r)
                 {
-                    if ($r[$cn] == $cv) $found = true;
-                    else
+                    $found = false;
+                    foreach ($cond as $cn=>$cv)
                     {
-                         $found=false;
-                         break;
+                        if ($r[$cn] == $cv) $found = true;
+                        else
+                        {
+                            $found=false;
+                            break;
+                        }
                     }
-                }
 
-                if ($found) return [$r];
+                    if ($found) return [$r];
+                }
+            }
+            else
+            {
+                return $this->data[$table];
             }
         }
         return [];
