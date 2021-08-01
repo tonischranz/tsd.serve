@@ -279,3 +279,31 @@ class MysqlDB implements DB
         return $this->con()->affected_rows > 0;
     }
 }
+
+/**
+ * In-memory fake implementation of tsd\serve\DB
+ *
+ * @Mode fake
+ */
+class FakeDB implements DB
+{
+    function select(string $table, array $fields = null, array $cond = null, $order = false, int $limit = 0): array
+    {
+        return [];
+    }
+
+    function insert(string $table, $values): int
+    {
+        return 1;
+    }
+
+    function update(string $table, $values, $cond): bool
+    {
+        return true;
+    }
+
+    function delete(string $table, $cond): bool
+    {
+        return true;
+    }
+}
