@@ -37,6 +37,8 @@
   }
 }
 
+
+
 body > main {
   padding-top: 5em;
   padding-bottom: 5em;
@@ -241,14 +243,26 @@ body > main > footer .center h2 {
 /** Font and Color Theme                      */
 /**********************************************/
 
+html {background: linear-gradient(95deg,#222, #000);}
+
 body {
   color: #ddd !important;
   background-color: #222 !important;
   font-family: myfont, sans-serif !important;
 }
 
+body > footer.debug pre.xdebug-var-dump {display: none;}
+body > footer.debug:hover pre.xdebug-var-dump {display: block;}
+body > footer.debug::after {content: "ⓘ";}
+
+/*body>main::after {content: " "; height: 50vh; }*/
+body>main::after {content: " "; height: 50vh; }
+
 body > footer {
   background-color: #000;
+  background: linear-gradient(90deg, #222, #000);
+  position: sticky;
+  bottom: 0;
 }
 
 a,

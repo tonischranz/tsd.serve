@@ -55,7 +55,7 @@ class StaticController extends Controller
         else
         {
             $css = <<< 'EOCSS'
-            html { scrollbar-color: #222 #000; scrollbar-width: thin; }
+            html { scrollbar-color: #222 #000; scrollbar-width: thin; background: linear-gradient(90deg, #222 55%, #000); }
             body::-webkit-scrollbar { width: .3em; }
             body::-webkit-scrollbar-track { box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3); }
             body::-webkit-scrollbar-thumb { background-color: #222; outline: .2em solid #010; }
@@ -81,10 +81,12 @@ class StaticController extends Controller
             body>main *::-webkit-scrollbar, body>footer *::-webkit-scrollbar { width : .3em; height: .3em; }
             body>main *::-webkit-scrollbar-track, body>footer *::-webkit-scrollbar-track { box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3); }
             body>main *::-webkit-scrollbar-thumb, body>footer *::-webkit-scrollbar-thumb { background-color: #000; outline: .2em solid #010; }
-            body>footer>pre { padding-bottom: .75em; }
+            body footer.debug>pre { padding-bottom: .75em; }
             body>footer.sticky { position:fixed; bottom:0; left:0; right:0; padding: .35em; padding-top:.02em; background-color: #0008; }
-            @media screen and (min-width: 38rem) { body>header>nav, body>main, body>footer{ width: 36rem; margin:auto; } }
-            @media screen and (min-width: 24rem) and (max-width: 38rem) { body>header>nav, body>main, body>footer{ margin-left:1rem; margin-right:1rem; } }
+            @media screen and (min-width: 86rem) { body>header>nav, body>main, body>footer{ width: 80rem; margin:auto; } }
+            @media screen and (min-width: 56rem) and (max-width: 86rem){ body>header>nav, body>main, body>footer>{ width: 52rem; margin:auto; } }
+            @media screen and (min-width: 38rem) and (max-width: 56rem) { body>header>nav, body>main, body>footer>{ width: 36rem; margin:auto; } }
+            @media screen and (min-width: 24rem) and (max-width: 38rem) { body>header>nav, body>main, body>footer>{ margin-left:1rem; margin-right:1rem; } }
             EOCSS;
             return new TextResult($css, 'text/css');
         }

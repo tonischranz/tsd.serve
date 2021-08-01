@@ -1,5 +1,6 @@
 <?php
 
+use tsd\serve\App;
 use tsd\serve\Controller;
 use tsd\serve\ViewContext;
 
@@ -16,6 +17,8 @@ class defaultController extends Controller
   {
     var_dump($_SERVER);
     var_dump($this);
+    var_dump(App::$plugins);
+    var_dump($this->ctx);
     $this->ctx->data['bla'] = "wtf";
 
       return $this->view (['text' => 'Foo']);
