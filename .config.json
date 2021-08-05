@@ -18,6 +18,7 @@
             }
         }
     },
+    "db": {"_mode":"fake" },
     "router": {
         "domains": {
             "localhost:8000": "lorem",
