@@ -75,7 +75,13 @@ class ServeViewEngine extends ViewEngine
 
     function __construct()
     {
-        if (file_exists(ServeViewEngine::CACHED_VIEWS)) include ServeViewEngine::CACHED_VIEWS;
+        if (file_exists(ServeViewEngine::CACHED_VIEWS)) 
+        {
+          try {
+          include ServeViewEngine::CACHED_VIEWS;
+          }
+          catch (\Error){}
+        }
         if (!is_dir(ServeViewEngine::CACHED_DIR)) mkdir(ServeViewEngine::CACHED_DIR);
     }
 
