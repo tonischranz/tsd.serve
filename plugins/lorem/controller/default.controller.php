@@ -11,6 +11,12 @@ class defaultController extends Controller
 
   function showFoo ()
   {
+    var_dump($_SERVER);
       return $this->view (['text' => 'Foo']);
+  }
+
+  function doRegister (string $code, string $geb)
+  {
+    var_dump($code, $geb);
   }
 }

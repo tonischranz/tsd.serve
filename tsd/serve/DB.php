@@ -54,12 +54,12 @@ interface DB
  */
 class MysqlDB implements DB
 {
-    private ?\mysqli $_con;
+    private ?\mysqli $_con = null;
     private string $prefix;
-    private string $host;
-    private string $database;
-    private string $username;
-    private string $password;
+    public string $host;
+    public string $database;
+    public string $username;
+    public string $password;
 
     #region private functions
 
@@ -132,7 +132,7 @@ class MysqlDB implements DB
 
     private function prefixTable(string $table)
     {
-        return "$this->prefix$table";
+        return strstr($table, '.') ?"`$this->prefix$table`":$table;
     }
 
     private function con(): \mysqli
@@ -145,7 +145,7 @@ class MysqlDB implements DB
 
             $con = new \mysqli($host, $user, $pw, $db);
 
-            if ($con) throw new Exception("MySQL connection to $user@$host failed.", 1);
+            if ($con->connect_errno) throw new Exception("MySQL connection to $user@$host failed.", 1);
 
             $con->set_charset('utf8');
 
@@ -157,14 +157,9 @@ class MysqlDB implements DB
 
     #endregion
 
-    function __construct(?string $_plugin/*, string $host, string $username, string $password, string $database*/)
+    function __construct(?string $_plugin)
     {
         $this->prefix = $_plugin ? "$_plugin." : '';
-        //$this->con = new \mysqli($host, $username, $password, $database);
-        /*$this->host = $host;
-        $this->database = $database;
-        $this->username = $username;
-        $this->password = $password;*/
     }
 
     function read($query)
@@ -173,7 +168,11 @@ class MysqlDB implements DB
 
         $r = $this->con()->query($query);
 
-        if (!$r) throw new Exception("MySQL error: $this->con->error", 1);
+        if (!$r) 
+        {
+            $e = $this->con()->error;
+            throw new Exception("MySQL error: $e", 1);
+        }
 
         while ($row = $r->fetch_array($r)) $rows[] = $row;
 
@@ -208,7 +207,7 @@ class MysqlDB implements DB
         $vals = $this->buildValues($values);
 
         $q = 'INSERT INTO ';
-        $q .= $this->prefixTable($table);;
+        $q .= $this->prefixTable($table);
         $q .= ' (';
         $q .= join(',', $fields);
         $q .= ' ) VALUES (';
@@ -216,7 +215,7 @@ class MysqlDB implements DB
         $q .= ')';
 
         $this->con()->query($q);
-        return $this->con->insert_id;
+        return $this->con()->insert_id;
     }
 
     function update(string $table, $values, $cond): bool
@@ -227,7 +226,7 @@ class MysqlDB implements DB
         $params = $this->buildConditions($cond);
 
         $q = 'UPDATE ';
-        $q .= $this->prefixTable($table);;
+        $q .= $this->prefixTable($table);
         $q .= ' SET ';
         $q .= join(' ,', $vals);
         $q .= ' WHERE ';
@@ -235,7 +234,7 @@ class MysqlDB implements DB
 
 
         $this->con()->query($q);
-        return $this->con->affected_rows == 1;
+        return $this->con()->affected_rows == 1;
     }
 
     function delete(string $table, $cond): bool
@@ -250,7 +249,7 @@ class MysqlDB implements DB
         $q .= join(' AND ', $params);
 
 
-        $this->con->query($q);
-        return $this->con->affected_rows > 0;
+        $this->con()->query($q);
+        return $this->con()->affected_rows > 0;
     }
 }

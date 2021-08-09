@@ -3,35 +3,94 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <link rel="stylesheet" href="/static/style.css" />
-    <!--<link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous" />-->
-    <!--<script src="https://code.jquery.com/jquery-3.4.1.js" integrity="sha256-DZAnKJ/6XZ9si04Hgrsxu/8s717jcIzLy3oi35EouyE=" crossorigin="anonymous"></script>-->
+
+    <script
+      src="https://code.jquery.com/jquery-3.4.1.min.js"
+      integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
+      crossorigin="anonymous"
+    ></script>
+
+    <script
+      src="http://code.jquery.com/ui/1.12.1/jquery-ui.min.js"
+      integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU="
+      crossorigin="anonymous"
+    ></script>
+
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.3/modernizr.min.js"
+      integrity="sha256-0rguYS0qgS6L4qVzANq4kjxPLtvnp5nn2nB5G1lWRv4="
+      crossorigin="anonymous"
+    ></script>
+
+    <script src="/static/script.js"></script>
+
     <title>{title} - [title]</title>
     {head}
   </head>
 
   <body>
     <header>
-      {if @menu}
-      <ul>
-        {each @menu}
-        <li class="{if active}active{/if}">
-          <a href="{url}">{title}</a>
-          {if menu} // lets use recursive partials {/if}
-          <span>
-            {each tags}{.}{/each}
-          </span>
-          <span>
-            {each emblems}{.}{/each}
-          </span>
-        </li>
-        {/each}
-      </ul>
-      {/if}
+      <nav>
+        <ul style="align-items: baseline;">
+          <!--<li>M⏵<a href="/">⚒</a></li>-->
+          <li><a href="/">⚒</a></li>
+          <li class="menu">
+            <ul>
+              <li>ASDF</li>
+              <li class="menu">
+                BlaBla
+                <ul>
+                  <li>Test</li>
+                  <li class="menu">
+                    llkthj
+                    <ul>
+                      <li>Test</li>
+                      <li>Test</li>
+                      <li>Test</li>
+                    </ul>
+                  </li>
+                  <li class="menu">
+                    agfrr
+                    <ul>
+                      <li>Test</li>
+                    </ul>
+                  </li>
+                </ul>
+              </li>
+              <li>ASDF</li>
+            </ul>
+          </li>
+          <li class="{if @menu}menu{/if}">
+            {if @menu}
+            <ul>
+              {each @menu}
+              <li class="{if active}active{/if}">
+                <a href="{url}">{title}</a>
+                {if menu} // lets use recursive partials {>menu menu} {/if}
+                <aside>
+                  {each tags}<small>{.}</small>{/each}
+                </aside>
+                <aside>
+                  {each emblems}<small>{.}</small>{/each}
+                </aside>
+              </li>
+              {/each}
+            </ul>
+            {/if}
+          </li>
+        </ul>
+      </nav>
     </header>
-    {content}
+    <main>
+      {content}
+      <footer class="debug">
+        {debug}
+      </footer>
+    </main>
     <footer>
-      {debug}
+      tsd.serve
     </footer>
   </body>
 </html>

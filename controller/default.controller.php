@@ -4,6 +4,7 @@ use tsd\serve\Controller;
 
 class defaultController extends Controller
 {
+
   function showIndex ()
   {
     return $this->view (['user' => 'Toni Schranz']);
@@ -12,6 +13,12 @@ class defaultController extends Controller
   function showBar (float $amt)
   {
       return $this->view (['amt' => $amt * 2]);
+  }
+
+  function showInfo()
+  {
+    phpinfo();
+    return $this->message("phpinfo()");
   }
 
   function show (array $names)

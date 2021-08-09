@@ -217,9 +217,9 @@ class View
                 $arg   = View::compileExpression($m['arg']);
                 return "<?php if (isset($arg) && $arg && array_push(\$s, $arg)) {\n$inner\n} \$d=array_pop(\$s) ?>";
             },
-            '/\{((\@?\w+(\.\w+)*(\|\w+)*)|\.)\s*\}/' => function ($m) {
+            '/\{((\@?[a-zA-Z_]\w*(\.\w+)*(\|\w+)*)|\.)\s*\}/' => function ($m) {
                 $o = View::compileOutput($m[1]);
-                return "<?php echo $o; ?>";
+                return "<?php if (isset($o)) echo $o; ?>";
             },
         ];
 
@@ -243,7 +243,7 @@ class View
         ob_end_clean();
 
         $m   = [];
-        $exp = '#<\s*title.*?>(?<title>.*)<\s*/title.*?>(?<head>.*)<\s*/head.*?>.*<\s*body.*?>(?<content>.*)<\s*/body.*>#ims';
+        $exp = '#<\s*title.*?>(?<title>.*)<\s*/title.*?>(?<head>.*)<\s*/head.*?>.*<\s*body.*?>.*<\s*main.*?>(?<content>.*)<\s*/main.*>.*<\s*/body.*>#ims';
 
         if (preg_match($exp, $html, $m)) {
             $layoutData = [
