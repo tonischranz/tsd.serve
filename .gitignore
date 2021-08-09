@@ -1,3 +1,6 @@
-.vs*/
 .ht*
-.config.json
+.cached_*
+/info.php
+/test.php
+/index.php
+/.tsd.serve.php

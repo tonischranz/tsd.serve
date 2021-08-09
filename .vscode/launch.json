@@ -1,0 +1,28 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+      {
+        "name": "Launch server",
+        "type": "php",
+        "request": "launch",
+        "program": "${workspaceRoot}/serve.php",
+        "runtimeArgs": [
+          //"-dextension=openssl",
+          //"-dextension=mysqli",
+          //"-dextension=session",
+          //"-dzend_extension=xdebug",
+          "-dxdebug.client_port=9000",
+          "-dxdebug.mode=develop,debug",
+          "-dxdebug.start_with_request=yes",
+          "-S",
+          "127.0.0.1:8000"
+        ],
+        "xdebugSettings": {
+          "max_data": -1, "max_children": 1000
+        },
+        
+        "cwd": "${workspaceRoot}",
+        "port": 9000
+      }
+    ]
+  }
