@@ -346,6 +346,13 @@ if ($fresh) {
             margin: auto;
             width: 32em;
         }
+        
+        @media screen and (max-width: 32rem) {
+            div#content {
+            margin: .5em;
+            width: auto;
+          }
+        }
 
         input,
         input:focus {
