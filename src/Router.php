@@ -254,7 +254,7 @@ class Router
 
     private function createController(string $name, string $plugin = '')
     {
-        $path = $plugin ? '.' . App::PLUGINS . DIRECTORY_SEPARATOR . $plugin . DIRECTORY_SEPARATOR . Router::CONTROLLER : '.' . Router::CONTROLLER;
+        $path = $plugin ? App::PLUGINS . DIRECTORY_SEPARATOR . $plugin . DIRECTORY_SEPARATOR . Router::CONTROLLER : Router::CONTROLLER;
 
         $fileName = $path . DIRECTORY_SEPARATOR . $name . '.php';
         $ctrlName = $name . 'Controller';

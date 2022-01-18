@@ -39,7 +39,7 @@ class Factory
                 foreach (App::$plugins as $k => $p) {
                     if (is_array($p)) {
                         if (@$p['namespace'] == $ns) {
-                            $file = '.' . App::PLUGINS . DIRECTORY_SEPARATOR . $k . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . $dn . DIRECTORY_SEPARATOR . $nm . '.php';
+                            $file = App::PLUGINS . DIRECTORY_SEPARATOR . $k . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . $dn . DIRECTORY_SEPARATOR . $nm . '.php';
                             if (file_exists($file)) {
                                 include $file;
                                 return;
@@ -66,7 +66,7 @@ class Factory
             }
         }
 
-        $plugin_files = Factory::rglob('.' . App::PLUGINS . DIRECTORY_SEPARATOR . '*' . DIRECTORY_SEPARATOR . 'src', '*.php');
+        $plugin_files = Factory::rglob(App::PLUGINS . DIRECTORY_SEPARATOR . '*' . DIRECTORY_SEPARATOR . 'src', '*.php');
         foreach ($plugin_files as $pf) $stats .= stat($pf)['mtime'];
 
 

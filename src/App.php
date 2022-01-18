@@ -45,9 +45,9 @@ class App
             $config = [];
 
         $stats = '';
-        $pdirs = glob('.' . App::PLUGINS . DIRECTORY_SEPARATOR . '*', GLOB_ONLYDIR);
+        $pdirs = glob(App::PLUGINS . DIRECTORY_SEPARATOR . '*', GLOB_ONLYDIR);
         foreach ($pdirs as $pd) $stats .= stat($pd)['mtime'];
-        $pfiles = glob('.' . App::PLUGINS . DIRECTORY_SEPARATOR . '*' . DIRECTORY_SEPARATOR . 'plugin.json');
+        $pfiles = glob(App::PLUGINS . DIRECTORY_SEPARATOR . '*' . DIRECTORY_SEPARATOR . 'plugin.json');
         foreach ($pfiles as $pf) $stats .= stat($pf)['mtime'];
         $md5 = md5($stats);
 
