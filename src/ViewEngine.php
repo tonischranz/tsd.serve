@@ -100,7 +100,7 @@ class ServeViewEngine extends ViewEngine
         $plugin = $result->plugin();
         $view = $result->view();
         $layoutPlugin = $ctx->layoutPlugin;
-        $key = "$layoutPlugin-$plugin-" . str_replace('/', '.', $view);
+        $key = "$layoutPlugin-$plugin-" . str_replace(DIRECTORY_SEPARATOR, '.', $view);
         $cached_view = '';
         $view_file = '';
         $v = null;
