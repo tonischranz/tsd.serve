@@ -61,9 +61,7 @@ abstract class ViewEngine
     protected abstract function renderView(IViewResult $result, ViewContext $ctx);
 }
 
-/**
- * @Default
- */
+#[DefaultMode]
 class ServeViewEngine extends ViewEngine
 {
     const CACHED_VIEWS = '.cached_views.php';

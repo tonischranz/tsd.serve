@@ -87,10 +87,10 @@ class Factory
                 $modes = array();
                 $mode_matches = array();
                 $r = new ReflectionClass($c);
-                $com = $r->getDocComment();
 
-                $default = preg_match('/@Default/', $com);
-                if (preg_match_all('/@Mode\s(\w+)/', $com, $mode_matches)) $modes = $mode_matches[1];
+                $default = $r->getAttributes("tsd\serve\DefaultMode");
+                $ma = $r->getAttributes("tsd\serve\Mode");
+                $modes = array_map(fn($a)=>$a->getArguments()[0], $ma);
 
                 if ($default || $modes) {
                     foreach ($r->getInterfaces() as $i) {
