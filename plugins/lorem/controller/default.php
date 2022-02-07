@@ -31,7 +31,8 @@ class defaultController extends Controller
 
   function doSomething(MyData $data)
   {
-
+    var_dump($data);
+    return $this->view();
   }
 }
 
