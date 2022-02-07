@@ -28,4 +28,17 @@ class defaultController extends Controller
   {
     var_dump($code, $geb);
   }
+
+  function doSomething(MyData $data)
+  {
+
+  }
+}
+
+class MyData
+{
+  public string $myStr;
+  public int $myNr;
+  public string $moreText;
+
 }
