@@ -79,8 +79,8 @@ function install_serve($modules = [])
     if (file_exists('index.php')) rename('index.php', 'index.php.orig');
     file_put_contents('index.php', ["<?php\n", 'include \'' . SERVE_FILE . "';\n", "use tsd\serve\App;\n", "return App::serve();\n"]);
 
-    if (!is_dir('.plugins')) mkdir('.plugins');
-    if (!is_dir('.views')) mkdir('.views');
+    if (!is_dir('plugins')) mkdir('plugins');
+    if (!is_dir('views')) mkdir('views');
 
     //install modules
     if (in_array('admin', $modules)) {
@@ -113,7 +113,7 @@ function get_admin()
 
     $dir = "admin.$md5/" . ADMIN_REPO . '-' . ADMIN_BRANCH;
 
-    rcopy($dir, '.plugins'.DIRECTORY_SEPARATOR.'admin');
+    rcopy($dir, 'plugins'.DIRECTORY_SEPARATOR.'admin');
 
     $cfg = json_decode(file_get_contents(CONFIG_FILE), true);
     $cfg['clean']['admin_md5'] = $md5;
