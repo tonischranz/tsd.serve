@@ -454,7 +454,7 @@ class View
                 <title>{#title} - tsd.serve</title>
 
                 <link rel="icon" type="image/svg+xml" href="/_static/favicon.svg" sizes="any" />
-                <link rel="stylesheet" href="/_static/style.css" />
+                <link rel="stylesheet" href="/_static/style/css" />
 
                 <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
 
