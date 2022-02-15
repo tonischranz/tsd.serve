@@ -47,10 +47,8 @@ interface DB
 
 /**
  * MySQL implementation of tsd\serve\DB
- *
- * @Default
- * @Mode mysql
  */
+#[DefaultMode]
 class MysqlDB implements DB
 {
     private ?\mysqli $_con = null;
@@ -282,9 +280,8 @@ class MysqlDB implements DB
 
 /**
  * In-memory fake implementation of tsd\serve\DB
- *
- * @Mode fake
  */
+#[Mode("fake")]
 class FakeDB implements DB
 {
     private array $data = [];

@@ -4,6 +4,8 @@ namespace tsd\serve;
 
 use \ReflectionMethod;
 use \ReflectionClass;
+use \ReflectionParameter;
+use \ReflectionNamedType;
 
 /**
  * The Router
@@ -254,7 +256,7 @@ class Router
 
     private function createController(string $name, string $plugin = '')
     {
-        $path = $plugin ? '.' . App::PLUGINS . DIRECTORY_SEPARATOR . $plugin . DIRECTORY_SEPARATOR . Router::CONTROLLER : '.' . Router::CONTROLLER;
+        $path = $plugin ? App::PLUGINS . DIRECTORY_SEPARATOR . $plugin . DIRECTORY_SEPARATOR . Router::CONTROLLER : Router::CONTROLLER;
 
         $fileName = $path . DIRECTORY_SEPARATOR . $name . '.php';
         $ctrlName = $name . 'Controller';
@@ -312,7 +314,8 @@ abstract class Route
         foreach ($pinfos as $pi) {
             if (count($params) <= $n) {
                 //todo: Model validation
-                if (key_exists($pi->name, $this->data)) $params[] = $this->data[$pi->name];
+                if ($this->isModelParam($pi)) $params[] = $this->injectModel($pi);
+                else if (key_exists($pi->name, $this->data)) $params[] = $this->data[$pi->name];
                 else if (key_exists($n, $this->data)) $params[] = $this->data[$n];
                 else if ($pi->isDefaultValueAvailable()) $params[] = $pi->getDefaultValue();
             }
@@ -321,6 +324,27 @@ abstract class Route
         }
 
         return $this->methodInfo->invokeArgs($this->controller, $params);
+    }
+
+    function isModelParam(ReflectionParameter $pi)
+    {
+        if (!$pi->hasType()) return false;
+        $t = $pi->getType();
+        if (!$t instanceof ReflectionNamedType) return false;
+        return !$t->isBuiltin();
+    }
+
+    function injectModel(ReflectionParameter $pi)
+    {
+        $t = $pi->getType();
+        $c = new ReflectionClass($t->getName());
+        $obj = $c->newInstance();
+
+        foreach ($c->getProperties() as $pi)
+        {
+            if(key_exists($pi->name, $this->data)) $pi->setValue($obj, $this->data[$pi->name]); 
+        }
+        return $obj;
     }
 
     function checkPermission(Membership $member)

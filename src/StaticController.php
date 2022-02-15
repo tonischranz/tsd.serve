@@ -13,7 +13,7 @@ class StaticController extends Controller
         $ext = array_pop($parts);
         $plugin = array_shift($parts);
 
-        $file = '.' . App::PLUGINS . DIRECTORY_SEPARATOR . $plugin . DIRECTORY_SEPARATOR . 'static' . DIRECTORY_SEPARATOR . join(DIRECTORY_SEPARATOR, $parts) . '.' . $ext;
+        $file = App::PLUGINS . DIRECTORY_SEPARATOR . $plugin . DIRECTORY_SEPARATOR . 'static' . DIRECTORY_SEPARATOR . join(DIRECTORY_SEPARATOR, $parts) . '.' . $ext;
 
         if (!file_exists($file)) throw new NotFoundException;
 
@@ -26,7 +26,7 @@ class StaticController extends Controller
     {
         if ($this->ctx->layoutPlugin)
         {
-            $file = '.' . App::PLUGINS . DIRECTORY_SEPARATOR . $this->ctx->layoutPlugin . DIRECTORY_SEPARATOR . 'static' . DIRECTORY_SEPARATOR . 'favicon.svg';
+            $file = App::PLUGINS . DIRECTORY_SEPARATOR . $this->ctx->layoutPlugin . DIRECTORY_SEPARATOR . 'static' . DIRECTORY_SEPARATOR . 'favicon.svg';
             if (file_exists($file)) return new FileResult($file, 'image/svg+xml');
         }
         $file = 'favicon.svg';
@@ -47,7 +47,7 @@ class StaticController extends Controller
     {
         if ($this->ctx->layoutPlugin)
         {
-            $file = '.' . App::PLUGINS . DIRECTORY_SEPARATOR . $this->ctx->layoutPlugin . DIRECTORY_SEPARATOR . 'static' . DIRECTORY_SEPARATOR . 'style.css';
+            $file = App::PLUGINS . DIRECTORY_SEPARATOR . $this->ctx->layoutPlugin . DIRECTORY_SEPARATOR . 'static' . DIRECTORY_SEPARATOR . 'style.css';
             if (file_exists($file)) return new FileResult($file, 'text/css');
         }
         $file = 'style.css';
@@ -96,7 +96,7 @@ class StaticController extends Controller
     {
         if ($this->ctx->layoutPlugin)
         {
-            $file = '.' . App::PLUGINS . DIRECTORY_SEPARATOR . $this->ctx->layoutPlugin . DIRECTORY_SEPARATOR . 'static' . DIRECTORY_SEPARATOR . 'favicon.ico';
+            $file = App::PLUGINS . DIRECTORY_SEPARATOR . $this->ctx->layoutPlugin . DIRECTORY_SEPARATOR . 'static' . DIRECTORY_SEPARATOR . 'favicon.ico';
             if (file_exists($file)) return new FileResult($file);
         }
         $file = 'favicon.ico';

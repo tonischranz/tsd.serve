@@ -61,9 +61,7 @@ abstract class ViewEngine
     protected abstract function renderView(IViewResult $result, ViewContext $ctx);
 }
 
-/**
- * @Default
- */
+#[DefaultMode]
 class ServeViewEngine extends ViewEngine
 {
     const CACHED_VIEWS = '.cached_views.php';
@@ -100,7 +98,7 @@ class ServeViewEngine extends ViewEngine
         $plugin = $result->plugin();
         $view = $result->view();
         $layoutPlugin = $ctx->layoutPlugin;
-        $key = "$layoutPlugin-$plugin-" . str_replace('/', '.', $view);
+        $key = "$layoutPlugin-$plugin-" . str_replace(DIRECTORY_SEPARATOR, '.', $view);
         $cached_view = '';
         $view_file = '';
         $v = null;
@@ -224,9 +222,9 @@ class View
 
     private static function loadTemplate($path, $plugin)
     {
-        $noPluginBasePath = '.' . ServeViewEngine::VIEWS;
-        $basePath = $plugin ? '.' . App::PLUGINS . DIRECTORY_SEPARATOR . $plugin . DIRECTORY_SEPARATOR . ServeViewEngine::VIEWS : $noPluginBasePath;
-        $alternateBasePath = $plugin ? '.' . ServeViewEngine::VIEWS . DIRECTORY_SEPARATOR . App::PLUGINS . DIRECTORY_SEPARATOR . $plugin : '';
+        $noPluginBasePath = ServeViewEngine::VIEWS;
+        $basePath = $plugin ? App::PLUGINS . DIRECTORY_SEPARATOR . $plugin . DIRECTORY_SEPARATOR . ServeViewEngine::VIEWS : $noPluginBasePath;
+        $alternateBasePath = $plugin ? ServeViewEngine::VIEWS . DIRECTORY_SEPARATOR . App::PLUGINS . DIRECTORY_SEPARATOR . $plugin : '';
 
         $viewPath = $alternateBasePath ? $alternateBasePath . DIRECTORY_SEPARATOR . $path : $basePath . DIRECTORY_SEPARATOR . $path;
 

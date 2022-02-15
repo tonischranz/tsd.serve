@@ -39,7 +39,7 @@ class Factory
                 foreach (App::$plugins as $k => $p) {
                     if (is_array($p)) {
                         if (@$p['namespace'] == $ns) {
-                            $file = '.' . App::PLUGINS . DIRECTORY_SEPARATOR . $k . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . $dn . DIRECTORY_SEPARATOR . $nm . '.php';
+                            $file = App::PLUGINS . DIRECTORY_SEPARATOR . $k . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . $dn . DIRECTORY_SEPARATOR . $nm . '.php';
                             if (file_exists($file)) {
                                 include $file;
                                 return;
@@ -66,7 +66,7 @@ class Factory
             }
         }
 
-        $plugin_files = Factory::rglob('.' . App::PLUGINS . DIRECTORY_SEPARATOR . '*' . DIRECTORY_SEPARATOR . 'src', '*.php');
+        $plugin_files = Factory::rglob(App::PLUGINS . DIRECTORY_SEPARATOR . '*' . DIRECTORY_SEPARATOR . 'src', '*.php');
         foreach ($plugin_files as $pf) $stats .= stat($pf)['mtime'];
 
 
@@ -87,10 +87,10 @@ class Factory
                 $modes = array();
                 $mode_matches = array();
                 $r = new ReflectionClass($c);
-                $com = $r->getDocComment();
 
-                $default = preg_match('/@Default/', $com);
-                if (preg_match_all('/@Mode\s(\w+)/', $com, $mode_matches)) $modes = $mode_matches[1];
+                $default = $r->getAttributes("tsd\serve\DefaultMode");
+                $ma = $r->getAttributes("tsd\serve\Mode");
+                $modes = array_map(fn($a)=>$a->getArguments()[0], $ma);
 
                 if ($default || $modes) {
                     foreach ($r->getInterfaces() as $i) {
