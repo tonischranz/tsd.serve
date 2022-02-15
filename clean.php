@@ -181,7 +181,14 @@ function get_serve()
     unlink("serve.$md5.zip");
 }
 
-
+if (PHP_SAPI == 'cli') {
+    if ($argc == 1) {
+        shell_exec(PHP_BINARY . " -S localhost:8000");
+    } else {
+        echo "Usage: php clean.php\n";
+        echo "\n";
+    }
+}
 
 $fresh = !file_exists(CONFIG_FILE);
 $auth = false;
