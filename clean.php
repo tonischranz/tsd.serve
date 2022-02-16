@@ -199,8 +199,14 @@ $admin_update_available = false;
 $config_no_key = false;
 $extensions_ok = false;
 $missing_extensions = [];
-$ext= [];
 
+$ext= get_loaded_extensions();
+            
+foreach (EXTENSIONS as $et)
+{
+    if (!in_array($et, $ext))
+    $missing_extensions[]=$et;
+}
 
 if ($fresh) {
     if (@$_POST['action'] == 'install') {
@@ -266,14 +272,7 @@ if ($fresh) {
                 $admin_update_available = $cfg['clean']['admin_md5'] != $md5;
             }
         } else {
-            $not_installed = true;
-            $ext = get_loaded_extensions();
-            
-            foreach (EXTENSIONS as $et)
-            {
-                if (!in_array($et, $ext))
-                $missing_extensions[]=$et;
-            }
+            $not_installed = true;            
         }
 
         if (@$_POST['action']) {
@@ -384,7 +383,7 @@ if ($fresh) {
             font-size: .6em;
         }
 
-        input[type=checkbox] {
+        input[type=checkbox] {            
             width: auto;
             margin-right: .7em;
         }
@@ -438,32 +437,49 @@ if ($fresh) {
             <p>
                 Looks like you don't have installed tsd.serve yet.
             </p>
+
             <div class="gap"></div>
-            <form method="post" action="<?php echo $_SERVER['PHP_SELF'] ?>" class="install">
-                <h3>Master Account</h3>
+
+            <?php if ($missing_extensions) : ?>
                 <div>
-                    <input type="text" name="username" placeholder="username" required />
+                    <h2>extensions</h2>
+                    <p>the following php extensions are needed by the framework</p>
+                    <ul>
+                        <?php foreach ($missing_extensions as $me) { ?>
+                            <li><?php echo $me; ?></li>
+                        <?php } ?>                    
+                    </ul>
                 </div>
-                <div>
-                    <input type="password" name="pw1" placeholder="password" required />
-                </div>
-                <div>
-                    <input type="password" name="pw2" placeholder="repeat password" required />
-                </div>
-                <div>
-                    <span class="error" style="display:none;" id="err_pwd_mismatch">passwords do not match</span>
-                </div>
-                <div class="gap"></div>
-                <h3>Additional Modules</h3>
-                <div>
-                    <input id="admin" type="checkbox" name="module[]" value="admin" checked>
-                    <label for="admin">Install the serve.admin administration UI as well</label>
-                </div>
-                <div class="gap"></div>
-                <div class="right">
-                    <button type="submit" name="action" value="install">install</button>
-                </div>
-            </form>
+            <?php else : ?>
+
+                <form method="post" action="<?php echo $_SERVER['PHP_SELF'] ?>" class="install">
+                    <h3>Master Account</h3>
+                    <div>
+                        <input type="text" name="username" placeholder="username" required />
+                    </div>
+                    <div>
+                        <input type="password" name="pw1" placeholder="password" required />
+                    </div>
+                    <div>
+                        <input type="password" name="pw2" placeholder="repeat password" required />
+                    </div>
+                    <div>
+                        <span class="error" style="display:none;" id="err_pwd_mismatch">passwords do not match</span>
+                    </div>
+                    <div class="gap"></div>
+                    <h3>Additional Modules</h3>
+                    <div>
+                        <label class="checkbox">
+                            <input id="admin" type="checkbox" name="module[]" value="admin" checked>
+                            Install the serve.admin administration UI as well
+                        </label>
+                    </div>
+                    <div class="gap"></div>
+                    <div class="right">
+                        <button type="submit" name="action" value="install">install</button>
+                    </div>                   
+                </form>
+            <?php endif ?>
 
         <?php endif ?>
 
