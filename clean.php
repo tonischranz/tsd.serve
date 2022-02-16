@@ -9,7 +9,7 @@ const SERVE_BRANCH = 'next';
 const ADMIN_REPO = 'serve.admin';
 const ADMIN_BRANCH = 'main';
 
-const EXTENSIONS = ['dom', 'openssl', 'session', 'zip', 'mysqli'];
+const EXTENSIONS = ['dom', 'openssl', 'session', 'zip' /*, 'mysqli'*/];
 
 $serve_url = SERVE_BASE . '/' . SERVE_REPO . '/archive/' . SERVE_BRANCH . '.zip';
 $admin_url = SERVE_BASE . '/' . ADMIN_REPO . '/archive/' . ADMIN_BRANCH . '.zip';
