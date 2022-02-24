@@ -11,7 +11,7 @@ ini_set('display_errors', 'On');
 
 if (PHP_SAPI == 'cli') {
     if ($argc == 1) {
-        shell_exec(PHP_BINARY . " -S localhost:8000 serve.php");
+        shell_exec("\"" . PHP_BINARY . "\" -S localhost:8000 serve.php");
     } else {
         echo "Usage: php serve.php [<command>]\n";
         echo "\n";
