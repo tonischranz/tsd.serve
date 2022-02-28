@@ -249,9 +249,12 @@ if ($fresh) {
         }
     } else $config_no_user = true;
 
-    session_start();
-    if (@$_SESSION['auth']) {
-        $auth = true;
+    if (!in_array('session', $missing_extensions)){
+    	session_start();
+
+	if (@$_SESSION['auth']) {
+            $auth = true;
+        }
     }
 
     if (@$auth) {
@@ -272,7 +275,7 @@ if ($fresh) {
                 $admin_update_available = $cfg['clean']['admin_md5'] != $md5;
             }
         } else {
-            $not_installed = true;            
+            $not_installed = true;
         }
 
         if (@$_POST['action']) {
