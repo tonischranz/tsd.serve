@@ -367,7 +367,7 @@ class View
                     </div>
                     <div>
                       <input type="email" name="email" placeholder="email" value="{email}" />
-                    </div>                   
+                    </div>
                     <div class="right">
                       <input type="submit" value="save" />
                     </div
@@ -387,20 +387,20 @@ class View
                 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
                 <title>change password</title>
                 <script>
-                $(function() {
-        
-                    $('form.password input[type=password]').change(function() {
-                        $('#err_pwd_mismatch').hide();
-                    });
-        
-                    $('form.password').submit(function(e) {
-                        if ($('input[name=pw1]').val() != $('input[name=pw2]').val()) {
-                            $('#err_pwd_mismatch').show();
-                            e.preventDefault();
-                        }
-                    });
-                });
-            </script>
+                  $(function() {
+          
+                      $('form.password input[type=password]').change(function() {
+                          $('#err_pwd_mismatch').hide();
+                      });
+          
+                      $('form.password').submit(function(e) {
+                          if ($('input[name=pw1]').val() != $('input[name=pw2]').val()) {
+                              $('#err_pwd_mismatch').show();
+                              e.preventDefault();
+                          }
+                      });
+                  });
+                </script>
               </head>
             
               <body>
