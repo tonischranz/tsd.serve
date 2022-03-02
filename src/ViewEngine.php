@@ -547,48 +547,4 @@ class View
 
         return preg_replace_callback_array($patterns, $template, -1);
     }
-
-    private static function copyNode(DOMNode $t, DOMDocument $o, DOMNode $p, Label $l)
-    {
-        switch ($t->nodeType) {
-            case XML_HTML_DOCUMENT_NODE:
-                View::copyNode($t->documentElement, $o, $o, $l);
-                break;
-            case XML_ELEMENT_NODE:
-                $n = $o->importNode($t);
-                $n = $p->appendChild($n);
-                View::localizeAttributes($n, $l);
-                foreach ($t->childNodes as $c) View::copyNode($c, $o, $n, $l);
-                break;
-            case XML_CDATA_SECTION_NODE:
-                View::copyCData($t, $o, $p);
-            case XML_TEXT_NODE:
-                View::copyText($t, $o, $p, $l);
-                break;
-        }
-    }
-
-    private static function localizeAttributes(DOMElement $e, Label $l)
-    {
-        foreach ($e->attributes as $a) {
-            if ($e->nodeName == 'input' && $a->name == 'placeholder') $a->value = View::localizeText($a->value, $l);
-            if ($e->nodeName == 'img' && $a->name == 'alt') $a->value = View::localizeText($a->value, $l);
-        }
-    }
-
-    private static function copyCData(DOMText $t, DOMDocument $o, DOMElement $p)
-    {
-        $p->appendChild($o->createCDATASection($t->data));
-    }
-
-    private static function copyText(DOMText $t, DOMDocument $o, DOMElement $p, Label $l)
-    {
-        if ($t->isElementContentWhitespace()) return;
-        if ($p->nodeName == 'style' || $p->nodeName == 'script') return;
-        else {
-            //todo: MD
-            $p->appendChild($o->createTextNode(View::localizeText($t->wholeText, $l)));
-        }
-    }
-
 }
