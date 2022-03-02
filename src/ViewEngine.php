@@ -139,7 +139,7 @@ class ServeViewEngine extends ViewEngine
         ob_end_clean();
 
         $ctx->debug = $debug;
-        $c = (array)$ctx;
+        $c = (array)$ctx; //todo: lkajdsföliabervr
 
         $d     = $data;
         $s  = [$d];
