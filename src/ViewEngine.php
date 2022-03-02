@@ -120,49 +120,6 @@ class ServeViewEngine extends ViewEngine
             if (!$v) $v = new View($view, $layoutPlugin, $plugin);
             
             $template = $v->compile();
-            /*$layout = new Layout($layoutPlugin);
-            $layoutTemplate = $layout->compile();*/
-
-            /*$t = new DOMDocument;
-            $o = new DOMDocument;
-
-            libxml_use_internal_errors(true);
-            $t->loadHTML($template);
-            $o->loadHTML($layoutTemplate);
-
-            $title = $t->getElementsByTagName('title')[0]->C14N();
-            $title = str_replace(['<title>', '</title>'], '', $title);
-            $title = str_replace('??>', '?>', $title);
-            $x = new DOMXPath($t);
-            $xL = new DOMXPath($o);
-            $links = $x->query('head/link');
-            $styles = $x->query('head/style');
-            $scripts = $x->query('head/script');
-            $main = $x->query('body/main')[0];
-
-            $lBody = $o->getElementsByTagName('body')[0];
-            $lOldMain = $xL->query('//main')[0];
-            $lMain = $o->importNode($main, true);
-            $lBody->replaceChild($lMain, $lOldMain);
-
-            $lHead = $o->getElementsByTagName('head')[0];
-
-            foreach ($links as $h) $lHead->appendChild($o->importNode($h, true));
-            foreach ($styles as $h) $lHead->appendChild($o->importNode($h, true));
-            foreach ($scripts as $h) $lHead->appendChild($o->importNode($h, true));
-
-
-            //$ctx->title = $title;
-            $to = $o->saveHTML();
-            $to = preg_replace('/\{#title\}/', $title, $to);
-            
-            $to = preg_replace('/\&lt;\?php/', '<?php', $to);
-            $to = preg_replace('/\?\&gt;/', '?>', $to);
-            $to = preg_replace('/%20/', ' ', $to);
-            $to = preg_replace('/%24/', '$', $to);
-            $to = preg_replace('/%5B/', '[', $to);
-            $to = preg_replace('/%5D/', ']', $to);
-            $to = preg_replace('/PUBLIC.//', '>', $to, 1);*/
 
             //cache
             $md5 = $v->md5();
@@ -193,14 +150,11 @@ class ServeViewEngine extends ViewEngine
 
 class View
 {
-    //private Label $labels;
     private string $template;
     private string $md5;
 
     function __construct(string $path, string $layoutPlugin, string $plugin = '')
     {
-        //$this->labels = Labels::create($path);
-
         $vt = View::loadTemplate($path . '.html', $plugin);
         $lt = View::loadTemplate('layout.html', $layoutPlugin);
         
@@ -232,11 +186,11 @@ class View
         foreach ($styles as $h) $lHead->appendChild($o->importNode($h, true));
         foreach ($scripts as $h) $lHead->appendChild($o->importNode($h, true));
 
-
-        //$ctx->title = $title;
         $to = $o->saveHTML();
+
+        $to = preg_replace('/%7B/', '{', $to);
+        $to = preg_replace('/%7D/', '}', $to);
     
-        //$this->template = View::loadTemplate($path . '.html', $plugin);
         $this->template = $to;
         $this->md5 = md5($this->template);
     }
@@ -249,13 +203,7 @@ class View
     public function compile()
     {
       return View::compileTemplate($this->template);
-      //return View::compileTemplate($this->localize($this->template));
     }
-
-    /*protected function localize($template)
-    {
-        return View::localizeTemplate($template, $this->labels);
-    }*/
 
     private static function loadTemplate($path, $plugin)
     {
@@ -522,21 +470,6 @@ class View
         return file_get_contents($viewPath);
     }
 
-    private static function localizeTemplate(string $template, Label $labels)
-    {
-        $t = new DOMDocument;
-        $o = new DOMDocument;
-        libxml_use_internal_errors(true);
-        $t->loadHTML($template);
-        View::copyNode($t, $o, $o, $labels);
-        $to = $o->saveHTML();
-
-        $to = preg_replace('/%7B/', '{', $to);
-        $to = preg_replace('/%7D/', '}', $to);
-        
-        return $to;
-    }
-
     private static function compileExpression($exp)
     {
         if ($exp == '.') return '$d';
@@ -658,84 +591,4 @@ class View
         }
     }
 
-    private static function localizeText(string $s, Label $l)
-    {
-        return $s;
-        //todo: localize!
-        //return $l->getLabel($s);
-    }
-}
-
-class Layout extends View
-{
-
-    public function __construct(string $plugin = '')
-    {
-        parent::__construct('layout', $plugin);
-    }
-}
-
-
-interface Label
-{
-
-    /**
-     *
-     * @param string $name
-     * @return string
-     */
-    function getLabel(string $name);
-}
-
-
-class JSONLabels implements Label
-{
-
-    private $root;
-    private $data;
-
-    public function __construct(string $path, JSONLabels $root = null)
-    {
-        if ($root)
-            $this->root = $root;
-
-        $file = $path . '/labels.json';
-
-        if (file_exists($file))
-            $this->data = json_decode(file_get_contents($file), true);
-    }
-
-    function getLabel(string $name)
-    {
-        $lang = 'de';
-
-        if (!$name)
-            return false;
-        if ($name[0] == '/') {
-            if ($this->root) {
-                return $this->root->getLabel(substr($name, 1));
-            }
-        }
-        if (!$this->data || !array_key_exists($name, $this->data))
-            return "[not found|$name]";
-        if (!array_key_exists($lang, $this->data[$name]))
-            return "[not $lang|$name]";
-        return $this->data[$name][$lang];
-    }
-}
-
-
-class Labels
-{
-
-    /**
-     *
-     * @param string $path
-     * @return \tsd\serve\Label
-     */
-    static function create(string $path)
-    {
-        $l = new JSONLabels(dirname($path), new JSONLabels('./views'));
-        return $l;
-    }
 }
