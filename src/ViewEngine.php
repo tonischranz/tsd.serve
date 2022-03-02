@@ -108,7 +108,7 @@ class ServeViewEngine extends ViewEngine
             $timestamp = ServeViewEngine::$cached_views[$key][1];
 
             if ($timestamp + ServeViewEngine::CACHE_DURATION < time()) {
-                $v = new View($view, $plugin);
+                $v = new View($view, $layoutPlugin, $plugin);
                 $md5 = $v->md5();
             }
             $cached_view = "$key.$md5.php";
@@ -117,13 +117,13 @@ class ServeViewEngine extends ViewEngine
         if ($cached_view && file_exists(ServeViewEngine::CACHED_VIEWS . DIRECTORY_SEPARATOR . $cached_view)) {
             $view_file = ServeViewEngine::CACHED_VIEWS . DIRECTORY_SEPARATOR . $cached_view;
         } else {
-            if (!$v) $v = new View($view, $plugin);
+            if (!$v) $v = new View($view, $layoutPlugin, $plugin);
             
             $template = $v->compile();
-            $layout = new Layout($layoutPlugin);
-            $layoutTemplate = $layout->compile();
+            /*$layout = new Layout($layoutPlugin);
+            $layoutTemplate = $layout->compile();*/
 
-            $t = new DOMDocument;
+            /*$t = new DOMDocument;
             $o = new DOMDocument;
 
             libxml_use_internal_errors(true);
@@ -152,7 +152,7 @@ class ServeViewEngine extends ViewEngine
             foreach ($scripts as $h) $lHead->appendChild($o->importNode($h, true));
 
 
-            /*$ctx->title = $title;*/
+            //$ctx->title = $title;
             $to = $o->saveHTML();
             $to = preg_replace('/\{#title\}/', $title, $to);
             
@@ -162,13 +162,13 @@ class ServeViewEngine extends ViewEngine
             $to = preg_replace('/%24/', '$', $to);
             $to = preg_replace('/%5B/', '[', $to);
             $to = preg_replace('/%5D/', ']', $to);
-            $to = preg_replace('/PUBLIC.*/', '>', $to, 1);
+            $to = preg_replace('/PUBLIC.//', '>', $to, 1);*/
 
             //cache
             $md5 = $v->md5();
             $view_file = ServeViewEngine::CACHED_DIR . DIRECTORY_SEPARATOR . "$key.$md5.php";
             array_map('unlink', glob(ServeViewEngine::CACHED_DIR . DIRECTORY_SEPARATOR . "$key.*.php"));
-            file_put_contents($view_file, $to);
+            file_put_contents($view_file, $template);
             ServeViewEngine::$cached_views[$key] = [$md5, time()];
             ServeViewEngine::writeCacheFile();
         }
@@ -193,15 +193,51 @@ class ServeViewEngine extends ViewEngine
 
 class View
 {
-    private Label $labels;
+    //private Label $labels;
     private string $template;
     private string $md5;
 
-    function __construct(string $path, string $plugin = '')
+    function __construct(string $path, string $layoutPlugin, string $plugin = '')
     {
-        $this->labels = Labels::create($path);
+        //$this->labels = Labels::create($path);
 
-        $this->template = View::loadTemplate($path . '.html', $plugin);
+        $vt = View::loadTemplate($path . '.html', $plugin);
+        $lt = View::loadTemplate('layout.html', $layoutPlugin);
+        
+        $t = new DOMDocument;
+        $o = new DOMDocument;
+
+        libxml_use_internal_errors(true);
+        $t->loadHTML($vt);
+        $o->loadHTML($lt);
+
+        $title = $t->getElementsByTagName('title')[0]->C14N();
+        $title = str_replace(['<title>', '</title>'], '', $title);
+        $title = str_replace('??>', '?>', $title);
+        $x = new DOMXPath($t);
+        $xL = new DOMXPath($o);
+        $links = $x->query('head/link');
+        $styles = $x->query('head/style');
+        $scripts = $x->query('head/script');
+        $main = $x->query('body/main')[0];
+
+        $lBody = $o->getElementsByTagName('body')[0];
+        $lOldMain = $xL->query('//main')[0];
+        $lMain = $o->importNode($main, true);
+        $lBody->replaceChild($lMain, $lOldMain);
+
+        $lHead = $o->getElementsByTagName('head')[0];
+
+        foreach ($links as $h) $lHead->appendChild($o->importNode($h, true));
+        foreach ($styles as $h) $lHead->appendChild($o->importNode($h, true));
+        foreach ($scripts as $h) $lHead->appendChild($o->importNode($h, true));
+
+
+        //$ctx->title = $title;
+        $to = $o->saveHTML();
+    
+        //$this->template = View::loadTemplate($path . '.html', $plugin);
+        $this->template = $to;
         $this->md5 = md5($this->template);
     }
 
@@ -212,13 +248,14 @@ class View
 
     public function compile()
     {
-        return View::compileTemplate($this->localize($this->template));
+      return View::compileTemplate($this->template);
+      //return View::compileTemplate($this->localize($this->template));
     }
 
-    protected function localize($template)
+    /*protected function localize($template)
     {
         return View::localizeTemplate($template, $this->labels);
-    }
+    }*/
 
     private static function loadTemplate($path, $plugin)
     {
