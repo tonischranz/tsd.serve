@@ -133,13 +133,13 @@ class ServeViewEngine extends ViewEngine
         ServeViewEngine::run($view_file, $result->data(), $ctx);
     }
 
-    private static function run(string $view, ?array $data, ViewContext $ctx)
+    private static function run(string $view, $data, ViewContext $ctx)
     {
         $debug = ob_get_contents();
         ob_end_clean();
 
         $ctx->debug = $debug;
-        $c = (array)$ctx; //todo: lkajdsföliabervr
+        $c = (array)$ctx;
 
         $d     = $data;
         $s  = [$d];
@@ -482,10 +482,10 @@ class View
 
         $name = substr($parts[0], 1);
 
-        $o = str_split($parts[0])[0] == '@' ? "\$c['$name']" : "\$d['$parts[0]']";
+        $o = str_split($parts[0])[0] == '@' ? "\$c['$name']" : "((array)\$d)['$parts[0]']";
         array_shift($parts);
         foreach ($parts as $p) {
-            $o .= "['$p']";
+            $o = "((array){$o})['$p']";
         }
 
         return $o;

@@ -11,4 +11,33 @@ class zahnController extends Controller
     'code'=>'<html>{bla}<bod><textarea>asdf&lt;/textarea></body></html>']);
   }
 
+  function showData ()
+  {
+    $data = new ViewData;
+    $aa = (array) $data;
+    $a = $aa['foo'];
+    $b = ((array)$data)['bar'];
+    $ab = ((array)((array)$data)['foo'])['bar'];
+
+
+    return $this->view(new ViewData);
+  }
+
+}
+
+class ViewData
+{
+  public Foo $foo;
+  public string $bar = "9876";
+
+  function __construct()
+  {
+    $this->foo = new Foo;
+  }
+
+}
+
+class Foo
+{
+  public string $bar = "1234";
 }
