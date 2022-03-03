@@ -303,19 +303,7 @@ if ($fresh) {
         $_SESSION['auth'] = true;
 
         $cfg = json_decode(file_get_contents(CONFIG_FILE), true);
-
-        if (@$_POST['action']) {
-            if ($_POST['action'] == 'update') {
-                if ($update_available) get_serve();
-                if ($admin_update_available) get_admin();
-                $update_available = false;
-                $admin_update_available = false;
-            } else if ($_POST['action'] == 'install') {
-                if ($config_no_key) update_config();
-                install_serve(@$_POST['module'] ? $_POST['module'] : []);
-            }
-        }
-
+        
         if (file_exists(SERVE_FILE))
         {
             if (@$cfg['clean']['serve_md5']) 
@@ -332,6 +320,17 @@ if ($fresh) {
             $not_installed = true;
         }
 
+        if (@$_POST['action']) {
+            if ($_POST['action'] == 'update') {
+                if ($update_available) get_serve();
+                if ($admin_update_available) get_admin();
+                $update_available = false;
+                $admin_update_available = false;
+            } else if ($_POST['action'] == 'install') {
+                if ($config_no_key) update_config();
+                install_serve(@$_POST['module'] ? $_POST['module'] : []);
+            }
+        }
     } else $login = true;
 }
 
