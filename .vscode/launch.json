@@ -5,7 +5,7 @@
         "name": "Launch server",
         "type": "php",
         "request": "launch",
-        "program": "${workspaceRoot}/serve.php",
+        "program": "${workspaceRoot}/clean.php",
         "runtimeArgs": [
           //"-dextension=openssl",
           //"-dextension=mysqli",

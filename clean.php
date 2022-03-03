@@ -1,7 +1,11 @@
 <?php
 
+////¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨/
+/// paths                                                                    /
+//__________________________________________________________________________/
+
 const CONFIG_FILE = '.config.json';
-const SERVE_FILE = '.tsd.serve.php';
+const SERVE_FILE = '.php';
 
 const SERVE_BASE = 'https://github.com/tonischranz';
 const SERVE_REPO = 'tsd.serve';
@@ -13,6 +17,10 @@ const EXTENSIONS = ['dom', 'openssl', 'session', 'zip' /*, 'mysqli'*/];
 
 $serve_url = SERVE_BASE . '/' . SERVE_REPO . '/archive/' . SERVE_BRANCH . '.zip';
 $admin_url = SERVE_BASE . '/' . ADMIN_REPO . '/archive/' . ADMIN_BRANCH . '.zip';
+
+////¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨/
+/// functions                                                                /
+//__________________________________________________________________________/
 
 function rrmdir($dir)
 {
@@ -76,8 +84,8 @@ function install_serve($modules = [])
 {
     get_serve();
 
-    if (file_exists('index.php')) rename('index.php', 'index.php.orig');
-    file_put_contents('index.php', ["<?php\n", 'include \'' . SERVE_FILE . "';\n", "use tsd\serve\App;\n", "return App::serve();\n"]);
+    /*if (file_exists('index.php')) rename('index.php', 'index.php.orig');
+    file_put_contents('index.php', ["<?php\n", 'include \'' . SERVE_FILE . "';\n", "use tsd\serve\App;\n", "return App::serve();\n"]);*/
 
     if (!is_dir('plugins')) mkdir('plugins');
     if (!is_dir('views')) mkdir('views');
@@ -173,6 +181,8 @@ function get_serve()
         }
     }
 
+    file_put_contents(SERVE_FILE, 'App::serve();', FILE_APPEND);
+    
     $cfg = json_decode(file_get_contents(CONFIG_FILE), true);
     $cfg['clean']['serve_md5'] = $md5;
     file_put_contents(CONFIG_FILE, json_encode($cfg, JSON_PRETTY_PRINT));
@@ -181,14 +191,43 @@ function get_serve()
     unlink("serve.$md5.zip");
 }
 
+////¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨/
+/// entry points                                                             /
+//__________________________________________________________________________/
+
 if (PHP_SAPI == 'cli') {
     if ($argc == 1) {
-        shell_exec(PHP_BINARY . " -S localhost:8000");
+        shell_exec(PHP_BINARY . " -S localhost:8000 clean.php");
     } else {
         echo "Usage: php clean.php\n";
         echo "\n";
     }
+    exit(0);
 }
+
+$url = $_SERVER['REQUEST_URI'];
+
+if ($url != '/clean.php')
+{
+    if (file_exists('.' . urldecode($url)) && $url != '/') return false;
+
+    if (file_exists('.php'))
+    {
+        include '.php';
+        exit(0);
+    }
+
+    spl_autoload_register(function($name){
+        $parts = explode('\\', $name);
+        if (count($parts) == 3 && $parts[0] == 'tsd' && $parts[1] == 'serve') include 'src' . DIRECTORY_SEPARATOR . $parts[2] . '.php';
+    });
+    \tsd\serve\App::serve();
+    exit(0);
+}
+
+////¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨/
+/// clean install                                                            /
+//__________________________________________________________________________/
 
 $fresh = !file_exists(CONFIG_FILE);
 $auth = false;
@@ -262,6 +301,18 @@ if ($fresh) {
 
         $cfg = json_decode(file_get_contents(CONFIG_FILE), true);
 
+        if (@$_POST['action']) {
+            if ($_POST['action'] == 'update') {
+                if ($update_available) get_serve();
+                if ($admin_update_available) get_admin();
+                $update_available = false;
+                $admin_update_available = false;
+            } else if ($_POST['action'] == 'install') {
+                if ($config_no_key) update_config();
+                install_serve(@$_POST['module'] ? $_POST['module'] : []);
+            }
+        }
+
         if (file_exists(SERVE_FILE))
         {
             if (@$cfg['clean']['serve_md5']) 
@@ -276,18 +327,6 @@ if ($fresh) {
             }
         } else {
             $not_installed = true;
-        }
-
-        if (@$_POST['action']) {
-            if ($_POST['action'] == 'update') {
-                if ($update_available) get_serve();
-                if ($admin_update_available) get_admin();
-                $update_available = false;
-                $admin_update_available = false;
-            } else if ($_POST['action'] == 'install') {
-                if ($config_no_key) update_config();
-                install_serve(@$_POST['module'] ? $_POST['module'] : []);
-            }
         }
 
     } else $login = true;
