@@ -39,7 +39,7 @@ class DefaulMembership implements Membership
     $username = $this->getName();
     $o = [];
     
-    if (array_key_exists('groups', $this->users[$username])) 
+    if (array_key_exists($username, $this->users) && array_key_exists('groups', $this->users[$username])) 
       foreach ($this->users[$username]['groups'] as $g)
       {
         $o[$g] = true;
