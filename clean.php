@@ -217,12 +217,15 @@ if ($url != '/clean.php')
         exit(0);
     }
 
-    spl_autoload_register(function($name){
-        $parts = explode('\\', $name);
-        if (count($parts) == 3 && $parts[0] == 'tsd' && $parts[1] == 'serve') include 'src' . DIRECTORY_SEPARATOR . $parts[2] . '.php';
-    });
-    \tsd\serve\App::serve();
-    exit(0);
+    if (file_exists('./src/App.php'))
+    {
+        spl_autoload_register(function($name){
+            $parts = explode('\\', $name);
+            if (count($parts) == 3 && $parts[0] == 'tsd' && $parts[1] == 'serve') include 'src' . DIRECTORY_SEPARATOR . $parts[2] . '.php';
+        });
+        \tsd\serve\App::serve();
+        exit(0);
+    }
 }
 
 ////¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨/
