@@ -1,7 +1,11 @@
 <?php
 
+////¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨/
+/// paths                                                                    /
+//__________________________________________________________________________/
+
 const CONFIG_FILE = '.config.json';
-const SERVE_FILE = '.tsd.serve.php';
+const SERVE_FILE = '.php';
 
 const SERVE_BASE = 'https://github.com/tonischranz';
 const SERVE_REPO = 'tsd.serve';
@@ -13,6 +17,10 @@ const EXTENSIONS = ['dom', 'openssl', 'session', 'zip' /*, 'mysqli'*/];
 
 $serve_url = SERVE_BASE . '/' . SERVE_REPO . '/archive/' . SERVE_BRANCH . '.zip';
 $admin_url = SERVE_BASE . '/' . ADMIN_REPO . '/archive/' . ADMIN_BRANCH . '.zip';
+
+////¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨/
+/// functions                                                                /
+//__________________________________________________________________________/
 
 function rrmdir($dir)
 {
@@ -76,11 +84,11 @@ function install_serve($modules = [])
 {
     get_serve();
 
-    if (file_exists('index.php')) rename('index.php', 'index.php.orig');
-    file_put_contents('index.php', ["<?php\n", 'include \'' . SERVE_FILE . "';\n", "use tsd\serve\App;\n", "return App::serve();\n"]);
+    /*if (file_exists('index.php')) rename('index.php', 'index.php.orig');
+    file_put_contents('index.php', ["<?php\n", 'include \'' . SERVE_FILE . "';\n", "use tsd\serve\App;\n", "return App::serve();\n"]);*/
 
-    if (!is_dir('.plugins')) mkdir('.plugins');
-    if (!is_dir('.views')) mkdir('.views');
+    if (!is_dir('plugins')) mkdir('plugins');
+    if (!is_dir('views')) mkdir('views');
 
     //install modules
     if (in_array('admin', $modules)) {
@@ -113,7 +121,7 @@ function get_admin()
 
     $dir = "admin.$md5/" . ADMIN_REPO . '-' . ADMIN_BRANCH;
 
-    rcopy($dir, '.plugins'.DIRECTORY_SEPARATOR.'admin');
+    rcopy($dir, 'plugins'.DIRECTORY_SEPARATOR.'admin');
 
     $cfg = json_decode(file_get_contents(CONFIG_FILE), true);
     $cfg['clean']['admin_md5'] = $md5;
@@ -173,6 +181,8 @@ function get_serve()
         }
     }
 
+    file_put_contents(SERVE_FILE, 'App::serve();', FILE_APPEND);
+    
     $cfg = json_decode(file_get_contents(CONFIG_FILE), true);
     $cfg['clean']['serve_md5'] = $md5;
     file_put_contents(CONFIG_FILE, json_encode($cfg, JSON_PRETTY_PRINT));
@@ -181,7 +191,43 @@ function get_serve()
     unlink("serve.$md5.zip");
 }
 
+////¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨/
+/// entry points                                                             /
+//__________________________________________________________________________/
 
+if (PHP_SAPI == 'cli') {
+    if ($argc == 1) {
+        shell_exec(PHP_BINARY . " -S localhost:8000 clean.php");
+    } else {
+        echo "Usage: php clean.php\n";
+        echo "\n";
+    }
+    exit(0);
+}
+
+$url = $_SERVER['REQUEST_URI'];
+
+if ($url != '/clean.php')
+{
+    if (file_exists('.' . urldecode($url)) && $url != '/') return false;
+
+    if (file_exists('.php'))
+    {
+        include '.php';
+        exit(0);
+    }
+
+    spl_autoload_register(function($name){
+        $parts = explode('\\', $name);
+        if (count($parts) == 3 && $parts[0] == 'tsd' && $parts[1] == 'serve') include 'src' . DIRECTORY_SEPARATOR . $parts[2] . '.php';
+    });
+    \tsd\serve\App::serve();
+    exit(0);
+}
+
+////¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨/
+/// clean install                                                            /
+//__________________________________________________________________________/
 
 $fresh = !file_exists(CONFIG_FILE);
 $auth = false;
@@ -192,8 +238,14 @@ $admin_update_available = false;
 $config_no_key = false;
 $extensions_ok = false;
 $missing_extensions = [];
-$ext= [];
 
+$ext= get_loaded_extensions();
+            
+foreach (EXTENSIONS as $et)
+{
+    if (!in_array($et, $ext))
+    $missing_extensions[]=$et;
+}
 
 if ($fresh) {
     if (@$_POST['action'] == 'install') {
@@ -236,15 +288,30 @@ if ($fresh) {
         }
     } else $config_no_user = true;
 
-    session_start();
-    if (@$_SESSION['auth']) {
-        $auth = true;
+    if (!in_array('session', $missing_extensions)){
+    	session_start();
+
+	if (@$_SESSION['auth']) {
+            $auth = true;
+        }
     }
 
     if (@$auth) {
         $_SESSION['auth'] = true;
 
         $cfg = json_decode(file_get_contents(CONFIG_FILE), true);
+
+        if (@$_POST['action']) {
+            if ($_POST['action'] == 'update') {
+                if ($update_available) get_serve();
+                if ($admin_update_available) get_admin();
+                $update_available = false;
+                $admin_update_available = false;
+            } else if ($_POST['action'] == 'install') {
+                if ($config_no_key) update_config();
+                install_serve(@$_POST['module'] ? $_POST['module'] : []);
+            }
+        }
 
         if (file_exists(SERVE_FILE))
         {
@@ -260,25 +327,6 @@ if ($fresh) {
             }
         } else {
             $not_installed = true;
-            $ext = get_loaded_extensions();
-            
-            foreach (EXTENSIONS as $et)
-            {
-                if (!in_array($et, $ext))
-                $missing_extensions[]=$et;
-            }
-        }
-
-        if (@$_POST['action']) {
-            if ($_POST['action'] == 'update') {
-                if ($update_available) get_serve();
-                if ($admin_update_available) get_admin();
-                $update_available = false;
-                $admin_update_available = false;
-            } else if ($_POST['action'] == 'install') {
-                if ($config_no_key) update_config();
-                install_serve(@$_POST['module'] ? $_POST['module'] : []);
-            }
         }
 
     } else $login = true;
@@ -377,7 +425,7 @@ if ($fresh) {
             font-size: .6em;
         }
 
-        input[type=checkbox] {
+        input[type=checkbox] {            
             width: auto;
             margin-right: .7em;
         }
@@ -431,32 +479,49 @@ if ($fresh) {
             <p>
                 Looks like you don't have installed tsd.serve yet.
             </p>
+
             <div class="gap"></div>
-            <form method="post" action="<?php echo $_SERVER['PHP_SELF'] ?>" class="install">
-                <h3>Master Account</h3>
+
+            <?php if ($missing_extensions) : ?>
                 <div>
-                    <input type="text" name="username" placeholder="username" required />
+                    <h2>extensions</h2>
+                    <p>the following php extensions are needed by the framework</p>
+                    <ul>
+                        <?php foreach ($missing_extensions as $me) { ?>
+                            <li><?php echo $me; ?></li>
+                        <?php } ?>                    
+                    </ul>
                 </div>
-                <div>
-                    <input type="password" name="pw1" placeholder="password" required />
-                </div>
-                <div>
-                    <input type="password" name="pw2" placeholder="repeat password" required />
-                </div>
-                <div>
-                    <span class="error" style="display:none;" id="err_pwd_mismatch">passwords do not match</span>
-                </div>
-                <div class="gap"></div>
-                <h3>Additional Modules</h3>
-                <div>
-                    <input id="admin" type="checkbox" name="module[]" value="admin" checked>
-                    <label for="admin">Install the serve.admin administration UI as well</label>
-                </div>
-                <div class="gap"></div>
-                <div class="right">
-                    <button type="submit" name="action" value="install">install</button>
-                </div>
-            </form>
+            <?php else : ?>
+
+                <form method="post" action="<?php echo $_SERVER['PHP_SELF'] ?>" class="install">
+                    <h3>Master Account</h3>
+                    <div>
+                        <input type="text" name="username" placeholder="username" required />
+                    </div>
+                    <div>
+                        <input type="password" name="pw1" placeholder="password" required />
+                    </div>
+                    <div>
+                        <input type="password" name="pw2" placeholder="repeat password" required />
+                    </div>
+                    <div>
+                        <span class="error" style="display:none;" id="err_pwd_mismatch">passwords do not match</span>
+                    </div>
+                    <div class="gap"></div>
+                    <h3>Additional Modules</h3>
+                    <div>
+                        <label class="checkbox">
+                            <input id="admin" type="checkbox" name="module[]" value="admin" checked>
+                            Install the serve.admin administration UI as well
+                        </label>
+                    </div>
+                    <div class="gap"></div>
+                    <div class="right">
+                        <button type="submit" name="action" value="install">install</button>
+                    </div>                   
+                </form>
+            <?php endif ?>
 
         <?php endif ?>
 

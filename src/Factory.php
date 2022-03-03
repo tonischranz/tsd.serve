@@ -8,7 +8,7 @@ use \RecursiveDirectoryIterator;
 use \RecursiveIteratorIterator;
 use \RegexIterator;
 use \RecursiveRegexIterator;
-use ReflectionNamedType;
+use \ReflectionNamedType;
 
 /**
  * The Factory

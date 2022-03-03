@@ -108,7 +108,7 @@ class ServeViewEngine extends ViewEngine
             $timestamp = ServeViewEngine::$cached_views[$key][1];
 
             if ($timestamp + ServeViewEngine::CACHE_DURATION < time()) {
-                $v = new View($view, $plugin);
+                $v = new View($view, $layoutPlugin, $plugin);
                 $md5 = $v->md5();
             }
             $cached_view = "$key.$md5.php";
@@ -117,58 +117,15 @@ class ServeViewEngine extends ViewEngine
         if ($cached_view && file_exists(ServeViewEngine::CACHED_VIEWS . DIRECTORY_SEPARATOR . $cached_view)) {
             $view_file = ServeViewEngine::CACHED_VIEWS . DIRECTORY_SEPARATOR . $cached_view;
         } else {
-            if (!$v) $v = new View($view, $plugin);
+            if (!$v) $v = new View($view, $layoutPlugin, $plugin);
             
             $template = $v->compile();
-            $layout = new Layout($layoutPlugin);
-            $layoutTemplate = $layout->compile();
-
-            $t = new DOMDocument;
-            $o = new DOMDocument;
-
-            libxml_use_internal_errors(true);
-            $t->loadHTML($template);
-            $o->loadHTML($layoutTemplate);
-
-            $title = $t->getElementsByTagName('title')[0]->C14N();
-            $title = str_replace(['<title>', '</title>'], '', $title);
-            $title = str_replace('??>', '?>', $title);
-            $x = new DOMXPath($t);
-            $xL = new DOMXPath($o);
-            $links = $x->query('head/link');
-            $styles = $x->query('head/style');
-            $scripts = $x->query('head/script');
-            $main = $x->query('body/main')[0];
-
-            $lBody = $o->getElementsByTagName('body')[0];
-            $lOldMain = $xL->query('//main')[0];
-            $lMain = $o->importNode($main, true);
-            $lBody->replaceChild($lMain, $lOldMain);
-
-            $lHead = $o->getElementsByTagName('head')[0];
-
-            foreach ($links as $h) $lHead->appendChild($o->importNode($h, true));
-            foreach ($styles as $h) $lHead->appendChild($o->importNode($h, true));
-            foreach ($scripts as $h) $lHead->appendChild($o->importNode($h, true));
-
-
-            /*$ctx->title = $title;*/
-            $to = $o->saveHTML();
-            $to = preg_replace('/\{#title\}/', $title, $to);
-            
-            $to = preg_replace('/\&lt;\?php/', '<?php', $to);
-            $to = preg_replace('/\?\&gt;/', '?>', $to);
-            $to = preg_replace('/%20/', ' ', $to);
-            $to = preg_replace('/%24/', '$', $to);
-            $to = preg_replace('/%5B/', '[', $to);
-            $to = preg_replace('/%5D/', ']', $to);
-            $to = preg_replace('/PUBLIC.*/', '>', $to, 1);
 
             //cache
             $md5 = $v->md5();
             $view_file = ServeViewEngine::CACHED_DIR . DIRECTORY_SEPARATOR . "$key.$md5.php";
             array_map('unlink', glob(ServeViewEngine::CACHED_DIR . DIRECTORY_SEPARATOR . "$key.*.php"));
-            file_put_contents($view_file, $to);
+            file_put_contents($view_file, $template);
             ServeViewEngine::$cached_views[$key] = [$md5, time()];
             ServeViewEngine::writeCacheFile();
         }
@@ -176,7 +133,7 @@ class ServeViewEngine extends ViewEngine
         ServeViewEngine::run($view_file, $result->data(), $ctx);
     }
 
-    private static function run(string $view, ?array $data, ViewContext $ctx)
+    private static function run(string $view, $data, ViewContext $ctx)
     {
         $debug = ob_get_contents();
         ob_end_clean();
@@ -193,15 +150,48 @@ class ServeViewEngine extends ViewEngine
 
 class View
 {
-    private Label $labels;
     private string $template;
     private string $md5;
 
-    function __construct(string $path, string $plugin = '')
+    function __construct(string $path, string $layoutPlugin, string $plugin = '')
     {
-        $this->labels = Labels::create($path);
+        $vt = View::loadTemplate($path . '.html', $plugin);
+        $lt = View::loadTemplate('layout.html', $layoutPlugin);
+        
+        $t = new DOMDocument;
+        $o = new DOMDocument;
 
-        $this->template = View::loadTemplate($path . '.html', $plugin);
+        libxml_use_internal_errors(true);
+        $t->loadHTML($vt);
+        $o->loadHTML($lt);
+
+        $title = $t->getElementsByTagName('title')[0]->C14N();
+        $title = str_replace(['<title>', '</title>'], '', $title);
+        $title = str_replace('??>', '?>', $title);
+        $x = new DOMXPath($t);
+        $xL = new DOMXPath($o);
+        $links = $x->query('head/link');
+        $styles = $x->query('head/style');
+        $scripts = $x->query('head/script');
+        $main = $x->query('body/main')[0];
+
+        $lBody = $o->getElementsByTagName('body')[0];
+        $lOldMain = $xL->query('//main')[0];
+        $lMain = $o->importNode($main, true);
+        $lBody->replaceChild($lMain, $lOldMain);
+
+        $lHead = $o->getElementsByTagName('head')[0];
+
+        foreach ($links as $h) $lHead->appendChild($o->importNode($h, true));
+        foreach ($styles as $h) $lHead->appendChild($o->importNode($h, true));
+        foreach ($scripts as $h) $lHead->appendChild($o->importNode($h, true));
+
+        $to = $o->saveHTML();
+
+        $to = preg_replace('/%7B/', '{', $to);
+        $to = preg_replace('/%7D/', '}', $to);
+    
+        $this->template = $to;
         $this->md5 = md5($this->template);
     }
 
@@ -212,12 +202,7 @@ class View
 
     public function compile()
     {
-        return View::compileTemplate($this->localize($this->template));
-    }
-
-    protected function localize($template)
-    {
-        return View::localizeTemplate($template, $this->labels);
+      return View::compileTemplate($this->template);
     }
 
     private static function loadTemplate($path, $plugin)
@@ -382,7 +367,7 @@ class View
                     </div>
                     <div>
                       <input type="email" name="email" placeholder="email" value="{email}" />
-                    </div>                   
+                    </div>
                     <div class="right">
                       <input type="submit" value="save" />
                     </div
@@ -402,20 +387,20 @@ class View
                 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
                 <title>change password</title>
                 <script>
-                $(function() {
-        
-                    $('form.password input[type=password]').change(function() {
-                        $('#err_pwd_mismatch').hide();
-                    });
-        
-                    $('form.password').submit(function(e) {
-                        if ($('input[name=pw1]').val() != $('input[name=pw2]').val()) {
-                            $('#err_pwd_mismatch').show();
-                            e.preventDefault();
-                        }
-                    });
-                });
-            </script>
+                  $(function() {
+          
+                      $('form.password input[type=password]').change(function() {
+                          $('#err_pwd_mismatch').hide();
+                      });
+          
+                      $('form.password').submit(function(e) {
+                          if ($('input[name=pw1]').val() != $('input[name=pw2]').val()) {
+                              $('#err_pwd_mismatch').show();
+                              e.preventDefault();
+                          }
+                      });
+                  });
+                </script>
               </head>
             
               <body>
@@ -485,21 +470,6 @@ class View
         return file_get_contents($viewPath);
     }
 
-    private static function localizeTemplate(string $template, Label $labels)
-    {
-        $t = new DOMDocument;
-        $o = new DOMDocument;
-        libxml_use_internal_errors(true);
-        $t->loadHTML($template);
-        View::copyNode($t, $o, $o, $labels);
-        $to = $o->saveHTML();
-
-        $to = preg_replace('/%7B/', '{', $to);
-        $to = preg_replace('/%7D/', '}', $to);
-        
-        return $to;
-    }
-
     private static function compileExpression($exp)
     {
         if ($exp == '.') return '$d';
@@ -512,10 +482,10 @@ class View
 
         $name = substr($parts[0], 1);
 
-        $o = str_split($parts[0])[0] == '@' ? "\$c['$name']" : "\$d['$parts[0]']";
+        $o = str_split($parts[0])[0] == '@' ? "\$c['$name']" : "((array)\$d)['$parts[0]']";
         array_shift($parts);
         foreach ($parts as $p) {
-            $o .= "['$p']";
+            $o = "((array){$o})['$p']";
         }
 
         return $o;
@@ -576,129 +546,5 @@ class View
         ];
 
         return preg_replace_callback_array($patterns, $template, -1);
-    }
-
-    private static function copyNode(DOMNode $t, DOMDocument $o, DOMNode $p, Label $l)
-    {
-        switch ($t->nodeType) {
-            case XML_HTML_DOCUMENT_NODE:
-                View::copyNode($t->documentElement, $o, $o, $l);
-                break;
-            case XML_ELEMENT_NODE:
-                $n = $o->importNode($t);
-                $n = $p->appendChild($n);
-                View::localizeAttributes($n, $l);
-                foreach ($t->childNodes as $c) View::copyNode($c, $o, $n, $l);
-                break;
-            case XML_CDATA_SECTION_NODE:
-                View::copyCData($t, $o, $p);
-            case XML_TEXT_NODE:
-                View::copyText($t, $o, $p, $l);
-                break;
-        }
-    }
-
-    private static function localizeAttributes(DOMElement $e, Label $l)
-    {
-        foreach ($e->attributes as $a) {
-            if ($e->nodeName == 'input' && $a->name == 'placeholder') $a->value = View::localizeText($a->value, $l);
-            if ($e->nodeName == 'img' && $a->name == 'alt') $a->value = View::localizeText($a->value, $l);
-        }
-    }
-
-    private static function copyCData(DOMText $t, DOMDocument $o, DOMElement $p)
-    {
-        $p->appendChild($o->createCDATASection($t->data));
-    }
-
-    private static function copyText(DOMText $t, DOMDocument $o, DOMElement $p, Label $l)
-    {
-        if ($t->isElementContentWhitespace()) return;
-        if ($p->nodeName == 'style' || $p->nodeName == 'script') return;
-        else {
-            //todo: MD
-            $p->appendChild($o->createTextNode(View::localizeText($t->wholeText, $l)));
-        }
-    }
-
-    private static function localizeText(string $s, Label $l)
-    {
-        return $s;
-        //todo: localize!
-        //return $l->getLabel($s);
-    }
-}
-
-class Layout extends View
-{
-
-    public function __construct(string $plugin = '')
-    {
-        parent::__construct('layout', $plugin);
-    }
-}
-
-
-interface Label
-{
-
-    /**
-     *
-     * @param string $name
-     * @return string
-     */
-    function getLabel(string $name);
-}
-
-
-class JSONLabels implements Label
-{
-
-    private $root;
-    private $data;
-
-    public function __construct(string $path, JSONLabels $root = null)
-    {
-        if ($root)
-            $this->root = $root;
-
-        $file = $path . '/labels.json';
-
-        if (file_exists($file))
-            $this->data = json_decode(file_get_contents($file), true);
-    }
-
-    function getLabel(string $name)
-    {
-        $lang = 'de';
-
-        if (!$name)
-            return false;
-        if ($name[0] == '/') {
-            if ($this->root) {
-                return $this->root->getLabel(substr($name, 1));
-            }
-        }
-        if (!$this->data || !array_key_exists($name, $this->data))
-            return "[not found|$name]";
-        if (!array_key_exists($lang, $this->data[$name]))
-            return "[not $lang|$name]";
-        return $this->data[$name][$lang];
-    }
-}
-
-
-class Labels
-{
-
-    /**
-     *
-     * @param string $path
-     * @return \tsd\serve\Label
-     */
-    static function create(string $path)
-    {
-        $l = new JSONLabels(dirname($path), new JSONLabels('./views'));
-        return $l;
     }
 }
