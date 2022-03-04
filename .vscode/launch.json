@@ -7,10 +7,6 @@
         "request": "launch",
         "program": "${workspaceRoot}/clean.php",
         "runtimeArgs": [
-          //"-dextension=openssl",
-          //"-dextension=mysqli",
-          //"-dextension=session",
-          //"-dzend_extension=xdebug",
           "-dxdebug.client_port=9000",
           "-dxdebug.mode=develop,debug",
           "-dxdebug.start_with_request=yes",
@@ -22,7 +18,12 @@
         },
         
         "cwd": "${workspaceRoot}",
-        "port": 9000
+        "port": 9000,
+        "serverReadyAction": {
+          "pattern": "Development Server \\(http://127.0.0.1:([0-9]+)\\) started",
+          "uriFormat": "http://localhost:%s",
+          "action": "openExternally"
+        }
       }
     ]
   }
