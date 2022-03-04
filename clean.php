@@ -197,7 +197,8 @@ function get_serve()
 
 if (PHP_SAPI == 'cli') {
     if ($argc == 1) {
-        shell_exec(PHP_BINARY . " -S localhost:8000 clean.php");
+        echo '"' . PHP_BINARY . '" -S localhost:8000 -t "' . __DIR__ . '" "' . __FILE__ ."\"\n";
+        shell_exec('"' . PHP_BINARY . '" -S localhost:8000 -t "' . __DIR__ . '" "' . __FILE__ .'"');        
     } else {
         echo "Usage: php clean.php\n";
         echo "\n";
@@ -206,6 +207,7 @@ if (PHP_SAPI == 'cli') {
 }
 
 $url = $_SERVER['REQUEST_URI'];
+chdir(__DIR__);
 
 if ($url != '/clean.php')
 {
