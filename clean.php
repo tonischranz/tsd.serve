@@ -14,6 +14,7 @@ const ADMIN_REPO = 'serve.admin';
 const ADMIN_BRANCH = 'main';
 
 const EXTENSIONS = ['dom', 'openssl', 'session', 'zip' /*, 'mysqli'*/];
+const MINVER = "8.0.0";
 
 $serve_url = SERVE_BASE . '/' . SERVE_REPO . '/archive/' . SERVE_BRANCH . '.zip';
 $admin_url = SERVE_BASE . '/' . ADMIN_REPO . '/archive/' . ADMIN_BRANCH . '.zip';
@@ -243,6 +244,7 @@ $admin_update_available = false;
 $config_no_key = false;
 $extensions_ok = false;
 $missing_extensions = [];
+$minver = false;
 
 $ext= get_loaded_extensions();
             
@@ -251,6 +253,8 @@ foreach (EXTENSIONS as $et)
     if (!in_array($et, $ext))
     $missing_extensions[]=$et;
 }
+
+$minver = version_compare(PHP_VERSION, MINVER) >= 0;
 
 if ($fresh) {
     if (@$_POST['action'] == 'install') {
@@ -495,6 +499,11 @@ if ($fresh) {
                             <li><?php echo $me; ?></li>
                         <?php } ?>                    
                     </ul>
+                </div>
+            <?php elseif (!$minver): ?>
+                <div>
+                    <h2>PHP version</h2>
+                    <p>the framework requires at least PHP <?php echo MINVER; ?></p>
                 </div>
             <?php else : ?>
 
