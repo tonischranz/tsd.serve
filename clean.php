@@ -197,6 +197,9 @@ function get_serve()
 
 if (PHP_SAPI == 'cli') {
     if ($argc == 1) {
+        if (PHP_OS == 'WINNT') shell_exec('start http://localhost:8000');
+        else if (PHP_OS == 'Linux') shell_exec('xdg-open http://localhost:8000');
+        
         echo '"' . PHP_BINARY . '" -S localhost:8000 -t "' . __DIR__ . '" "' . __FILE__ ."\"\n";
         shell_exec('"' . PHP_BINARY . '" -S localhost:8000 -t "' . __DIR__ . '" "' . __FILE__ .'"');        
     } else {
