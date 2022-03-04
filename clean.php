@@ -84,9 +84,6 @@ function install_serve($modules = [])
 {
     get_serve();
 
-    /*if (file_exists('index.php')) rename('index.php', 'index.php.orig');
-    file_put_contents('index.php', ["<?php\n", 'include \'' . SERVE_FILE . "';\n", "use tsd\serve\App;\n", "return App::serve();\n"]);*/
-
     if (!is_dir('plugins')) mkdir('plugins');
     if (!is_dir('views')) mkdir('views');
 
