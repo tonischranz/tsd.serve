@@ -22,7 +22,12 @@
         },
         
         "cwd": "${workspaceRoot}",
-        "port": 9000
+        "port": 9000,
+        "serverReadyAction": {
+          "pattern": "Development Server \\(http://127.0.0.1:([0-9]+)\\) started",
+          "uriFormat": "http://localhost:%s",
+          "action": "openExternally"
+        }
       }
     ]
   }
