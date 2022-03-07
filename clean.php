@@ -199,8 +199,8 @@ if (PHP_SAPI == 'cli') {
         else if (PHP_OS == 'Linux') shell_exec('xdg-open http://localhost:8000');
         else if (PHP_OS == 'FreeBSD') shell_exec('xdg-open http://localhost:8000');
         
-        echo '"' . PHP_BINARY . '" -S localhost:8000 -t "' . __DIR__ . '" "' . __FILE__ ."\"\n";
-        shell_exec('"' . PHP_BINARY . '" -S localhost:8000 -t "' . __DIR__ . '" "' . __FILE__ .'"');        
+        echo '"' . PHP_BINARY . '" -S 127.0.0.1:8000 -t "' . __DIR__ . '" "' . __FILE__ ."\"\n";
+        shell_exec('"' . PHP_BINARY . '" -S 127.0.0.1:8000 -t "' . __DIR__ . '" "' . __FILE__ .'"');        
     } else {
         echo "Usage: php clean.php\n";
         echo "\n";
