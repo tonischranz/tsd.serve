@@ -1,6 +1,3 @@
 .ht*
-.cached_*
-/info.php
-/test.php
-/index.php
+/.cache
 /.php

@@ -71,11 +71,11 @@ class Factory
 
 
         $md5 = md5($stats);
-        $cache_file = ".cached_classes.$md5.php";
+        $cache_file = App::CACHE . DIRECTORY_SEPARATOR .  "classes.$md5.php";
 
         if (file_exists($cache_file)) include $cache_file;
         else {
-            array_map('unlink', glob(".cached_classes.*.php"));
+            array_map('unlink', glob(App::CACHE . DIRECTORY_SEPARATOR . "classes.*.php"));
 
             foreach ($sfiles as $sf) require_once $sf;
             foreach ($plugin_files as $pf) require_once $pf;
