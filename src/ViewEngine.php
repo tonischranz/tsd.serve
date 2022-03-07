@@ -64,8 +64,8 @@ abstract class ViewEngine
 #[DefaultMode]
 class ServeViewEngine extends ViewEngine
 {
-    const CACHED_VIEWS = '.cached_views.php';
-    const CACHED_DIR = '.cached_views';
+    const CACHED_VIEWS = App::CACHE . DIRECTORY_SEPARATOR . 'views.php';
+    const CACHED_DIR =  App::CACHE . DIRECTORY_SEPARATOR .'views';
     const CACHE_DURATION = 30;
     const VIEWS = 'views';
 

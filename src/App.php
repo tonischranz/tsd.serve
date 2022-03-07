@@ -22,6 +22,11 @@ class App
      */
     const PLUGINS = 'plugins';
 
+    /**
+     * Cache directory
+     */
+    const CACHE = '.cache';
+
     public static array $plugins = [];
 
     private Router $router;
@@ -51,7 +56,9 @@ class App
         foreach ($pfiles as $pf) $stats .= stat($pf)['mtime'];
         $md5 = md5($stats);
 
-        $cache_file = ".cached_plugins.$md5.php";
+        if (!is_dir(App::CACHE)) mkdir(App::CACHE);
+
+        $cache_file = App::CACHE . DIRECTORY_SEPARATOR . "plugins.$md5.php";
         if (file_exists($cache_file)) include $cache_file;
         else {
             foreach ($pdirs as $pd) App::$plugins[basename($pd)] = true;
@@ -64,7 +71,7 @@ class App
                 if (@$i['usePrefix']) App::$plugins[$n]['usePrefix'] = $i['usePrefix'];
             }
 
-            array_map('unlink', glob(".cached_plugins.*.php"));
+            array_map('unlink', glob(App::CACHE . DIRECTORY_SEPARATOR . "plugins.*.php"));
             file_put_contents($cache_file, ["<?php\n", "use tsd\serve\App;\n", 'App::$plugins = [']);
 
             foreach (App::$plugins as $k => $v) {
