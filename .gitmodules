@@ -1,3 +1,0 @@
-[submodule "plugins/admin"]
-	path = plugins/admin
-	url = https://github.com/tonischranz/serve.admin
