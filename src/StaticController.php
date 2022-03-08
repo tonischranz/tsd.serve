@@ -55,10 +55,10 @@ class StaticController extends Controller
         else
         {
             $css = <<< 'EOCSS'
-            html { scrollbar-color: var(--scrollbar-bg-color,#222) var(--scrollbar-color,#000); scrollbar-width: thin; }
-            body::-webkit-scrollbar { width: .3em; }
-            body::-webkit-scrollbar-track { box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3); }
-            body::-webkit-scrollbar-thumb { background-color: var(--scrollbar-bg-color, #222); outline: .2em solid #010; }
+            html { scrollbar-color: var(--scrollbar-color,#222) var(--scrollbar-bg-color,#000); scrollbar-width: thin; }
+            body::-webkit-scrollbar { width: .5em; }
+            body::-webkit-scrollbar-track { background-color: var(--scrollbar-bg-color,#000); }
+            body::-webkit-scrollbar-thumb { background-color: var(--scrollbar-color, #222);}
             body { color:var(--body-color,#ddd); background-color:var(--body-bg-color, #222); font-family: sans-serif; margin:0; margin-bottom: 1.5em; }
             a, a:visited { text-decoration: none; color:var(--link-color, #aaa); }
             a:active, a:hover { text-decoration: var(--link-active-color, #ddd) underline; }        
@@ -77,9 +77,9 @@ class StaticController extends Controller
             body>header>nav ul {list-style-type:none; padding-inline-start:0; margin-block-start:0; margin-block-end:0; font-size:4rem;}    
             body>main { min-height:100vh;}                
             body>main>*, body>footer>* { overflow-x:auto; scrollbar-color: var(--scrollbar-color,#000) var(--scrollbar-bg-color,#222); scrollbar-width: thin; }
-            body>main *::-webkit-scrollbar, body>footer *::-webkit-scrollbar { width : .3em; height: .3em; }
-            body>main *::-webkit-scrollbar-track, body>footer *::-webkit-scrollbar-track { box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3); }
-            body>main *::-webkit-scrollbar-thumb, body>footer *::-webkit-scrollbar-thumb { background-color: var(--scrollbar-color,#000) ; outline: .2em solid #010; }
+            body>main *::-webkit-scrollbar, body>footer *::-webkit-scrollbar { width : .5em; height: .5em; }
+            body>main *::-webkit-scrollbar-track, body>footer *::-webkit-scrollbar-track { background-color: var(--scrollbar-bg-color,#000); }
+            body>main *::-webkit-scrollbar-thumb, body>footer *::-webkit-scrollbar-thumb { background-color: var(--scrollbar-color,#222) ; outline: none /*.2em solid #010;*/ }
             body footer.debug>pre { padding-bottom: .75em; }
             body>footer.sticky { position:fixed; bottom:0; left:0; right:0; padding: .35em; padding-top:.02em; background-color: var(--footer-bg-color, #0008); }
             @media screen and (min-width: 86rem) { body>header>nav, body>main, body>footer{ width: 80rem; margin:auto; } }
