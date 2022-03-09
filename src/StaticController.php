@@ -61,7 +61,7 @@ class StaticController extends Controller
             body::-webkit-scrollbar-thumb { background-color: var(--scrollbar-color, #222);}
             body { color:var(--body-color, #ddd); background-color:var(--body-bg-color, #222); font-family: sans-serif; margin:0; margin-bottom: 1.5em; }
             a, a:visited { text-decoration: none; color:var(--link-color, #aaa); }
-            a:active, a:hover { text-decoration: var(--link-active-color, #ddd) underline; }        
+            a:active, a:hover { text-decoration: var(--link-active-color, #ddd) underline; }
             button {  border: thin solid var(--border-color, #888); background-color: var(--button-bg-color, #000); color: var(--button-color, #ddd); font-weight: bold; font-size: 2em; border-radius: .5em; padding:.25em 1em; outline:none; }
             h1 { font-size: 2.5rem; }
             div.gap { height: 2em; }
@@ -75,7 +75,7 @@ class StaticController extends Controller
             body {padding-bottom: 3.5em }
             body>header { background-color:var(--header-bg-color, #111); }
             body>header>nav ul {list-style-type:none; padding-inline-start:0; margin-block-start:0; margin-block-end:0; font-size:4rem;}    
-            body>main { min-height:100vh;}                
+            body>main { min-height:calc(100vh - 12rem);}
             body>main>*, body>footer>* { overflow-x:auto; scrollbar-color: var(--scrollbar-color, #000) var(--scrollbar-bg-color, #222); scrollbar-width: thin; }
             body>main *::-webkit-scrollbar, body>footer *::-webkit-scrollbar { width : .5em; height: .5em; }
             body>main *::-webkit-scrollbar-track, body>footer *::-webkit-scrollbar-track { background-color: var(--scrollbar-bg-color, #000); }
@@ -86,6 +86,12 @@ class StaticController extends Controller
             @media screen and (min-width: 56rem) and (max-width: 86rem){ body>header>nav, body>main, body>footer>{ width: 52rem; margin:auto; } }
             @media screen and (min-width: 38rem) and (max-width: 56rem) { body>header>nav, body>main, body>footer>{ width: 36rem; margin:auto; } }
             @media screen and (min-width: 24rem) and (max-width: 38rem) { body>header>nav, body>main, body>footer>{ margin-left:1rem; margin-right:1rem; } }
+            .fg { display: flex; flex-wrap: wrap; }
+            .fg > * { padding-right: 1em; padding-bottom: 1.5em; box-sizing: border-box; width: 100%; flex: auto; }
+            .fg > * > * { display: block; width: 100%; box-sizing: border-box; padding: 0.5em; }
+            @media screen and (min-width: 36em) { .fg > * { width: 50%; } .fg > .b, .fg > .bb { width: 100%; } }
+            @media screen and (min-width: 56em) { .fg > * { width: 33.3%; } .fg > .b { width: 66.6%; } .fg > .bb { width: 100%; } }
+            textarea { height: 10em; resize: vertical; }
             EOCSS;
             return new TextResult($css, 'text/css');
         }
