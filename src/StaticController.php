@@ -59,7 +59,7 @@ class StaticController extends Controller
             body::-webkit-scrollbar { width: .5em; }
             body::-webkit-scrollbar-track { background-color: var(--scrollbar-bg-color, #000); }
             body::-webkit-scrollbar-thumb { background-color: var(--scrollbar-color, #222);}
-            body { color:var(--body-color, #ddd); background-color:var(--body-bg-color, #222); font-family: sans-serif; margin:0; margin-bottom: 1.5em; }
+            body { color:var(--body-color, #ddd) !important; background-color:var(--body-bg-color, #222) !important; font-family: sans-serif; margin:0; margin-bottom: 1.5em; }
             a, a:visited { text-decoration: none; color:var(--link-color, #aaa); }
             a:active, a:hover { text-decoration: var(--link-active-color, #ddd) underline; }
             button {  border: thin solid var(--border-color, #888); background-color: var(--button-bg-color, #000); color: var(--button-color, #ddd); font-weight: bold; font-size: 2em; border-radius: .5em; padding:.25em 1em; outline:none; }
@@ -92,6 +92,11 @@ class StaticController extends Controller
             @media screen and (min-width: 36em) { .fg > * { width: 50%; } .fg > .b, .fg > .bb { width: 100%; } }
             @media screen and (min-width: 56em) { .fg > * { width: 33.3%; } .fg > .b { width: 66.6%; } .fg > .bb { width: 100%; } }
             textarea { height: 10em; resize: vertical; }
+            a:link { background:none !important; }
+            .e {background:var(--body-bg-color, #222) !important; color:var(--body-color, #ddd) !important;}
+            .v {background:var(--body-bg-color, #222) !important; color:var(--body-color, #ddd) !important;}
+            .h {background:var(--body-bg-color, #222) !important; color:var(--body-color, #ddd) !important;}
+            table {box-shadow:none !important;}
             EOCSS;
             return new TextResult($css, 'text/css');
         }
