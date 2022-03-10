@@ -29,7 +29,7 @@ class Controller
 
     static function message(string $message, ?string $url = null)
     {
-        return new MessageResult('info', $message, $url);
+        return new MessageResult('info', $message, url: $url);
     }
 
     static function success(string $message, ?string $url = null)
