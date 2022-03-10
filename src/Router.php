@@ -75,7 +75,7 @@ class Router
                 $pluginRoot = "/$name";
                 $oldPluginRoot = $pluginRoot;
 
-                if ($hostPlugin && @App::$plugins[$hostPlugin]['overridePluginController']) {
+                if ($hostPlugin && @App::$plugins[$hostPlugin]['overrideController']) {
                     $overrideName = $hostPlugin;
                 }
 
@@ -93,11 +93,12 @@ class Router
                 }
 
                 if (array_key_exists($name, App::$plugins)) {
+                    $tmp = App::$plugins;
                     $oldPlugin = $plugin;
                     $plugin = $name;
                     $pluginRoot = "$pluginRoot/$name";
 
-                    if ($oldPlugin && @App::$plugins[$oldPlugin]['overridePluginController']) {
+                    if ($oldPlugin && @App::$plugins[$oldPlugin]['overrideController']) {
                         $overrideName = $oldPlugin;
                     }
 

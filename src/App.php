@@ -68,7 +68,8 @@ class App
                 App::$plugins[$n] = [];
                 if (@$i['namespace']) App::$plugins[$n]['namespace'] = $i['namespace'];
                 if (@$i['forceLayout']) App::$plugins[$n]['forceLayout'] = $i['forceLayout'];
-                if (@$i['usePrefix']) App::$plugins[$n]['usePrefix'] = $i['usePrefix'];
+                //if (@$i['usePrefix']) App::$plugins[$n]['usePrefix'] = $i['usePrefix'];
+                if (@$i['overrideController']) App::$plugins[$n]['overrideController'] = $i['overrideController'];
             }
 
             array_map('unlink', glob(App::CACHE . DIRECTORY_SEPARATOR . "plugins.*.php"));
@@ -81,7 +82,8 @@ class App
                     file_put_contents($cache_file, '[', FILE_APPEND);
                     if (@$v['namespace']) file_put_contents($cache_file, "'namespace'=>'" . $v['namespace'] . "',", FILE_APPEND);
                     if (@$v['forceLayout']) file_put_contents($cache_file, "'forceLayout'=>" . $v['forceLayout'] . ',', FILE_APPEND);
-                    if (@$v['usePrefix']) file_put_contents($cache_file, "'usePrefix'=>" . $v['usePrefix'] . ',', FILE_APPEND);
+                    //if (@$v['usePrefix']) file_put_contents($cache_file, "'usePrefix'=>" . $v['usePrefix'] . ',', FILE_APPEND);
+                    if (@$v['overrideController']) file_put_contents($cache_file, "'overrideController'=>" . $v['overrideController'] . ',', FILE_APPEND);
                     file_put_contents($cache_file, '],', FILE_APPEND);
                 }
             }
