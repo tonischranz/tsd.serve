@@ -143,10 +143,10 @@ class App
      */
     protected function serveRequest(string $method, string $host, string $path, array $data, $accept)
     {
-        try {
-            $i = \strpos($path, '?');
-            $route = $this->router->getRoute($host, $method, \substr($path, 0, $i > 0 ? $i : \strlen($path)));
+        $i = \strpos($path, '?');
+        $route = $this->router->getRoute($host, $method, \substr($path, 0, $i > 0 ? $i : \strlen($path)));
 
+        try {
             $result = $this->getResult($route, $data);
         } catch (AccessDeniedException $e)
         {
