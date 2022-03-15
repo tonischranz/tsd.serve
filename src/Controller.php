@@ -27,6 +27,9 @@ class Controller
         return new ViewResult($this->_name . DIRECTORY_SEPARATOR . $view, $data, $this->_plugin);
     }
 
+    public function prepare()
+    {}
+
     static function message(string $message, ?string $url = null)
     {
         return new MessageResult('info', $message, url: $url);

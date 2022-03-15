@@ -173,7 +173,7 @@ class App
         if (!$route->checkPermission($this->member))
             throw new AccessDeniedException($route);
 
-        $route->ctx()->groups = $this->member->getGroups();
+        //$route->ctx()->groups = $this->member->getGroups();
         $route->fill($data);
 
         return $route->follow();

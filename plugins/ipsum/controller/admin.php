@@ -1,8 +1,8 @@
 <?php 
 
-use tsd\serve\Controller;
+use tsd\serve\admin\AdminControllerBase;
 
-class adminController extends Controller
+class adminController extends AdminControllerBase
 {
     #[SecurityGroup('admin')]
     #[SecurityGroup('editor')]

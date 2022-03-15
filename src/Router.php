@@ -308,6 +308,8 @@ abstract class Route
 
     function follow()
     {
+        $this->controller->prepare();
+        
         $pinfos = $this->methodInfo->getParameters();
         $n = 0;
         $params = [];
