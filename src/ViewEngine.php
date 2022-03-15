@@ -157,6 +157,8 @@ class View
     {
         $vt = View::loadTemplate($path . '.html', $plugin);
         $lt = View::loadTemplate('layout.html', $layoutPlugin);
+
+        if (!$vt) throw new NotFoundException("View $path in $plugin");
         
         $t = new DOMDocument;
         $o = new DOMDocument;

@@ -415,7 +415,7 @@ class NoRoute extends Route
 
     function follow()
     {
-        throw new NotFoundException();
+        throw new NotFoundException('Route');
     }
 
     function checkPermission(Membership $member)

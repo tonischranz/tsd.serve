@@ -15,7 +15,7 @@ class StaticController extends Controller
 
         $file = App::PLUGINS . DIRECTORY_SEPARATOR . $plugin . DIRECTORY_SEPARATOR . 'static' . DIRECTORY_SEPARATOR . join(DIRECTORY_SEPARATOR, $parts) . '.' . $ext;
 
-        if (!file_exists($file)) throw new NotFoundException;
+        if (!file_exists($file)) throw new NotFoundException("file $file");
 
         if (array_key_exists($ext, StaticController::MIME_TYPES)) return new FileResult($file, StaticController::MIME_TYPES[$ext]);
         
@@ -110,7 +110,7 @@ class StaticController extends Controller
             if (file_exists($file)) return new FileResult($file);
         }
         $file = 'favicon.ico';
-        if (!file_exists($file)) throw new NotFoundException;
+        if (!file_exists($file)) throw new NotFoundException('Favicon');
         return new FileResult($file);
     }
 }

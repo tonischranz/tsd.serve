@@ -232,8 +232,8 @@ class AccessDeniedException extends \Exception
 
 class NotFoundException extends \Exception
 {
-    function __construct()
+    function __construct(string $name = '')
     {
-        parent::__construct("not found!");
+        parent::__construct("$name not found!");
     }
 }
