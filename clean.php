@@ -213,7 +213,7 @@ chdir(__DIR__);
 
 if ($url != '/clean.php')
 {
-    if (file_exists('.' . urldecode($url)) && $url != '/') return false;
+    if (file_exists('.' . urldecode($url)) && !is_dir('.' . urldecode($url)) && $url != '/') return false;
 
     if (file_exists('.php'))
     {

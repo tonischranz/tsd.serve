@@ -77,6 +77,7 @@ class Router
 
                 if ($hostPlugin && @App::$plugins[$hostPlugin]['overrideController']) {
                     $overrideName = $hostPlugin;
+                    $pluginRoot = '';
                 }
 
                 $name = count($parts) > 2 ? $parts[2] : 'default';
@@ -96,7 +97,7 @@ class Router
                     $tmp = App::$plugins;
                     $oldPlugin = $plugin;
                     $plugin = $name;
-                    $pluginRoot = "$pluginRoot/$name";
+                    //$pluginRoot = "$pluginRoot/$name";
 
                     if ($oldPlugin && @App::$plugins[$oldPlugin]['overrideController']) {
                         $overrideName = $oldPlugin;
@@ -114,9 +115,9 @@ class Router
                     if (!$layoutPlugin || @App::$plugins[$plugin]['forceLayout']) {
                         $layoutPlugin = $plugin;
                     }
-                } else if ($overrideName) {
+                } /*else if ($overrideName) {
                     $overrideName = '';
-                }
+                }*/
 
                 if ($overrideName) {
                     $c = $this->createController($overrideName, $plugin);
