@@ -75,7 +75,7 @@ class StaticController extends Controller
             body {padding-bottom: 3.5em }
             body>header { background-color:var(--header-bg-color, #111); }
             body>header>nav ul {list-style-type:none; padding-inline-start:0; margin-block-start:0; margin-block-end:0; font-size:4rem;}
-            body>header>nav ul ul {padding-inline-start:1em; font-size:.7em;}
+            body>header>nav ul ul ul {padding-inline-start:1em; font-size:.7em; }
             body>main { min-height:calc(100vh - 12rem);}
             body>main>*, body>footer>* { overflow-x:auto; scrollbar-color: var(--scrollbar-color, #000) var(--scrollbar-bg-color, #222); scrollbar-width: thin; }
             body>main *::-webkit-scrollbar, body>footer *::-webkit-scrollbar { width : .5em; height: .5em; }
@@ -87,6 +87,7 @@ class StaticController extends Controller
             @media screen and (min-width: 56rem) and (max-width: 86rem){ body>header>nav, body>main, body>footer>{ width: 52rem; margin:auto; } }
             @media screen and (min-width: 38rem) and (max-width: 56rem) { body>header>nav, body>main, body>footer>{ width: 36rem; margin:auto; } }
             @media screen and (min-width: 24rem) and (max-width: 38rem) { body>header>nav, body>main, body>footer>{ margin-left:1rem; margin-right:1rem; } }
+            @media screen and (min-height: 32em) {body>header {position:sticky; top:0;}
             .fg { display: flex; flex-wrap: wrap; }
             .fg > * { padding-right: 1em; padding-bottom: 1.5em; box-sizing: border-box; width: 100%; flex: auto; }
             .fg > * > * { display: block; width: 100%; box-sizing: border-box; padding: 0.5em; }
@@ -98,6 +99,10 @@ class StaticController extends Controller
             .v {background:var(--body-bg-color, #222) !important; color:var(--body-color, #ddd) !important;}
             .h {background:var(--body-bg-color, #222) !important; color:var(--body-color, #ddd) !important;}
             table {box-shadow:none !important;}
+            details summary {list-style:none;}
+            details summary:before {content:"🍔"; cursor:pointer;}
+            details[open] summary:before {content:"❌";}
+            details[open] {background-color:#abc}
             EOCSS;
             return new TextResult($css, 'text/css');
         }
