@@ -229,7 +229,7 @@ class View
               </head>
             
               <body>
-                <main>
+                <main class="s">
                   <h1>💥 error</h1>
                   <p>{message}</p>
                 </main>
@@ -246,7 +246,7 @@ class View
               </head>
             
               <body>
-                <main>
+                <main class="s">
                   <h1>🛈 info</h1>
                   <p>{message}</p>
                 </main>
@@ -263,7 +263,7 @@ class View
               </head>
             
               <body>
-                <main class="success">
+                <main class="success s">
                   <h1>🛈 success</h1>
                   <p>{message}</p>
                 </main>
@@ -280,7 +280,7 @@ class View
               </head>
             
               <body>
-                <main>
+                <main class="s">
                   <h1>🔑 login</h1>
                   <form method="post" action="/_login">
                     {with returnUrl}<input type="hidden" name="returnUrl" value="{.}" />{/with}
@@ -313,7 +313,7 @@ class View
               </head>
             
               <body>
-                <main>
+                <main class="s">
                   <h1>🔒 logout</h1>
                   <p>do you really want to logout?</p>
                   <form method="post" action="/_login/logout">
@@ -336,7 +336,7 @@ class View
               </head>
             
               <body>
-                <main>
+                <main class="s">
                   <h1>🔒 logged out</h1>
                   <p>you have successfully logged out</p>
                   {with returnUrl}
@@ -358,7 +358,7 @@ class View
               </head>
             
               <body>
-                <main>
+                <main class="s">
                   <h1>⚐ user profile</h1>
                   <form method="post" action="profile">
                     <div>
@@ -406,7 +406,7 @@ class View
               </head>
             
               <body>
-                <main>
+                <main class="s">
                   <h1>🔑 change password</h1>
                   <form method="post" action="password" class="password">
                     <div>
