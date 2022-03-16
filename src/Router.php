@@ -127,6 +127,7 @@ class Router
                         $pluginRoot = $oldPluginRoot;
                         $cutoff--;
                     }
+                    $cutoff--;
                 } else {
                     $c = $this->createController($name, $plugin);
                     if (!$c) {
