@@ -77,6 +77,7 @@ class Router
 
                 if ($hostPlugin && @App::$plugins[$hostPlugin]['overrideController']) {
                     $overrideName = $hostPlugin;
+                    $pluginRoot = '';
                 }
 
                 $name = count($parts) > 2 ? $parts[2] : 'default';
@@ -96,7 +97,7 @@ class Router
                     $tmp = App::$plugins;
                     $oldPlugin = $plugin;
                     $plugin = $name;
-                    $pluginRoot = "$pluginRoot/$name";
+                    //$pluginRoot = "$pluginRoot/$name";
 
                     if ($oldPlugin && @App::$plugins[$oldPlugin]['overrideController']) {
                         $overrideName = $oldPlugin;
@@ -114,9 +115,9 @@ class Router
                     if (!$layoutPlugin || @App::$plugins[$plugin]['forceLayout']) {
                         $layoutPlugin = $plugin;
                     }
-                } else if ($overrideName) {
+                } /*else if ($overrideName) {
                     $overrideName = '';
-                }
+                }*/
 
                 if ($overrideName) {
                     $c = $this->createController($overrideName, $plugin);
@@ -126,6 +127,7 @@ class Router
                         $pluginRoot = $oldPluginRoot;
                         $cutoff--;
                     }
+                    $cutoff--;
                 } else {
                     $c = $this->createController($name, $plugin);
                     if (!$c) {
@@ -308,6 +310,8 @@ abstract class Route
 
     function follow()
     {
+        $this->controller->prepare();
+        
         $pinfos = $this->methodInfo->getParameters();
         $n = 0;
         $params = [];
@@ -412,7 +416,7 @@ class NoRoute extends Route
 
     function follow()
     {
-        throw new NotFoundException();
+        throw new NotFoundException('Route');
     }
 
     function checkPermission(Membership $member)

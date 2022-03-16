@@ -143,10 +143,10 @@ class App
      */
     protected function serveRequest(string $method, string $host, string $path, array $data, $accept)
     {
-        try {
-            $i = \strpos($path, '?');
-            $route = $this->router->getRoute($host, $method, \substr($path, 0, $i > 0 ? $i : \strlen($path)));
+        $i = \strpos($path, '?');
+        $route = $this->router->getRoute($host, $method, \substr($path, 0, $i > 0 ? $i : \strlen($path)));
 
+        try {
             $result = $this->getResult($route, $data);
         } catch (AccessDeniedException $e)
         {
@@ -173,7 +173,7 @@ class App
         if (!$route->checkPermission($this->member))
             throw new AccessDeniedException($route);
 
-        $route->ctx()->groups = $this->member->getGroups();
+        //$route->ctx()->groups = $this->member->getGroups();
         $route->fill($data);
 
         return $route->follow();
@@ -232,8 +232,8 @@ class AccessDeniedException extends \Exception
 
 class NotFoundException extends \Exception
 {
-    function __construct()
+    function __construct(string $name = '')
     {
-        parent::__construct("not found!");
+        parent::__construct("$name not found!");
     }
 }

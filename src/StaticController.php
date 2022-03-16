@@ -15,7 +15,7 @@ class StaticController extends Controller
 
         $file = App::PLUGINS . DIRECTORY_SEPARATOR . $plugin . DIRECTORY_SEPARATOR . 'static' . DIRECTORY_SEPARATOR . join(DIRECTORY_SEPARATOR, $parts) . '.' . $ext;
 
-        if (!file_exists($file)) throw new NotFoundException;
+        if (!file_exists($file)) throw new NotFoundException("file $file");
 
         if (array_key_exists($ext, StaticController::MIME_TYPES)) return new FileResult($file, StaticController::MIME_TYPES[$ext]);
         
@@ -74,7 +74,8 @@ class StaticController extends Controller
             div {margin-top: .5em;}
             body {padding-bottom: 3.5em }
             body>header { background-color:var(--header-bg-color, #111); }
-            body>header>nav ul {list-style-type:none; padding-inline-start:0; margin-block-start:0; margin-block-end:0; font-size:4rem;}    
+            body>header>nav ul {list-style-type:none; padding-inline-start:0; margin-block-start:0; margin-block-end:0; font-size:4rem;}
+            body>header>nav ul ul {padding-inline-start:1em; font-size:.7em;}
             body>main { min-height:calc(100vh - 12rem);}
             body>main>*, body>footer>* { overflow-x:auto; scrollbar-color: var(--scrollbar-color, #000) var(--scrollbar-bg-color, #222); scrollbar-width: thin; }
             body>main *::-webkit-scrollbar, body>footer *::-webkit-scrollbar { width : .5em; height: .5em; }
@@ -110,7 +111,7 @@ class StaticController extends Controller
             if (file_exists($file)) return new FileResult($file);
         }
         $file = 'favicon.ico';
-        if (!file_exists($file)) throw new NotFoundException;
+        if (!file_exists($file)) throw new NotFoundException('Favicon');
         return new FileResult($file);
     }
 }
