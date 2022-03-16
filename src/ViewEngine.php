@@ -434,40 +434,42 @@ class View
             <!doctype html>
             <html>
             
-            <head>
-                <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-                <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+              <head>
+                  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+                  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-                <title>{#title} - tsd.serve</title>
+                  <title>{#title} - tsd.serve</title>
 
-                <link rel="icon" type="image/svg+xml" href="/_static/favicon.svg" sizes="any" />
-                <link rel="stylesheet" href="/_static/style.css" />
+                  <link rel="icon" type="image/svg+xml" href="/_static/favicon.svg" sizes="any" />
+                  <link rel="stylesheet" href="/_static/style.css" />
 
-                <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+                  <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
 
-            </head>
+              </head>
 
-            <body>
-                <header>
-                <nav>
-                <ul>
-                <li><a href="/">⚒</a></li>
-                </ul>
-                </nav>
-                </header>
-                <main>
-                </main>
-                <footer class="debug">
-                    {@debug}
-                </footer>
-                <footer class="sticky">
-                <span style="color:#040">tsd.serve</span>  
-                <div style="text-align: right;">by&nbsp;&nbsp;&nbsp;&nbsp;Δ@✞εℕᚹⅤᚢᛕ</div>                
-                </footer>
-            </body>
+              <body>
+                  <header>
+                  <nav>
+                  <ul>
+                  <li><a href="/">⚒</a></li>
+                  </ul>
+                  </nav>
+                  </header>
+                  <main>
+                  </main>
+                  <footer class="debug">
+                      {@debug}
+                  </footer>
+                  <footer class="sticky">
+                  <span style="color:#040">tsd.serve</span>  
+                  <div style="text-align: right;">by&nbsp;&nbsp;&nbsp;&nbsp;Δ@✞εℕᚹⅤᚢᛕ</div>                
+                  </footer>
+              </body>
             </html>
             EOLayout;
         }
+
+        if (!file_exists($viewPath)) throw new NotFoundException("View $viewPath");
 
         return file_get_contents($viewPath);
     }
