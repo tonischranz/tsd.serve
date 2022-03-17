@@ -106,6 +106,7 @@ class StaticController extends Controller
             details.member {background-color:#0000;}
             details div {text-align:left; }
             details summary {list-style:none; width:5.5rem;}
+            details summary::-webkit-details-marker {display: none;}
             details summary::before {content:"☰"; cursor:pointer;}
             details.member summary::before {content:"🧒";}
             details[open] summary::before {content:"❌";}
