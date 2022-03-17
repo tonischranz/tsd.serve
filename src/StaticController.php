@@ -66,6 +66,7 @@ class StaticController extends Controller
             h1 { font-size: 2.5rem; }
             div.gap { height: 2em; }
             input, input:focus, select, select:focus, textarea, textarea:focus { color:var(--input-color, #ddd); background-color:var(--input-bg-color, #222); border-style:solid; border-radius: .5em; padding:.25em; font-size: 1.5em; width:100%; box-sizing:border-box; outline:none; text-align:right; padding-right: 1em; margin-bottom:.5em;}
+            input[type=submit] {width:33%;}
             input::placeholder { text-align:left;font-size:.8em; }
             input:focus::placeholder {font-size:.6em; }
             input[type=checkbox] {width:auto; margin-right:.7em;}
@@ -102,9 +103,11 @@ class StaticController extends Controller
             .h {background:var(--body-bg-color, #222) !important; color:var(--body-color, #ddd) !important;}
             table {box-shadow:none !important;}
             details {background-color:#007; text-align:center; }
+            details.member {background-color:#0000;}
             details div {text-align:left; }
             details summary {list-style:none; width:5.5rem;}
             details summary:before {content:"☰"; cursor:pointer;}
+            details.member summary:before {content:"🧒";}
             details[open] summary:before {content:"❌";}
             details[open] {background-color:#abc}
             EOCSS;
