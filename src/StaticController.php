@@ -106,9 +106,9 @@ class StaticController extends Controller
             details.member {background-color:#0000;}
             details div {text-align:left; }
             details summary {list-style:none; width:5.5rem;}
-            details summary:before {content:"☰"; cursor:pointer;}
-            details.member summary:before {content:"🧒";}
-            details[open] summary:before {content:"❌";}
+            details summary::before {content:"☰"; cursor:pointer;}
+            details.member summary::before {content:"🧒";}
+            details[open] summary::before {content:"❌";}
             details[open] {background-color:#abc}
             EOCSS;
             return new TextResult($css, 'text/css');
