@@ -111,7 +111,7 @@ class StaticController extends Controller
             details.member summary::before {content:"🧒";}
             details[open] summary::before {content:"❌";}
             details[open] {background-color:#abc}
-            :focus-visible {outline:none;}
+            :focus-visible {outline:none; box-shadow:none;}
             EOCSS;
             return new TextResult($css, 'text/css');
         }
