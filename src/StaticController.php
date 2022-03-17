@@ -89,7 +89,7 @@ class StaticController extends Controller
             @media screen and (min-width: 38rem) and (max-width: 56rem) { body>header>nav, body>main, body>footer>{ width: 36rem; margin:auto; } }
             @media screen and (min-width: 24rem) and (max-width: 38rem) { body>header>nav, body>main, body>footer>{ margin-left:1rem; margin-right:1rem; } }
             @media screen and (min-width: 38rem) { body>main.s { width:32rem;} }
-            @media screen and (min-height: 32em) {body>header {position:sticky; top:0;}
+            @media screen and (min-height: 32em) {body>header {position:sticky; top:0;}}
             body>main.s {margin:auto;}
             .fg { display: flex; flex-wrap: wrap; }
             .fg > * { padding-right: 1em; padding-bottom: 1.5em; box-sizing: border-box; width: 100%; flex: auto; }
