@@ -5,7 +5,7 @@
 //__________________________________________________________________________/
 
 const CONFIG_FILE = '.config.json';
-const SERVE_FILE = '.php';
+const SERVE_FILE = '.serve.php';
 
 const SERVE_BASE = 'https://github.com/tonischranz';
 const SERVE_REPO = 'tsd.serve';
@@ -215,9 +215,9 @@ if ($url != '/clean.php')
 {
     if (file_exists('.' . urldecode($url)) && !is_dir('.' . urldecode($url)) && $url != '/') return false;
 
-    if (file_exists('.php'))
+    if (file_exists(SERVE_FILE))
     {
-        include '.php';
+        include SERVE_FILE;
         exit(0);
     }
 
