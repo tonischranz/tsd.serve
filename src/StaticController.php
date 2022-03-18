@@ -118,9 +118,9 @@ class StaticController extends Controller
             body>header>nav details.member {background-color:#0000; position:relative;}
             body>header>nav details div {text-align:left; }
             body>header>nav details ul {font-size:2.5rem; }
-            body>header>nav details summary {list-style:none; min-width:5.5rem;}
+            body>header>nav details summary {list-style:none; min-width:5.5rem;cursor:pointer;}
             body>header>nav summary::-webkit-details-marker {display: none;}
-            body>header>nav details summary::before {content:"☰"; cursor:pointer;}
+            body>header>nav details summary::before {content:"☰";}
             body>header>nav details summary small {font-size:1rem; }
             body>header>nav details.member summary::after {content:"🧑";}
             body>header>nav details.member summary::before {content:none;}
