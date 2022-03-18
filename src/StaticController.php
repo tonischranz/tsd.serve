@@ -85,12 +85,16 @@ class StaticController extends Controller
             body>main *::-webkit-scrollbar-thumb, body>footer *::-webkit-scrollbar-thumb { background-color: var(--scrollbar-color, #222) ; outline: none }
             body footer.debug>pre { padding-bottom: .75em; }
             body>footer.sticky { position:fixed; bottom:0; left:0; right:0; padding: .35em; padding-top:.02em; background-color: var(--footer-bg-color, #0008); }
-            @media screen and (min-width: 86rem) { body>header>nav, body>main, body>footer{ width: 80rem; margin:auto; } }
-            @media screen and (min-width: 56rem) and (max-width: 86rem){ body>header>nav, body>main, body>footer>{ width: 52rem; margin:auto; } }
-            @media screen and (min-width: 38rem) and (max-width: 56rem) { body>header>nav, body>main, body>footer>{ width: 36rem; margin:auto; } }
-            @media screen and (min-width: 24rem) and (max-width: 38rem) { body>header>nav, body>main, body>footer>{ margin-left:1rem; margin-right:1rem; } }
+            
+            @media screen and (min-width: 86rem) { body>header>nav, body>main, body>footer, body>header>nav details.menu>div>div{ width: 80rem; margin:auto; } }
+            @media screen and (min-width: 56rem) and (max-width: 86rem){ body>header>nav, body>main, body>footer, body>header>nav details.menu>div>div{ width: 52rem; margin:auto; } }
+            @media screen and (min-width: 38rem) and (max-width: 56rem) { body>header>nav, body>main, body>footer, body>header>nav details.menu>div>div{ width: 36rem; margin:auto; } }
+            @media screen and (min-width: 24rem) and (max-width: 38rem) { body>header>nav, body>main, body>footer, body>header>nav details.menu>div>div{ margin-left:1rem; margin-right:1rem; } }
+            
             @media screen and (min-width: 38rem) { body>main.s { width:32rem;} }
+            
             @media screen and (min-height: 32em) {body>header {position:sticky; top:0;}}
+
             body>main.s {margin:auto;}
             .fg { display: flex; flex-wrap: wrap; }
             .fg > * { padding-right: 1em; padding-bottom: 1.5em; box-sizing: border-box; width: 100%; flex: auto; }
@@ -103,15 +107,20 @@ class StaticController extends Controller
             .v {background:var(--body-bg-color, #222) !important; color:var(--body-color, #ddd) !important;}
             .h {background:var(--body-bg-color, #222) !important; color:var(--body-color, #ddd) !important;}
             table {box-shadow:none !important;}
-            details {background-color:#007; text-align:center; }
-            details.member {background-color:#0000;}
-            details div {text-align:left; }
-            details summary {list-style:none; width:5.5rem;}
-            summary::-webkit-details-marker {display: none;}
-            details summary::before {content:"☰"; cursor:pointer;}
-            details.member summary::before {content:"🧒";}
-            details[open] summary::before {content:"✕"; color:#005;}
-            details[open] {background-color:#abc}
+            body>header {position:relative;}
+            body>header>nav>ul {display: flex;}
+            body>header>nav>ul>li.home {margin-right:auto;}
+            body>header>nav details.menu>div {left: 0;}
+            body>header>nav details>div {position: absolute; top: 3.4rem; right: 0;background-color:var(--menu-bg-color, #555); padding:.5rem;}
+            body>header>nav details {background-color:var(--menu-closed-bg-color, transparent); text-align:center; }
+            body>header>nav details.member {background-color:#0000; position:relative;}
+            body>header>nav details div {text-align:left; }
+            body>header>nav details summary {list-style:none; width:5.5rem;}
+            body>header>nav summary::-webkit-details-marker {display: none;}
+            body>header>nav details summary::before {content:"☰"; cursor:pointer;}
+            body>header>nav details.member summary::before {content:"🧑";}
+            body>header>nav details[open] summary::before {content:"✕"; color:var(--menu-color,#222);}
+            body>header>nav details[open] {background-color: var(--menu-bg-color, #555);}
             EOCSS;
             return new TextResult($css, 'text/css');
         }
