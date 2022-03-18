@@ -14,11 +14,15 @@
                 "password": "$2y$10$xNqXDtfLb.Ky5ntUHEdBLOa3ZKTvyN4MlvqhIZokwm7AWrDob12RK",
                 "groups": [
                     "editor"
-                ]
+                ],
+                "fullname": "Superduper Editor",
+                "email": "viu@tsd.ovh"
             }
         }
     },
-    "db": {"_mode":"fake" },
+    "db": {
+        "_mode": "fake"
+    },
     "router": {
         "domains": {
             "localhost:8000": "lorem",

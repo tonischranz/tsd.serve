@@ -91,9 +91,11 @@ class StaticController extends Controller
             @media screen and (min-width: 38rem) and (max-width: 56rem) { body>header>nav, body>main, body>footer, body>header>nav details.menu>div>div{ width: 36rem; margin:auto; } }
             @media screen and (min-width: 24rem) and (max-width: 38rem) { body>header>nav, body>main, body>footer, body>header>nav details.menu>div>div{ margin-left:1rem; margin-right:1rem; } }
             
-            @media screen and (min-width: 38rem) { body>main.s { width:32rem;} }
+            @media screen and (min-width: 38rem) { body>main.s { width:32rem;} body>header>nav details div { display:flex;} body>header>nav details div ul {width:50%;} }
             
             @media screen and (min-height: 32em) {body>header {position:sticky; top:0;}}
+
+            @media screen and (max-width: 38rem) {body>header>nav details summary small {display:none; } }
 
             body>main.s {margin:auto;}
             .fg { display: flex; flex-wrap: wrap; }
@@ -111,15 +113,20 @@ class StaticController extends Controller
             body>header>nav>ul {display: flex;}
             body>header>nav>ul>li.home {margin-right:auto;}
             body>header>nav details.menu>div {left: 0;}
-            body>header>nav details>div {position: absolute; top: 3.4rem; right: 0;background-color:var(--menu-bg-color, #555); padding:.5rem;}
+            body>header>nav details>div {position: absolute; top: 3.4rem; right: 0;background-color:var(--menu-bg-color, #555); padding:.5rem; border:.15rem solid black;}
             body>header>nav details {background-color:var(--menu-closed-bg-color, transparent); text-align:center; }
             body>header>nav details.member {background-color:#0000; position:relative;}
             body>header>nav details div {text-align:left; }
-            body>header>nav details summary {list-style:none; width:5.5rem;}
+            body>header>nav details ul {font-size:2.5rem; }
+            body>header>nav details summary {list-style:none; min-width:5.5rem;}
             body>header>nav summary::-webkit-details-marker {display: none;}
             body>header>nav details summary::before {content:"☰"; cursor:pointer;}
-            body>header>nav details.member summary::before {content:"🧑";}
+            body>header>nav details summary small {font-size:1rem; }
+            body>header>nav details.member summary::after {content:"🧑";}
+            body>header>nav details.member summary::before {content:none;}
             body>header>nav details[open] summary::before {content:"✕"; color:var(--menu-color,#222);}
+            body>header>nav details[open] summary::after {content:none;}
+            body>header>nav details[open] summary small {display:none;}
             body>header>nav details[open] {background-color: var(--menu-bg-color, #555);}
             EOCSS;
             return new TextResult($css, 'text/css');

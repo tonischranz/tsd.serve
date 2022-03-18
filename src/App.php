@@ -174,6 +174,7 @@ class App
             throw new AccessDeniedException($route);
 
         //$route->ctx()->groups = $this->member->getGroups();
+        $route->ctx()->member['fullname'] = $this->member->getFullName();
         $route->fill($data);
 
         return $route->follow();
