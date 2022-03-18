@@ -110,9 +110,8 @@ class StaticController extends Controller
             summary::-webkit-details-marker {display: none;}
             details summary::before {content:"☰"; cursor:pointer;}
             details.member summary::before {content:"🧒";}
-            details[open] summary::before {content:"✕";}
+            details[open] summary::before {content:"✕"; color:#005;}
             details[open] {background-color:#abc}
-            :focus-visible {outline:none;}
             EOCSS;
             return new TextResult($css, 'text/css');
         }
