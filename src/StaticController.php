@@ -62,7 +62,7 @@ class StaticController extends Controller
             body { color:var(--body-color, #ddd) !important; background-color:var(--body-bg-color, #222) !important; font-family: sans-serif; margin:0; margin-bottom: 1.5em; }
             a, a:visited { text-decoration: none; color:var(--link-color, #aaa); }
             a:active, a:hover { text-decoration: var(--link-active-color, #ddd) underline; }
-            button {  border: thin solid var(--border-color, #888); background-color: var(--button-bg-color, #000); color: var(--button-color, #ddd); font-weight: bold; font-size: 2em; border-radius: .5em; padding:.25em 1em; outline:none; }
+            button, a.btn {  border: thin solid var(--border-color, #888); background-color: var(--button-bg-color, #000); color: var(--button-color, #ddd); font-weight: bold; font-size: 2em; border-radius: .5em; padding:.25em 1em; outline:none; }
             h1 { font-size: 2.5rem; }
             div.gap { height: 2em; }
             input, input:focus, select, select:focus, textarea, textarea:focus { color:var(--input-color, #ddd); background-color:var(--input-bg-color, #222); border-style:solid; border-radius: .5em; padding:.25em; font-size: 1.5em; width:100%; box-sizing:border-box; outline:none;/* text-align:right;*/ padding-right: 1em; margin-bottom:.5em;}
@@ -104,7 +104,7 @@ class StaticController extends Controller
             @media screen and (min-width: 36em) { .fg > * { width: 50%; } .fg > .b, .fg > .bb { width: 100%; } }
             @media screen and (min-width: 56em) { .fg > * { width: 33.3%; } .fg > .b { width: 66.6%; } .fg > .bb { width: 100%; } }
             textarea { height: 10em; resize: vertical; }
-            a:link { background:none !important; }
+            /*a:link { background:none !important; }*/
             .e {background:var(--body-bg-color, #222) !important; color:var(--body-color, #ddd) !important;}
             .v {background:var(--body-bg-color, #222) !important; color:var(--body-color, #ddd) !important;}
             .h {background:var(--body-bg-color, #222) !important; color:var(--body-color, #ddd) !important;}
