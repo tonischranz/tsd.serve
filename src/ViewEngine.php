@@ -10,6 +10,8 @@ use \DOMXPath;
 
 abstract class ViewEngine
 {
+    const VIEWS = 'views';
+
     function render($result, ViewContext $ctx, string $accept)
     {
         if ($result instanceof AccessDeniedException) $result = Controller::error($result, 403);
@@ -67,7 +69,6 @@ class ServeViewEngine extends ViewEngine
     const CACHED_VIEWS = App::CACHE . DIRECTORY_SEPARATOR . 'views.php';
     const CACHED_DIR =  App::CACHE . DIRECTORY_SEPARATOR .'views';
     const CACHE_DURATION = 30;
-    const VIEWS = 'views';
 
     public static array $cached_views = array();
 
@@ -209,9 +210,9 @@ class View
 
     private static function loadTemplate($path, $plugin)
     {
-        $noPluginBasePath = ServeViewEngine::VIEWS;
-        $basePath = $plugin ? App::PLUGINS . DIRECTORY_SEPARATOR . $plugin . DIRECTORY_SEPARATOR . ServeViewEngine::VIEWS : $noPluginBasePath;
-        $alternateBasePath = $plugin ? ServeViewEngine::VIEWS . DIRECTORY_SEPARATOR . App::PLUGINS . DIRECTORY_SEPARATOR . $plugin : '';
+        $noPluginBasePath = ViewEngine::VIEWS;
+        $basePath = $plugin ? App::PLUGINS . DIRECTORY_SEPARATOR . $plugin . DIRECTORY_SEPARATOR . ViewEngine::VIEWS : $noPluginBasePath;
+        $alternateBasePath = $plugin ? ViewEngine::VIEWS . /*DIRECTORY_SEPARATOR . App::PLUGINS .*/ DIRECTORY_SEPARATOR . $plugin : '';
 
         $viewPath = $alternateBasePath ? $alternateBasePath . DIRECTORY_SEPARATOR . $path : $basePath . DIRECTORY_SEPARATOR . $path;
 
