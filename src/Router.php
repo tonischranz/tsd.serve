@@ -399,7 +399,7 @@ class PostRoute extends Route
 
     function fill(array $data)
     {
-        $this->data = array_merge($this->data, $data['_POST'], $data);
+        $this->data = array_merge($this->data, $data['_GET'], $data['_POST'], $data);
     }
 }
 
