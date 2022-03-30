@@ -98,6 +98,7 @@ class StaticController extends Controller
             @media screen and (max-width: 38rem) {body>header>nav details summary small {display:none; } }
 
             body>main.s {margin:auto;}
+            body>main.l {width:100vw;}
             .fg { display: flex; flex-wrap: wrap; }
             .fg > * { padding-right: 1em; padding-bottom: 1.5em; box-sizing: border-box; width: 100%; flex: auto; }
             .fg > * > * { display: block; width: 100%; box-sizing: border-box; padding: 0.5em; }
