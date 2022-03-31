@@ -104,7 +104,7 @@ class StaticController extends Controller
             .fg > * > * { display: block; width: 100%; box-sizing: border-box; padding: 0.5em; }
             @media screen and (min-width: 36em) { .fg > * { width: 50%; } .fg > .b, .fg > .bb { width: 100%; } }
             @media screen and (min-width: 56em) { .fg > * { width: 33.3%; } .fg > .b { width: 66.6%; } .fg > .bb { width: 100%; } }
-            textarea { height: 10em; resize: vertical; }
+            textarea { height: 10em; resize: none; }
             /*a:link { background:none !important; }*/
             .e {background:var(--body-bg-color, #222) !important; color:var(--body-color, #ddd) !important;}
             .v {background:var(--body-bg-color, #222) !important; color:var(--body-color, #ddd) !important;}
