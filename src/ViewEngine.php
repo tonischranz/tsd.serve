@@ -168,9 +168,11 @@ class View
         $t->loadHTML($vt);
         $o->loadHTML($lt);
 
-        $title = $t->getElementsByTagName('title')[0]->C14N();
-        $title = str_replace(['<title>', '</title>'], '', $title);
-        $title = str_replace('??>', '?>', $title);
+        $title = $t->getElementsByTagName('title')[0];
+        $lTitle = $o->getElementsByTagName('title')[0];
+
+        $lTitle->nodeValue = str_replace('{#title}', $title->nodeValue, $lTitle->nodeValue);
+
         $x = new DOMXPath($t);
         $xL = new DOMXPath($o);
         $links = $x->query('head/link');
@@ -212,7 +214,7 @@ class View
     {
         $noPluginBasePath = ViewEngine::VIEWS;
         $basePath = $plugin ? App::PLUGINS . DIRECTORY_SEPARATOR . $plugin . DIRECTORY_SEPARATOR . ViewEngine::VIEWS : $noPluginBasePath;
-        $alternateBasePath = $plugin ? ViewEngine::VIEWS . /*DIRECTORY_SEPARATOR . App::PLUGINS .*/ DIRECTORY_SEPARATOR . $plugin : '';
+        $alternateBasePath = $plugin ? ViewEngine::VIEWS . DIRECTORY_SEPARATOR . $plugin : '';
 
         $viewPath = $alternateBasePath ? $alternateBasePath . DIRECTORY_SEPARATOR . $path : $basePath . DIRECTORY_SEPARATOR . $path;
 
