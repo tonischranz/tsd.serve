@@ -122,12 +122,15 @@ class StaticController extends Controller
             body>header>nav details summary {list-style:none; min-width:5.5rem;cursor:pointer;}
             body>header>nav summary::-webkit-details-marker {display: none;}
             body>header>nav details summary::before {content:"☰";}
+            body>header>nav details[open] summary::before {content:none;}
+            body>header>nav details summary:hover, body>header>nav li.home:hover {background-color:var(--menu-hover-color, #050);}
+            body>header>nav li.home:hover a:link {text-decoration:none;}
+            body>header>nav details[open] summary:hover {background-color:unset;}
             body>header>nav details summary small {font-size:1rem; }
             body>header>nav details.member summary::after {content:"🧑";}
             body>header>nav details.member summary::before {content:none;}
-            body>header>nav details[open] summary::before {content:"✕"; color:var(--menu-color,#222);}
-            body>header>nav details[open] summary::after {content:none;}
-            body>header>nav details[open] summary small {display:none;}
+            body>header>nav details.member summary {padding-left:.5em}
+            body>header>nav details[open] summary::after {content:" ✕"; color:var(--menu-color,#222);padding-right:.2em;}
             body>header>nav details[open] {background-color: var(--menu-bg-color, #555);}
             EOCSS;
             return new TextResult($css, 'text/css');
