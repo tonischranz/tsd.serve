@@ -97,7 +97,6 @@ class Router
                     $tmp = App::$plugins;
                     $oldPlugin = $plugin;
                     $plugin = $name;
-                    //$pluginRoot = "$pluginRoot/$name";
 
                     if ($oldPlugin && @App::$plugins[$oldPlugin]['overrideController']) {
                         $overrideName = $oldPlugin;
@@ -115,9 +114,7 @@ class Router
                     if (!$layoutPlugin || @App::$plugins[$plugin]['forceLayout']) {
                         $layoutPlugin = $plugin;
                     }
-                } /*else if ($overrideName) {
-                    $overrideName = '';
-                }*/
+                }
 
                 if ($overrideName) {
                     $c = $this->createController($overrideName, $plugin);
@@ -166,82 +163,46 @@ class Router
         $params = [];
         $prefix = $method == 'POST' ? 'do' : ($method == 'GET' ? 'show' : $method);
 
-        $methodName = $this->getMethodName($methodPath, $prefix, $params);
-
         $rc = new ReflectionClass($c);
 
-        $mi = $this->getMethodInfo($rc, $methodName);
-
-        if (!$mi) {
-            $alternatives = [];
-            $methodName = $this->getMethodName($methodPath, $prefix, $params, $alternatives);
+            $alternatives = Router::getAlternatives(preg_split('/\/|\./',$methodPath), $prefix);
 
             foreach ($alternatives as $a) {
-                $mi = $this->getMethodInfo($rc, $a['methodName']);
+                $mi = $this->getMethodInfo($rc, $a['name']);
 
                 if ($mi) {
-                    $params = [$a['params']];
+                    $params = $a['params'] ? [$a['params']] : [];
                     break;
                 }
             }
             if (!$mi) {
                 return new NoRoute($ctx);
             }
-        }
 
         return $method == 'POST' ? new PostRoute($c, $mi, $ctx, $params) : ($method == 'GET' ? new GetRoute($c, $mi, $ctx, $params) : false);
     }
 
-    public static function getMethodName(string $methodPath, string $prefix, array &$params, array &$pathAlternatives = null): string
+    private static function getAlternatives(array $path, string $name = '', array $params = [])
     {
-        $parts = explode('/', $methodPath);
-        $methodName = $prefix;
-        $params = [];
+        if (count($path) > 1)
+        {
+            $newPath = $path;
+            $newPart = array_shift($newPath);
+            $chalt = Router::getAlternatives($newPath,$name.$newPart, $params);
+            $chalt2 = Router::getAlternatives($newPath,$name, array_merge($params, [$newPart]));
 
-        if ($methodPath == '') {
-            $methodName .= 'index';
+            foreach ($chalt as $ca) yield $ca;
+            foreach ($chalt2 as $ca2) yield $ca2;
         }
-
-        foreach ($parts as $p) {
-            if (is_numeric($p)) {
-                $params[] = $p;
-            } else {
-                $sparts = explode('.', $p);
-
-                foreach ($sparts as $sp) {
-                    if (is_numeric($sp)) {
-                        $params[] = $sp;
-                    } else if (is_array($pathAlternatives) && $sp) {
-                        $params[] = $sp;
-                    } else {
-                        $methodName .= $sp;
-                    }
-                }
+        else
+        {
+            if ($path[0] == '') yield ['name'=>$name.'index', 'params' => $params];
+            else
+            {
+                yield ['name'=>$name.$path[0], 'params' => $params];
+                yield ['name'=>$name, 'params'=>array_merge($params, [$path[0]]) ];
             }
         }
-
-        if (is_array($pathAlternatives)) {
-            foreach ($params as $p) {
-                $a = ['methodName' => $prefix, 'params' => []];
-                $x = 0;
-
-                foreach ($params as $p2) {
-                    if ($x > count($pathAlternatives)) {
-                        $a['methodName'] .= $p2;
-                    } else {
-                        $a['params'][] = $p2;
-                        $x++;
-                    }
-                }
-
-                $pathAlternatives[] = $a;
-            }
-
-            $params = [$params];
-            return count($pathAlternatives);
-        }
-
-        return $methodName;
     }
 
     private static function getMethodInfo(ReflectionClass $rc, string $name)
