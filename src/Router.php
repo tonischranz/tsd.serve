@@ -277,20 +277,13 @@ abstract class Route
         $n = 0;
         $params = [];
 
-        foreach ($pinfos as $pi) {
-            /*if (count($params) <= $n) {*/
-                //todo: Model validation
-                if ($this->isModelParam($pi)) $params[] = $this->injectModel($pi);
-                else if (key_exists($pi->name, $this->data)) $params[] = $this->data[$pi->name];
-                //todo: 
-                else if (($pi->isVariadic()) && key_exists(0, $this->data)) foreach ($this->data[0] as $d) $params[] = $d;
-                else if (Route::declaresArray($pi) && key_exists(0, $this->data))$params[] = $this->data[0];
-                else if (key_exists(0, $this->data) && key_exists($n, $this->data[0])) { $params[] = $this->data[0][$n]; $n++;}
-                else if ($pi->isDefaultValueAvailable()) $params[] = $pi->getDefaultValue();
-            /*}*/
-
-            //$n++;
-        }
+        foreach ($pinfos as $pi)
+            if ($this->isModelParam($pi)) $params[] = $this->injectModel($pi);
+            else if (key_exists($pi->name, $this->data)) $params[] = $this->data[$pi->name];
+            else if (($pi->isVariadic()) && key_exists(0, $this->data)) foreach ($this->data[0] as $d) $params[] = $d;
+            else if (Route::declaresArray($pi) && key_exists(0, $this->data))$params[] = $this->data[0];
+            else if (key_exists(0, $this->data) && key_exists($n, $this->data[0])) { $params[] = $this->data[0][$n]; $n++;}
+            else if ($pi->isDefaultValueAvailable()) $params[] = $pi->getDefaultValue();
 
         return $this->methodInfo->invokeArgs($this->controller, $params);
     }
@@ -308,7 +301,7 @@ abstract class Route
         return in_array('array', array_map(fn(ReflectionNamedType $t) => $t->getName(), $types));
     }
 
-    function isModelParam(ReflectionParameter $pi)
+    function isModelParam(ReflectionParameter $pi) : bool
     {
         if (!$pi->hasType()) return false;
         $t = $pi->getType();
@@ -329,7 +322,7 @@ abstract class Route
         return $obj;
     }
 
-    function checkPermission(Membership $member)
+    function checkPermission(Membership $member) : bool
     {
         $att = $this->methodInfo->getAttributes();
         $authorized = true;
@@ -396,7 +389,7 @@ class NoRoute extends Route
         throw new NotFoundException('Route');
     }
 
-    function checkPermission(Membership $member)
+    function checkPermission(Membership $member) : bool
     {
         return true;
     }
