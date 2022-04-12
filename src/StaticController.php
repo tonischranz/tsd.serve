@@ -62,10 +62,10 @@ class StaticController extends Controller
             body { color:var(--body-color, #ddd) !important; background-color:var(--body-bg-color, #222) !important; font-family: sans-serif; margin:0; margin-bottom: 1.5em; }
             a, a:visited { text-decoration: none; color:var(--link-color, #aaa); }
             a:active, a:hover { text-decoration: var(--link-active-color, #ddd) underline; }
-            button {  border: thin solid var(--border-color, #888); background-color: var(--button-bg-color, #000); color: var(--button-color, #ddd); font-weight: bold; font-size: 2em; border-radius: .5em; padding:.25em 1em; outline:none; }
+            button, a.btn {  border: thin solid var(--border-color, #888); background-color: var(--button-bg-color, #000); color: var(--button-color, #ddd); font-weight: bold; font-size: 2em; border-radius: .5em; padding:.25em 1em; outline:none; }
             h1 { font-size: 2.5rem; }
             div.gap { height: 2em; }
-            input, input:focus, select, select:focus, textarea, textarea:focus { color:var(--input-color, #ddd); background-color:var(--input-bg-color, #222); border-style:solid; border-radius: .5em; padding:.25em; font-size: 1.5em; width:100%; box-sizing:border-box; outline:none; text-align:right; padding-right: 1em; margin-bottom:.5em;}
+            input, input:focus, select, select:focus, textarea, textarea:focus { color:var(--input-color, #ddd); background-color:var(--input-bg-color, #222); border-style:solid; border-radius: .5em; padding:.25em; font-size: 1.5em; width:100%; box-sizing:border-box; outline:none;/* text-align:right;*/ padding-right: 1em; margin-bottom:.5em;}
             input[type=submit] {width:33%;}
             input::placeholder { text-align:left;font-size:.8em; }
             input:focus::placeholder {font-size:.6em; }
@@ -78,7 +78,7 @@ class StaticController extends Controller
             body>header>nav>ul>li {margin:.25rem;}
             body>header>nav ul {list-style-type:none; padding-inline-start:0; margin-block-start:0; margin-block-end:0; font-size:4rem;}
             body>header>nav ul ul ul {padding-inline-start:1em; font-size:.7em; }
-            body>main { min-height:calc(100vh - 12rem);}
+            body>main { min-height:calc(100vh - 12.5rem);}
             body>main>*, body>footer>* { overflow-x:auto; scrollbar-color: var(--scrollbar-color, #000) var(--scrollbar-bg-color, #222); scrollbar-width: thin; }
             body>main *::-webkit-scrollbar, body>footer *::-webkit-scrollbar { width : .5em; height: .5em; }
             body>main *::-webkit-scrollbar-track, body>footer *::-webkit-scrollbar-track { background-color: var(--scrollbar-bg-color, #000); }
@@ -98,13 +98,14 @@ class StaticController extends Controller
             @media screen and (max-width: 38rem) {body>header>nav details summary small {display:none; } }
 
             body>main.s {margin:auto;}
+            body>main.l {width:100vw;}
             .fg { display: flex; flex-wrap: wrap; }
             .fg > * { padding-right: 1em; padding-bottom: 1.5em; box-sizing: border-box; width: 100%; flex: auto; }
             .fg > * > * { display: block; width: 100%; box-sizing: border-box; padding: 0.5em; }
             @media screen and (min-width: 36em) { .fg > * { width: 50%; } .fg > .b, .fg > .bb { width: 100%; } }
             @media screen and (min-width: 56em) { .fg > * { width: 33.3%; } .fg > .b { width: 66.6%; } .fg > .bb { width: 100%; } }
-            textarea { height: 10em; resize: vertical; }
-            a:link { background:none !important; }
+            textarea { height: 10em; resize: none; }
+            /*a:link { background:none !important; }*/
             .e {background:var(--body-bg-color, #222) !important; color:var(--body-color, #ddd) !important;}
             .v {background:var(--body-bg-color, #222) !important; color:var(--body-color, #ddd) !important;}
             .h {background:var(--body-bg-color, #222) !important; color:var(--body-color, #ddd) !important;}
@@ -121,12 +122,15 @@ class StaticController extends Controller
             body>header>nav details summary {list-style:none; min-width:5.5rem;cursor:pointer;}
             body>header>nav summary::-webkit-details-marker {display: none;}
             body>header>nav details summary::before {content:"☰";}
+            body>header>nav details[open] summary::before {content:none;}
+            body>header>nav details summary:hover, body>header>nav li.home:hover {background-color:var(--menu-hover-color, #050);}
+            body>header>nav li.home:hover a:link {text-decoration:none;}
+            body>header>nav details[open] summary:hover {background-color:unset;}
             body>header>nav details summary small {font-size:1rem; }
             body>header>nav details.member summary::after {content:"🧑";}
             body>header>nav details.member summary::before {content:none;}
-            body>header>nav details[open] summary::before {content:"✕"; color:var(--menu-color,#222);}
-            body>header>nav details[open] summary::after {content:none;}
-            body>header>nav details[open] summary small {display:none;}
+            body>header>nav details.member summary {padding-left:.5em}
+            body>header>nav details[open] summary::after {content:" ✕"; color:var(--menu-color,#222);padding-right:.2em;}
             body>header>nav details[open] {background-color: var(--menu-bg-color, #555);}
             EOCSS;
             return new TextResult($css, 'text/css');
