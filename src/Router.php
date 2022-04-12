@@ -278,18 +278,33 @@ abstract class Route
         $params = [];
 
         foreach ($pinfos as $pi) {
-            if (count($params) <= $n) {
+            /*if (count($params) <= $n) {*/
                 //todo: Model validation
                 if ($this->isModelParam($pi)) $params[] = $this->injectModel($pi);
                 else if (key_exists($pi->name, $this->data)) $params[] = $this->data[$pi->name];
-                else if (key_exists($n, $this->data)) $params[] = $this->data[$n];
+                //todo: 
+                else if (Route::declaresArray($pi) && key_exists(0, $this->data))$params[] = $this->data[0];
+                else if (key_exists(0, $this->data) && key_exists($n, $this->data[0])) { $params[] = $this->data[0][$n]; $n++;}
                 else if ($pi->isDefaultValueAvailable()) $params[] = $pi->getDefaultValue();
-            }
+            /*}*/
 
-            $n++;
+            //$n++;
         }
 
         return $this->methodInfo->invokeArgs($this->controller, $params);
+    }
+
+    static function declaresArray(ReflectionParameter $reflectionParameter): bool
+    {
+        $reflectionType = $reflectionParameter->getType();
+
+        if (!$reflectionType) return false;
+
+        $types = $reflectionType instanceof ReflectionUnionType
+            ? $reflectionType->getTypes()
+            : [$reflectionType];
+
+        return in_array('array', array_map(fn(ReflectionNamedType $t) => $t->getName(), $types));
     }
 
     function isModelParam(ReflectionParameter $pi)
