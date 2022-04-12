@@ -48,4 +48,11 @@ class defaultController extends Controller
 
     return $this->view(view:'index');
   }
+
+  function showTgb(string ...$path)
+  {
+    var_dump($path);
+
+    return $this->view(view:'index');
+  }
 }

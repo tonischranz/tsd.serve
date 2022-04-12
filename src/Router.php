@@ -283,6 +283,7 @@ abstract class Route
                 if ($this->isModelParam($pi)) $params[] = $this->injectModel($pi);
                 else if (key_exists($pi->name, $this->data)) $params[] = $this->data[$pi->name];
                 //todo: 
+                else if (($pi->isVariadic()) && key_exists(0, $this->data)) foreach ($this->data[0] as $d) $params[] = $d;
                 else if (Route::declaresArray($pi) && key_exists(0, $this->data))$params[] = $this->data[0];
                 else if (key_exists(0, $this->data) && key_exists($n, $this->data[0])) { $params[] = $this->data[0][$n]; $n++;}
                 else if ($pi->isDefaultValueAvailable()) $params[] = $pi->getDefaultValue();
