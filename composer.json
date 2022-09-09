@@ -1,0 +1,18 @@
+{
+    "name": "tonischranz/tsd.serve",
+    "description": "Minimalist Dependency Injection MVC Framework",
+    "type": "library",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "tsd\\serve": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Toni Schranz",
+            "email": "toni.schranz@gmail.com"
+        }
+    ],
+    "require": {}
+}
