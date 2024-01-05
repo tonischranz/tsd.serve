@@ -14,5 +14,7 @@
             "email": "toni.schranz@gmail.com"
         }
     ],
-    "require": {}
+    "require": {
+        "php": "~8.0"
+    }
 }
