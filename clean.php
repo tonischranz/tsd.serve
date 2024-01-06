@@ -14,6 +14,8 @@ const ADMIN_REPO = 'serve.admin';
 const ADMIN_BRANCH = 'main';
 
 const EXTENSIONS = ['dom', 'openssl', 'session', 'zip' /*, 'mysqli'*/];
+const EXTENSIONS_COMPOSER = ['filter', 'mbstring', 'phar'];
+
 const MINVER = "8.0.0";
 
 $serve_url = SERVE_BASE . '/' . SERVE_REPO . '/archive/' . SERVE_BRANCH . '.zip';
