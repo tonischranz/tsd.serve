@@ -232,9 +232,9 @@ class View
               </head>
             
               <body>
-                <main class="s">
+                <main>
                   <h1>💥 error</h1>
-                  <p>{message}</p>
+                  <pre>{message}</pre>
                 </main>
               </body>
             </html>
@@ -249,7 +249,7 @@ class View
               </head>
             
               <body>
-                <main class="s">
+                <main>
                   <h1>🛈 info</h1>
                   <p>{message}</p>
                 </main>
@@ -266,7 +266,7 @@ class View
               </head>
             
               <body>
-                <main class="success s">
+                <main class="success">
                   <h1>🛈 success</h1>
                   <p>{message}</p>
                 </main>
@@ -446,7 +446,7 @@ class View
                   <link rel="icon" type="image/svg+xml" href="/_static/favicon.svg" sizes="any" />
                   <link rel="stylesheet" href="/_static/style.css" />
 
-                  <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+                  <script src="https://code.jquery.com/jquery-3.7.1.slim.min.js" integrity="sha256-kmHvs0B+OpCW5GVHUNjv9rOmY0IvSIRcf7zGUDTDQM8=" crossorigin="anonymous"></script>
 
               </head>
 
