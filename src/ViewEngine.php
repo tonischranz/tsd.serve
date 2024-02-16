@@ -452,11 +452,11 @@ class View
 
               <body>
                   <header>
-                  <nav>
-                  <ul>
-                  <li><a href="/">⚒</a></li>
-                  </ul>
-                  </nav>
+                    <nav>
+                      <ul>
+                        <li><a href="/">⚒</a></li>
+                      </ul>
+                    </nav>
                   </header>
                   <main>
                   </main>
@@ -464,8 +464,8 @@ class View
                       {@debug}
                   </footer>
                   <footer class="sticky">
-                  <span style="color:#040">tsd.serve</span>  
-                  <div style="text-align: right;">by&nbsp;&nbsp;&nbsp;&nbsp;Δ@✞εℕᚹⅤᚢᛕ</div>                
+                    <span style="color:#040">tsd.serve</span>  
+                    <div style="text-align: right;">by&nbsp;&nbsp;&nbsp;&nbsp;Δ@✞εℕᚹⅤᚢᛕ</div>                
                   </footer>
               </body>
             </html>
