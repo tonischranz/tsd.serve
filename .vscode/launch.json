@@ -11,7 +11,7 @@
           "-dxdebug.mode=develop,debug",
           "-dxdebug.start_with_request=yes",
           "-S",
-          "127.0.0.1:8000"
+          "127.0.0.1:0"
         ],
         "xdebugSettings": {
           "max_data": -1, "max_children": 1000

@@ -1,6 +1,6 @@
 {
     "name": "tonischranz/tsd.serve",
-    "description": "Minimalist Dependency Injection MVC Framework",
+    "description": "Minimalist Dependency Injection MVC Framework with builtin view template engine",
     "type": "library",
     "license": "MIT",
     "autoload": {
