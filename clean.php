@@ -16,6 +16,7 @@ namespace tsd\serve;
 //__________________________________________________________________________/
 
 const SERVE_FILE = '.tsd.serve.php';
+const CONFIG_FILE = '.htconfig.json';su
 const SRC_DIR = 'src';
 const EXTENSIONS_SERVE = ['dom', 'session'];
 
@@ -105,7 +106,6 @@ if ($url != "/$fn")
 /// clean.php ⚒ install and setup your tsd.serve application                 /
 //__________________________________________________________________________/
 
-const CONFIG_FILE = '.htconfig.json';
 const SERVE_BASE = 'https://github.com/tonischranz';
 const SERVE_REPO = 'tsd.serve';
 const SERVE_BRANCH = 'next';
