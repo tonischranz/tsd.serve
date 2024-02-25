@@ -2,7 +2,7 @@
 
 ////¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨| 
 ///  tsd.serve ⚒ clean.php                                                    |
-// 𝄞 Toni Schranz                                                             |
+// ♫ Toni Schranz                                                             |
 // ---------------------------------------------------------------------------|
 // This file helps you to setup your new application based on the             |
 // [tsd.serve] framework. It also acts as router-script/FallbackResource.     |
