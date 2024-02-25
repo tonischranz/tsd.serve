@@ -2,9 +2,10 @@
 
 ////¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨| 
 ///  tsd.serve ⚒ clean.php                                                    |
-//                                                                            |
-// This file helps you to setup your new application based on                 |
-// the tsd.serve framework. It also acts as router-script/FallbackResource.   |
+// 𝄞 Toni Schranz                                                             |
+// ---------------------------------------------------------------------------|
+// This file helps you to setup your new application based on the             |
+// [tsd.serve] framework. It also acts as router-script/FallbackResource.     |
 // If called via CLI it starts a development webserver on 127.0.0.1:8000      |
 // ___________________________________________________________________________|
 
@@ -21,7 +22,7 @@ const EXTENSIONS_SERVE = ['dom', 'session'];
 $fn = basename(__FILE__);
 
 ////¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨|
-/// CLI ⚒ launch dev webserver and browser                                   /
+/// CLI ♫ launch dev webserver and browser                                   /
 //__________________________________________________________________________/
 
 if (PHP_SAPI == 'cli') {
@@ -45,6 +46,7 @@ if (PHP_SAPI == 'cli') {
 //__________________________________________________________________________/
 
 $url = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+$ext= get_loaded_extensions();
 
 if ($url != "/$fn")
 {
@@ -58,8 +60,7 @@ if ($url != "/$fn")
     if ($url != '/' && file_exists(__DIR__ . $url))
         return false;
 
-    // extensions check
-    $ext= get_loaded_extensions();
+    // extensions check    
     foreach ( EXTENSIONS_SERVE as $ex)
         if (!in_array($ex, $ext))
         {
