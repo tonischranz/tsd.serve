@@ -16,7 +16,7 @@ namespace tsd\serve;
 //__________________________________________________________________________/
 
 const SERVE_FILE = '.tsd.serve.php';
-const CONFIG_FILE = '.htconfig.json';su
+const CONFIG_FILE = '.htconfig.json';
 const SRC_DIR = 'src';
 const EXTENSIONS_SERVE = ['dom', 'session'];
 
