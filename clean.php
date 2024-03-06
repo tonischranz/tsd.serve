@@ -1,13 +1,13 @@
 <?php
 
-////¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨| 
+////¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨|
 ///  tsd.serve ⚒ clean.php                                                    |
 // ♫ Toni Schranz                                                             |
 // ---------------------------------------------------------------------------|
 // This file helps you to setup your new application based on the             |
 // [tsd.serve] framework. It also acts as router-script/FallbackResource.     |
-// If called via CLI it starts a development webserver on 127.0.0.1:8000      |
-// ___________________________________________________________________________|
+// If called via CLI it starts a development webserver on 127.0.0.1:8000     /
+// _________________________________________________________________________/
 
 namespace tsd\serve;
 
@@ -15,57 +15,93 @@ namespace tsd\serve;
 /// ⚒ paths                                                                  /
 //__________________________________________________________________________/
 
-const SERVE_FILE = '.tsd.serve.php';
+const SERVE_HOST = 'github.com';
+const SERVE_BASE = 'tonischranz';
+const SERVE_REPO = 'tsd.serve';
+const SERVE_BRANCH = 'next';
+
 const CONFIG_FILE = '.htconfig.json';
-const SRC_DIR = 'src';
 const EXTENSIONS_SERVE = ['dom', 'session'];
 
-$fn = basename(__FILE__);
+$serve_file = '.' . SERVE_REPO . '.php';
+$filename = basename(__FILE__);
+$url = $_SERVER['PHP_SELF'];
+$ext= get_loaded_extensions();
 
 ////¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨|
 /// CLI ♫ launch dev webserver and browser                                   /
 //__________________________________________________________________________/
 
 if (PHP_SAPI == 'cli') {
+    if ($url == 'vendor/'.SERVE_BASE.'/'.SERVE_REPO.'/'.$filename)
+    {
+        copy(__FILE__, '.');
+        shell_exec(PHP_BINARY." $filename");
+        exit (0);
+    }
     if ($argc == 1) {
-        if (PHP_OS == 'WINNT') shell_exec('start http://localhost:8000');
-        else if (PHP_OS == 'Linux') shell_exec('xdg-open http://localhost:8000');
-        else if (PHP_OS == 'FreeBSD') shell_exec('xdg-open http://localhost:8000');
+        if (PHP_OS == 'WINNT') 
+            shell_exec('start http://localhost:8000');
+        else if (PHP_OS == 'Linux') 
+            shell_exec('xdg-open http://localhost:8000');
+        else if (PHP_OS == 'FreeBSD') 
+            shell_exec('xdg-open http://localhost:8000');
         //ToDo: macOS
         
-        echo '"' . PHP_BINARY . '" -S 127.0.0.1:8000 -t "' . __DIR__ . '" "' . $fn ."\"\n";
-        shell_exec('"' . PHP_BINARY . '" -S 127.0.0.1:8000 -t "' . __DIR__ . '" "' . $fn .'"');        
+        echo '"' . PHP_BINARY . '" -S 127.0.0.1:8000 -t "' . __DIR__ . '" "' . $filename ."\"\n";
+        shell_exec('"' . PHP_BINARY . '" -S 127.0.0.1:8000 -t "' . __DIR__ . '" "' . $filename .'"');
     } else {
-        echo "Usage: php $fn\n";
+        echo "Usage: php $filename\n";
+        var_dump($argv);
+        var_dump($_SERVER);
         echo "\n";
     }
     exit(0);
 }
 
 ////¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨|
-/// router script ⚒ load and execute the app                                 /
+/// ☮ router script ⚒ load and execute the app                               /
 //__________________________________________________________________________/
 
-$url = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-$ext= get_loaded_extensions();
-
-if ($url != "/$fn")
+if ($url != "/$filename")
 {
+    // static files
+    if (PHP_SAPI == 'cli-server') {
+        if ($url == '/' . CONFIG_FILE)
+        {
+            header("Location: /$filename");
+            exit(0);
+        }
+            
+        if (is_file(__DIR__ . $url))
+            return false;
+    }
+
     // heartbeat
     if ($url == '/_heartbeat')
     {
         echo \time();
         exit(0);
     }
-    // router script static files
-    if ($url != '/' && file_exists(__DIR__ . $url))
-        return false;
+
+    // in composer directory
+    // if ($url == "/vendor/tonischranz/tsd.serve/$filename")
+    // {
+    //     copy (__FILE__, '.');
+    // }
+
+    // no config
+    if (!file_exists(CONFIG_FILE))
+    {
+        header("Location: /$filename");
+        exit(0);
+    }
 
     // extensions check    
     foreach ( EXTENSIONS_SERVE as $ex)
         if (!in_array($ex, $ext))
         {
-            header("Location: /$fn");
+            header("Location: /$filename");
             exit(0);
         }
 
@@ -78,50 +114,45 @@ if ($url != "/$fn")
         include __DIR__ . DIRECTORY_SEPARATOR . SERVE_FILE;
 
     // dev
-    elseif (file_exists(__DIR__ . DIRECTORY_SEPARATOR . SRC_DIR . DIRECTORY_SEPARATOR . 'App.php'))
+    elseif (file_exists(__DIR__ . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . 'App.php'))
     {
         $ds = DIRECTORY_SEPARATOR;
         spl_autoload_register(function($name) use ($ds)
         {
             $parts = explode('\\', $name);
             if (count($parts) == 3 && $parts[0] == 'tsd' && $parts[1] == 'serve') 
-                include __DIR__ . $ds . SRC_DIR . $ds . $parts[2] . '.php';
+                include __DIR__ . $ds . 'src' . $ds . $parts[2] . '.php';
         });
     }
 
     // setup
     else
     {
-        header("Location: /$fn");
+        header("Location: /$filename");
         exit(0);
     }
-    
 
-    // ⚒
+    // ⚒ serve ⚒ //
     App::serve();
     exit(0);
 }
 
 ////¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨|
-/// clean.php ⚒ install and setup your tsd.serve application                 /
+/// 🧽 clean.php ⚒ install and setup your tsd.serve application              /
 //__________________________________________________________________________/
 
-const SERVE_BASE = 'https://github.com/tonischranz';
-const SERVE_REPO = 'tsd.serve';
-const SERVE_BRANCH = 'next';
-const ADMIN_REPO = 'serve.admin';
-const ADMIN_BRANCH = 'main';
+
 
 const EXTENSIONS_STANDALONE = ['openssl', 'session', 'zip'];
 const EXTENSIONS_COMPOSER = ['filter', 'mbstring', 'phar'];
 
 const MINVER = "8.0.0";
 
-$serve_url = SERVE_BASE . '/' . SERVE_REPO . '/archive/' . SERVE_BRANCH . '.zip';
-$admin_url = SERVE_BASE . '/' . ADMIN_REPO . '/archive/' . ADMIN_BRANCH . '.zip';
+$serve_url = 'https://' . SERVE_HOST . '/' . SERVE_BASE . '/' . SERVE_REPO . '/archive/' . SERVE_BRANCH . '.zip';
+//$admin_url = SERVE_BASE . '/' . ADMIN_REPO . '/archive/' . ADMIN_BRANCH . '.zip';
 
 ////¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨|
-/// functions                                                                /
+/// lib functions                                                            /
 //__________________________________________________________________________/
 
 function rrmdir($dir)
@@ -158,6 +189,10 @@ function rcopy($src, $dest)
     return true;
 }
 
+////¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨|
+/// install functions                                                        /
+//__________________________________________________________________________/
+
 function create_config($username, $pw)
 {
     $key = str_replace('+', '_', base64_encode(random_bytes(128)));
@@ -171,16 +206,16 @@ function create_config($username, $pw)
     file_put_contents(CONFIG_FILE, json_encode($config, JSON_PRETTY_PRINT));
 }
 
-function update_config()
-{
-    $cfg = json_decode(file_get_contents(CONFIG_FILE), true);
+// function update_config()
+// {
+//     $cfg = json_decode(file_get_contents(CONFIG_FILE), true);
 
-    if (!@$cfg['clean']['key']) {
-        $key = str_replace('+', '_', base64_encode(random_bytes(128)));
-        $cfg['clean']['key'] = $key;
-        file_put_contents(CONFIG_FILE, json_encode($cfg, JSON_PRETTY_PRINT));
-    }
-}
+//     if (!@$cfg['clean']['key']) {
+//         $key = str_replace('+', '_', base64_encode(random_bytes(128)));
+//         $cfg['clean']['key'] = $key;
+//         file_put_contents(CONFIG_FILE, json_encode($cfg, JSON_PRETTY_PRINT));
+//     }
+// }
 
 function install_serve($modules = [])
 {
@@ -298,7 +333,7 @@ $no_cfg = !file_exists(CONFIG_FILE);
 
 //$cfg = load_config();
 
-$nouser = !@$cfg['member']['user'];
+$no_user = !@$cfg['member']['user'];
 //$nopkg = 
 $auth = false;
 $login = false;
@@ -320,7 +355,7 @@ foreach (EXTENSIONS_SERVE as $et)
 
 $minver = version_compare(\PHP_VERSION, MINVER) >= 0;
 
-if ($fresh) {
+if ($no_cfg) {
     if (@$_POST['action'] == 'install') {
         $valid = true;
 
@@ -413,7 +448,7 @@ if ($fresh) {
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <title>🧽 <?=$fn?></title>
+    <title>🧽 <?=$filename?></title>
 
     <style type="text/css">
         body {
@@ -502,11 +537,11 @@ if ($fresh) {
             margin-right: .7em;
         }
 
-        div.right {
+        .right {
             text-align: right;
         }
 
-        span.error {
+        .error {
             color: #a00;
         }
 
@@ -518,7 +553,7 @@ if ($fresh) {
     <script src="https://code.jquery.com/jquery-3.7.1.slim.min.js" integrity="sha256-kmHvs0B+OpCW5GVHUNjv9rOmY0IvSIRcf7zGUDTDQM8=" crossorigin="anonymous"></script>
 
     <script>
-        $(function() {
+        $(() => {
 
             $('form.install input[type=password]').change(function() {
                 $('#err_pwd_mismatch').hide();
@@ -530,6 +565,7 @@ if ($fresh) {
                     e.preventDefault();
                 }
             });
+
         });
     </script>
 
@@ -539,42 +575,61 @@ if ($fresh) {
     <header></header>
 
     <div id="content">
-        <h1>🧽  <?=$fn?></h1>
-        <div style="text-align: right; font-size:.7em;">by&nbsp;&nbsp;&nbsp;&nbsp;Δ@✞εℕᚹⅤᚢᛕ</div>
+        <h1> 🧽 <?=$filename?> </h1>
+        <div class="right" style="font-size:.7em;">by&nbsp;&nbsp;&nbsp;&nbsp;Δ@✞εℕᚹⅤᚢᛕ</div>
         
         <div class="gap"></div>
 
+        <?php if ($missing_extensions) : ?>
+            <div>
+                <h2>extensions</h2>
+                <p>the following php extensions are needed by the framework</p>
+                <ul>
+                    <?php foreach ($missing_extensions as $me) { ?>
+                        <li><?=$me; ?></li>
+                    <?php } ?>                    
+                </ul>
+            </div>
+        <?php elseif (!$minver): ?>
+            <div>
+                <h2>PHP version</h2>
+                <p>the framework requires at least PHP <?=MINVER; ?></p>
+            </div>
+        <?php endif ?>
 
-        <?php if ($fresh) : ?>
 
-            <h2>fresh install</h2>
+        <?php if ($no_cfg) : ?>
+
+
+
+            <h2>secure your app</h2>
+
             <p>
-                Looks like you don't have installed tsd.serve yet.
+                Choose your favorite authentication method.
             </p>
 
             <div class="gap"></div>
 
-            <?php if ($missing_extensions) : ?>
-                <div>
-                    <h2>extensions</h2>
-                    <p>the following php extensions are needed by the framework</p>
-                    <ul>
-                        <?php foreach ($missing_extensions as $me) { ?>
-                            <li><?=$me; ?></li>
-                        <?php } ?>                    
-                    </ul>
-                </div>
-            <?php elseif (!$minver): ?>
-                <div>
-                    <h2>PHP version</h2>
-                    <p>the framework requires at least PHP <?=MINVER; ?></p>
-                </div>
-            <?php else : ?>
-
-                <form method="post" action="<?=$_SERVER['PHP_SELF'] ?>" class="install">
-                    <h3>Master Account</h3>
+                <form method="post" action="<?=$filename?>" class="install">
                     <div>
-                        <input type="text" name="username" placeholder="username" required />
+                        <input type="email" name="email" placeholder="email" required autocomplete="email"/>
+                    </div>
+                    <div>
+                        <input type="name" name="name" placeholder="name" autocomplete="name"/>
+                    </div>
+                </form>
+            
+
+                <form method="post" action="<?=$filename?>" class="install">
+                    <h3>Master Account</h3>
+                    <!-- <div>
+                        <input type="text" name="username" placeholder="username" required autocomplete=""/>
+                    </div> -->
+                    <div>
+                        <input type="email" name="email" placeholder="email" required autocomplete="email"/>
+                    </div>
+                    <div>
+                        <input type="name" name="name" placeholder="name" autocomplete="name"/>
                     </div>
                     <div>
                         <input type="password" name="pw1" placeholder="password" required />
@@ -598,7 +653,6 @@ if ($fresh) {
                         <button type="submit" name="action" value="install">install</button>
                     </div>                   
                 </form>
-            <?php endif ?>
 
         <?php endif ?>
 
