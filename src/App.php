@@ -106,19 +106,13 @@ class App
      */
     static function serve()
     {
-        $url = key_exists('REDIRECT_URL', $_SERVER) ?
-            $_SERVER['REDIRECT_URL'] :
-            urldecode($_SERVER['REQUEST_URI']);
-
         ob_start(null, 0, PHP_OUTPUT_HANDLER_CLEANABLE | PHP_OUTPUT_HANDLER_REMOVABLE | PHP_OUTPUT_HANDLER_FLUSHABLE);
 
         try {
-            $app = new App();
-
-            $app->serveRequest(
+            (new App)->serveRequest(
                 $_SERVER['REQUEST_METHOD'],
                 $_SERVER['HTTP_HOST'],
-                $url,
+                $_SERVER['PHP_SELF'],
                 [
                     '_GET' => $_GET, '_COOKIE' => $_COOKIE,
                     '_POST' => $_POST, '_FILES' => $_FILES
