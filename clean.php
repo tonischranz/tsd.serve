@@ -6,7 +6,7 @@
 // ---------------------------------------------------------------------------|
 // This file helps you to setup your new application based on the             |
 // [tsd.serve] framework. It also acts as router-script/FallbackResource.     |
-// If called via CLI it starts a development webserver on 127.0.0.1:8000     /
+// If called via CLI it starts a development webserver and browser           /
 // _________________________________________________________________________/
 
 namespace tsd\serve;
@@ -23,37 +23,110 @@ const SERVE_BRANCH = 'next';
 const CONFIG_FILE = '.htconfig.json';
 const EXTENSIONS_SERVE = ['dom', 'session'];
 
+ini_set('display_errors', true);
+// echo "${url}";
+
 $serve_file = '.' . SERVE_REPO . '.php';
 $filename = basename(__FILE__);
+$dirname = getenv('CLEAN_DIRNAME') ? getenv('CLEAN_DIRNAME') : basename(__DIR__);
 $url = $_SERVER['PHP_SELF'];
 $ext= get_loaded_extensions();
+$no_cfg = !file_exists(CONFIG_FILE);
 
 ////¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨|
 /// CLI ♫ launch dev webserver and browser                                   /
 //__________________________________________________________________________/
 
 if (PHP_SAPI == 'cli') {
-    if ($url == 'vendor/'.SERVE_BASE.'/'.SERVE_REPO.'/'.$filename)
+
+    function launchBrowser (string $url)
     {
-        copy(__FILE__, '.');
-        shell_exec(PHP_BINARY." $filename");
-        exit (0);
-    }
-    if ($argc == 1) {
-        if (PHP_OS == 'WINNT') 
-            shell_exec('start http://localhost:8000');
-        else if (PHP_OS == 'Linux') 
-            shell_exec('xdg-open http://localhost:8000');
-        else if (PHP_OS == 'FreeBSD') 
-            shell_exec('xdg-open http://localhost:8000');
-        //ToDo: macOS
+        echo "Launching browser on $url\n";
+        if(!str_starts_with($url, 'http')) 
+            $url = "https://$url";
         
-        echo '"' . PHP_BINARY . '" -S 127.0.0.1:8000 -t "' . __DIR__ . '" "' . $filename ."\"\n";
-        shell_exec('"' . PHP_BINARY . '" -S 127.0.0.1:8000 -t "' . __DIR__ . '" "' . $filename .'"');
-    } else {
-        echo "Usage: php $filename\n";
-        var_dump($argv);
-        var_dump($_SERVER);
+        if (PHP_OS == 'WINNT') {
+            echo "Launching browser on Windows with start\n";
+            shell_exec("start '$url'");
+        }
+        else if (PHP_OS == 'Linux') {
+            echo "Launching browser on Linux with xdg-open\n";
+            shell_exec("xdg-open '$url'");
+        }            
+        else if (PHP_OS == 'FreeBSD') {
+            echo "Launching browser on FreeBSD with xdg-open\n";
+            shell_exec("xdg-open '$url'");
+        }
+        else
+            echo "Unknown PHP_OS " . PHP_OS . "\n";
+            
+         //ToDo: macOS
+    }
+
+
+    function launchserver (string $hostname='localhost', int $port=8000)
+    {
+        echo "Launching server on $hostname:$port\n";
+        global $dirname;
+
+        $docker = shell_exec('which docker');
+        
+        if ($docker) {            
+            $df = file_exists('Dockerfile');
+            $in = $df ? "debug-$dirname":'php:8.3-apache';
+            $bo = false;
+
+            echo "Docker CLI found\n";
+
+            if($df) {
+                echo "Building docker image debug-$dirname\n";
+                $bo = shell_exec("docker build -t $in . && echo built");
+            }
+
+            if(!$df || $bo)
+            {
+                echo "Running docker image $in\n";
+                
+                shell_exec('chmod a+w .');
+                
+                $rid = strtok(shell_exec("docker run -d -v .:/var/www/html -e CLEAN_DIRNAME=\"`basename $(pwd)`\" -e XDEBUG_CONFIG=\"client_host=`hostname -I | cut -d \" \" -f 1`\" -p $port:80 $in"), "\n");
+                                
+                if ($rid)
+                {
+                    echo "Container $rid is running.\n Go to http://$hostname:$port\n";
+                    readline("Press enter to shutdown");
+                    shell_exec("docker stop $rid");
+                
+                    exit(0);
+                }
+            }
+            else
+                echo "Docker build failed";
+        }
+        
+        echo "Launching dev webserver\n";
+        $dir = __DIR__;
+        echo PHP_BINARY . " -S $hostname:$port -t $dir $filename\n";
+        shell_exec(PHP_BINARY . " -S $hostname:$port -t $dir $filename\n");
+    }
+
+    // CLI entry point
+    $hn = gethostname();
+    $lu = $no_cfg ? "http://$hn:8000/$filename" : "http://$hn:8000/";
+
+    if ($argc == 1) {
+        launchBrowser($lu);
+        launchserver($hn,8000);        
+    }
+    elseif ($argv[1] == 'debug') {
+        launchIDE();        
+    }
+    elseif ($argv[1] == 'info') {
+        phpinfo();
+    }
+    else {
+        echo "Usage: php $filename [info]\n";
+        var_dump($argv);        
         echo "\n";
     }
     exit(0);
@@ -142,7 +215,7 @@ if ($url != "/$filename")
 //__________________________________________________________________________/
 
 
-
+const SERVE_FILE = '.tsd.serve.php';
 const EXTENSIONS_STANDALONE = ['openssl', 'session', 'zip'];
 const EXTENSIONS_COMPOSER = ['filter', 'mbstring', 'phar'];
 
@@ -216,6 +289,11 @@ function create_config($username, $pw)
 //         file_put_contents(CONFIG_FILE, json_encode($cfg, JSON_PRETTY_PRINT));
 //     }
 // }
+
+function install_composer()
+{
+
+}
 
 function install_serve($modules = [])
 {
@@ -329,12 +407,11 @@ function get_serve()
 /// clean.php entry point                                                    /
 //__________________________________________________________________________/
 
-$no_cfg = !file_exists(CONFIG_FILE);
+
 
 //$cfg = load_config();
-
+$hostname = $_SERVER['HTTP_HOST'];
 $no_user = !@$cfg['member']['user'];
-//$nopkg = 
 $auth = false;
 $login = false;
 $not_installed = false;
@@ -371,15 +448,17 @@ if ($no_cfg) {
             header('Location: /admin'); //ToDo if admin not installed
         }
     }
+    
 } else {
     $config = json_decode(file_get_contents(CONFIG_FILE), true);
+    $appname = @$config['name'];
 
-    if (@$config['clean']['key']) {
-        if (@$_POST['key']) {
-            if ($_POST['key'] == $config['clean']['key']) $auth = true;
-            else $error_bad_key = true;
-        }
-    } else $config_no_key = true;
+    // if (@$config['clean']['key']) {
+    //     if (@$_POST['key']) {
+    //         if ($_POST['key'] == $config['clean']['key']) $auth = true;
+    //         else $error_bad_key = true;
+    //     }
+    // } else $config_no_key = true;
 
     if (@$config['member']['users']) {
         if (@$_POST['username'] && @$_POST['pw']) {
@@ -432,7 +511,7 @@ if ($no_cfg) {
                 $update_available = false;
                 $admin_update_available = false;
             } else if ($_POST['action'] == 'install') {
-                if ($config_no_key) update_config();
+                // if ($config_no_key) update_config();
                 install_serve(@$_POST['module'] ? $_POST['module'] : []);
             }
         }
@@ -541,6 +620,16 @@ if ($no_cfg) {
             text-align: right;
         }
 
+        .ff {
+            display:flex;
+        }
+        .ff>* {
+            width:50%;
+        }
+        .ff>button>img {
+            width:100%;
+        }
+
         .error {
             color: #a00;
         }
@@ -576,7 +665,8 @@ if ($no_cfg) {
 
     <div id="content">
         <h1> 🧽 <?=$filename?> </h1>
-        <div class="right" style="font-size:.7em;">by&nbsp;&nbsp;&nbsp;&nbsp;Δ@✞εℕᚹⅤᚢᛕ</div>
+        <!-- <div class="right" style="font-size:.7em;">by&nbsp;&nbsp;&nbsp;&nbsp;Δ@✞εℕᚹⅤᚢᛕ</div> -->
+        <div class="right"><?=$appname??"$dirname on $hostname"?></div>
         
         <div class="gap"></div>
 
@@ -601,47 +691,60 @@ if ($no_cfg) {
         <?php if ($no_cfg) : ?>
 
 
-
-            <h2>secure your app</h2>
-
-            <p>
-                Choose your favorite authentication method.
-            </p>
-
+            
             <div class="gap"></div>
 
-                <form method="post" action="<?=$filename?>" class="install">
+                <!-- <form method="post" action="<?=$filename?>" class="install">
                     <div>
                         <input type="email" name="email" placeholder="email" required autocomplete="email"/>
                     </div>
                     <div>
                         <input type="name" name="name" placeholder="name" autocomplete="name"/>
                     </div>
-                </form>
+                </form> -->
+
             
 
                 <form method="post" action="<?=$filename?>" class="install">
-                    <h3>Master Account</h3>
-                    <!-- <div>
-                        <input type="text" name="username" placeholder="username" required autocomplete=""/>
-                    </div> -->
+                    <h2>about you and your app</h2>
                     <div>
-                        <input type="email" name="email" placeholder="email" required autocomplete="email"/>
+                        <input type="email" name="email" placeholder="your email" required autocomplete="email"/>
                     </div>
                     <div>
-                        <input type="name" name="name" placeholder="name" autocomplete="name"/>
+                        <input type="name" name="name" placeholder="your name" autocomplete="name"/>
                     </div>
                     <div>
-                        <input type="password" name="pw1" placeholder="password" required />
+                        <input type="name" name="name" placeholder="name of your app" autocomplete="on" value="<?="$dirname on $hostname"?>" required />
+                    </div>                    
+
+                    <h2>secure your app</h2>
+
+                    <p>
+                        Choose your favorite authentication method.
+                    </p>
+                    <h3>GitHub OAuth</h3>
+                    <div>
+                        <input type="text" name="github_clientid" placeholder="client id" />
                     </div>
                     <div>
-                        <input type="password" name="pw2" placeholder="repeat password" required />
+                        <input type="text" name="github_secret" placeholder="secret" />
+                    </div>
+                    <h3>Username / Password</h3>
+                    <div>
+                        <input type="text" name="username" placeholder="username" required autocomplete="username" value="admin"/>
+                    </div>
+                    <div>
+                        <input type="password" name="pw1" placeholder="password" autocomplete="new-password" required />
+                    </div>
+                    <div>
+                        <input type="password" name="pw2" placeholder="repeat password" autocomplete="new-password" required />
                     </div>
                     <div>
                         <span class="error" style="display:none;" id="err_pwd_mismatch">passwords do not match</span>
                     </div>
                     <div class="gap"></div>
-                    <h3>Additional Modules</h3>
+                    <h2>install</h2>
+                    <h3>additional modules</h3>
                     <div>
                         <label class="checkbox">
                             <input id="admin" type="checkbox" name="module[]" value="admin" checked>
@@ -649,9 +752,11 @@ if ($no_cfg) {
                         </label>
                     </div>
                     <div class="gap"></div>
-                    <div class="right">
-                        <button type="submit" name="action" value="install">install</button>
-                    </div>                   
+                    <h3>choose your method</h2>
+                    <div class="ff">
+                        <button type="submit" name="action" value="install"><img  alt="install standalone" src="http://tsd.ovh/%E2%92%B6.svg" /></button>
+                        <button type="submit" name="action" value="composer"><img  alt="install with composer" src="https://getcomposer.org/img/logo-composer-transparent.png" /></button>
+                    </div>
                 </form>
 
         <?php endif ?>
@@ -662,10 +767,10 @@ if ($no_cfg) {
             <div class="gap"></div>
             <form method="post" action="<?=$_SERVER['PHP_SELF'] ?>">
                 <div>
-                    <input type="text" name="username" placeholder="username" required />
+                    <input type="text" name="username" placeholder="username" autocomplete="username" required />
                 </div>
                 <div>
-                    <input type="password" name="pw" placeholder="password" />
+                    <input type="password" name="pw" placeholder="password" autocomplete="current-password" required />
                 </div>
                 <div class="right">
                     <button type="submit" name="action" value="login">login</button>
@@ -700,8 +805,9 @@ if ($no_cfg) {
                     </p>
                     <form method="post" action="<?=$_SERVER['PHP_SELF'] ?>">
                         <div class="gap"></div>
-                        <div class="right">
-                            <button type="submit" name="action" value="install">install</button>
+                        <div class="ff">
+                            <button type="submit" name="action" value="install"><img  alt="install standalone" src="http://tsd.ovh/%E2%92%B6.svg" /></button>
+                            <button type="submit" name="action" value="composer"><img  alt="install with composer" src="https://getcomposer.org/img/logo-composer-transparent.png" /></button>
                         </div>
                     </form>
                 <?php endif; ?>
