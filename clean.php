@@ -65,10 +65,11 @@ if (PHP_SAPI == 'cli') {
     }
 
 
-    function launchserver (string $hostname='localhost', int $port=8000)
+    function launchserver (string $hostname='localhost', int $port=8000) : callable
     {
         echo "Launching server on $hostname:$port\n";
         global $dirname;
+        global $filename;
 
         $docker = shell_exec('which docker');
         
@@ -95,20 +96,25 @@ if (PHP_SAPI == 'cli') {
                 if ($rid)
                 {
                     echo "Container $rid is running.\n Go to http://$hostname:$port\n";
-                    readline("Press enter to shutdown");
-                    shell_exec("docker stop $rid");
+                    echo "\nPress ENTER to shut down\n\n";
+                    
+                    return fn() => shell_exec("docker stop $rid");
                 
                     exit(0);
                 }
             }
             else
-                echo "Docker build failed";
+                echo "Docker build failed\n";
         }
         
         echo "Launching dev webserver\n";
-        $dir = __DIR__;
-        echo PHP_BINARY . " -S $hostname:$port -t $dir $filename\n";
-        shell_exec(PHP_BINARY . " -S $hostname:$port -t $dir $filename\n");
+
+        $dir = __DIR__;        
+        $h = popen(PHP_BINARY . " -S $hostname:$port -t $dir -dextension=zip $filename\n", 'r');
+
+        echo "\nPress CTRL+C to shut down\n\n";
+        
+        return fn() => true;
     }
 
     // CLI entry point
@@ -116,8 +122,11 @@ if (PHP_SAPI == 'cli') {
     $lu = $no_cfg ? "http://$hn:8000/$filename" : "http://$hn:8000/";
 
     if ($argc == 1) {
+        $stop = launchserver($hn,8000);
         launchBrowser($lu);
-        launchserver($hn,8000);        
+        readline("...");
+        echo "Shutting down\n";
+        $stop();
     }
     elseif ($argv[1] == 'debug') {
         launchIDE();        
@@ -621,7 +630,7 @@ if ($no_cfg) {
             margin-right: .7em;
         }
 
-        .right {
+        .r {
             text-align: right;
         }
 
@@ -635,12 +644,19 @@ if ($no_cfg) {
             width:100%;
         }
 
-        .error {
+        .e {
             color: #a00;
         }
 
         div {
             margin-top: .5em;
+        }
+
+        label.checkbox {
+            display:block;
+        }
+        .c {
+            text-align: center;
         }
     </style>
 
@@ -678,9 +694,15 @@ if ($no_cfg) {
     <header></header>
 
     <div id="content">
+        <?php $eu = $_SERVER['REQUEST_SCHEME'] . '://'. $_SERVER['HTTP_HOST'] . $_SERVER['PHP_SELF']; ?>
+        <div class="gap"></div>
+        <div class="c">            
+            <img src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=<?=urlencode($eu)?>" alt="QR-Code"?>
+        </div>
+    
         <h1> 🧽 <?=$filename?> </h1>
-        <!-- <div class="right" style="font-size:.7em;">by&nbsp;&nbsp;&nbsp;&nbsp;Δ@✞εℕᚹⅤᚢᛕ</div> -->
-        <div class="right"><?=$appname??"$dirname on $hostname"?></div>
+        
+        <div class="r"><?=$appname??"$dirname on $hostname"?></div>
         
         <div class="gap"></div>
 
@@ -706,8 +728,7 @@ if ($no_cfg) {
 
 
             
-            <div class="gap"></div>
-
+           
                 <!-- <form method="post" action="<?=$filename?>" class="install">
                     <div>
                         <input type="email" name="email" placeholder="email" required autocomplete="email"/>
@@ -716,7 +737,7 @@ if ($no_cfg) {
                         <input type="name" name="name" placeholder="name" autocomplete="name"/>
                     </div>
                 </form> -->
-
+                
             
 
                 <form method="post" action="<?=$filename?>" class="install">
@@ -734,7 +755,7 @@ if ($no_cfg) {
                     <h2>secure your app</h2>
 
                     <p>
-                        Choose your favorite authentication method.
+                        choose your favorite authentication method.
                     </p>
                     <h3>GitHub OAuth</h3>
                     <div>
@@ -743,7 +764,7 @@ if ($no_cfg) {
                     <div>
                         <input type="text" name="github_secret" placeholder="secret" />
                     </div>
-                    <h3>Username / Password</h3>
+                    <h3>username / password</h3>
                     <div>
                         <input type="text" name="username" placeholder="username" required autocomplete="username" value="admin"/>
                     </div>
@@ -754,7 +775,7 @@ if ($no_cfg) {
                         <input type="password" name="pw2" placeholder="repeat password" autocomplete="new-password" required />
                     </div>
                     <div>
-                        <span class="error" style="display:none;" id="err_pwd_mismatch">passwords do not match</span>
+                        <span class="e" style="display:none;" id="err_pwd_mismatch">passwords do not match</span>
                     </div>
                     <div class="gap"></div>
                     <h2>install</h2>
@@ -762,7 +783,11 @@ if ($no_cfg) {
                     <div>
                         <label class="checkbox">
                             <input id="admin" type="checkbox" name="module[]" value="admin" checked>
-                            Install the serve.admin administration UI as well
+                            install serve.admin as well
+                        </label>
+                        <label class="checkbox">
+                            <input id="admin" type="checkbox" name="module[]" value="pages">
+                            install serve.pages
                         </label>
                     </div>
                     <div class="gap"></div>
@@ -779,20 +804,20 @@ if ($no_cfg) {
 
             <h2>login</h2>
             <div class="gap"></div>
-            <form method="post" action="<?=$_SERVER['PHP_SELF'] ?>">
+            <form method="post" action="<?=$filename ?>">
                 <div>
                     <input type="text" name="username" placeholder="username" autocomplete="username" required />
                 </div>
                 <div>
                     <input type="password" name="pw" placeholder="password" autocomplete="current-password" required />
                 </div>
-                <div class="right">
+                <div class="r">
                     <button type="submit" name="action" value="login">login</button>
                 </div>
                 <div>
-                    <?php if (@$error_bad_key) : ?><span class="error">bad key, please check it again or use username/password</span><?php endif; ?>
-                    <?php if (@$error_bad_password) : ?><span class="error">bad username/password, please check it again</span><?php endif; ?>
-                    <?php if (@$error_insufficient_permissions) : ?><span class="error">you were logged in successfully, but don't have enough permissions</span><?php endif; ?>
+                    <?php if (@$error_bad_key) : ?><span class="e">bad key, please check it again or use username/password</span><?php endif; ?>
+                    <?php if (@$error_bad_password) : ?><span class="e">bad username/password, please check it again</span><?php endif; ?>
+                    <?php if (@$error_insufficient_permissions) : ?><span class="e">you were logged in successfully, but don't have enough permissions</span><?php endif; ?>
                 </div>
             </form>
 
@@ -820,7 +845,10 @@ if ($no_cfg) {
                     <form method="post" action="<?=$_SERVER['PHP_SELF'] ?>">
                         <div class="gap"></div>
                         <div class="ff">
-                            <button type="submit" name="action" value="install"><img  alt="install standalone" src="http://tsd.ovh/%E2%92%B6.svg" /></button>
+                            <button type="submit" name="action" value="install">
+
+                                <img  alt="install standalone" src="http://tsd.ovh/%E2%92%B6.svg" />
+                            </button>
                             <button type="submit" name="action" value="composer"><img  alt="install with composer" src="https://getcomposer.org/img/logo-composer-transparent.png" /></button>
                         </div>
                     </form>
@@ -839,7 +867,7 @@ if ($no_cfg) {
                 <?php endif; ?>
                 <form method="post" action="<?=$_SERVER['PHP_SELF'] ?>">
                     <div class="gap"></div>
-                    <div class="right">
+                    <div class="r">
                         <button type="submit" name="action" value="update">install</button>
                     </div>
                 </form>
