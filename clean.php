@@ -19,6 +19,7 @@ const SERVE_HOST = 'github.com';
 const SERVE_BASE = 'tonischranz';
 const SERVE_REPO = 'tsd.serve';
 const SERVE_BRANCH = 'next';
+const SERVE_FILE = '.tsd.serve.php';
 
 const CONFIG_FILE = '.htconfig.json';
 const EXTENSIONS_SERVE = ['dom', 'session'];
@@ -215,7 +216,6 @@ if ($url != "/$filename")
 //__________________________________________________________________________/
 
 
-const SERVE_FILE = '.tsd.serve.php';
 const EXTENSIONS_STANDALONE = ['openssl', 'session', 'zip'];
 const EXTENSIONS_COMPOSER = ['filter', 'mbstring', 'phar'];
 
@@ -266,19 +266,24 @@ function rcopy($src, $dest)
 /// install functions                                                        /
 //__________________________________________________________________________/
 
-function create_config($username, $pw)
+function create_config(string $username, string $pw, string $name, string $email)
 {
-    $key = str_replace('+', '_', base64_encode(random_bytes(128)));
+    // $key = str_replace('+', '_', base64_encode(random_bytes(128)));
     $config = [
-        'clean' =>  ['key' => $key],
+        // 'clean' =>  ['key' => $key],
         'member' =>  ['users' => ["$username" => [
             'password' => password_hash($pw, PASSWORD_DEFAULT),
+            'name' => $name,
+            'email' => $email,
             'groups' => ['admin', 'developer']
         ]]]
     ];
     file_put_contents(CONFIG_FILE, json_encode($config, JSON_PRETTY_PRINT));
 }
 
+function create_github_config($clientid){
+
+}
 // function update_config()
 // {
 //     $cfg = json_decode(file_get_contents(CONFIG_FILE), true);
@@ -644,11 +649,20 @@ if ($no_cfg) {
     <script>
         $(() => {
 
-            $('form.install input[type=password]').change(function() {
+            $('form.install input[name=github_clientid]').change(e => {
+                let i = $(e.currentTarget);
+                if (i.val())
+                {
+                    $('form.install input[name=username]').prop('disabled', true);
+                }
+
+            });
+
+            $('form.install input[type=password]').change(() => {
                 $('#err_pwd_mismatch').hide();
             });
 
-            $('form.install').submit(function(e) {
+            $('form.install').submit( e => {
                 if ($('input[name=pw1]').val() != $('input[name=pw2]').val()) {
                     $('#err_pwd_mismatch').show();
                     e.preventDefault();
