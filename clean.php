@@ -26,10 +26,12 @@ const EXTENSIONS_SERVE = ['dom', 'session'];
 
 ini_set('display_errors', true);
 // echo "${url}";
+// var_dump($_SERVER);
 
 $serve_file = '.' . SERVE_REPO . '.php';
 $filename = basename(__FILE__);
 $dirname = getenv('CLEAN_DIRNAME') ? getenv('CLEAN_DIRNAME') : basename(__DIR__);
+$username = getenv('CLEAN_USERNAME') ? getenv('CLEAN_USERNAME') : get_current_user();
 $url = $_SERVER['PHP_SELF'];
 $ext= get_loaded_extensions();
 $no_cfg = !file_exists(CONFIG_FILE);
@@ -70,6 +72,7 @@ if (PHP_SAPI == 'cli') {
         echo "Launching server on $hostname:$port\n";
         global $dirname;
         global $filename;
+        global $username;
 
         $docker = shell_exec('which docker');
         
@@ -91,7 +94,7 @@ if (PHP_SAPI == 'cli') {
                 
                 shell_exec('chmod a+w .');
                 
-                $rid = strtok(shell_exec("docker run -d -v .:/var/www/html -e CLEAN_DIRNAME=\"`basename $(pwd)`\" -e XDEBUG_CONFIG=\"client_host=`hostname -I | cut -d \" \" -f 1`\" -p $port:80 $in"), "\n");
+                $rid = strtok(shell_exec("docker run -d -v .:/var/www/html -e CLEAN_DIRNAME=\"`basename $(pwd)`\"  -e CLEAN_USERNAME=\"$username\" -e XDEBUG_CONFIG=\"client_host=`hostname -I | cut -d \" \" -f 1`\" -p $port:80 $in"), "\n");
                                 
                 if ($rid)
                 {
@@ -114,7 +117,7 @@ if (PHP_SAPI == 'cli') {
 
         echo "\nPress CTRL+C to shut down\n\n";
         
-        return fn() => true;
+        return fn() => pclose($h);
     }
 
     // CLI entry point
@@ -694,7 +697,7 @@ if ($no_cfg) {
     <header></header>
 
     <div id="content">
-        <?php $eu = $_SERVER['REQUEST_SCHEME'] . '://'. $_SERVER['HTTP_HOST'] . $_SERVER['PHP_SELF']; ?>
+        <?php $eu = (@$_SERVER['HTTPS'] ? 'https://' : 'http://') . $_SERVER['HTTP_HOST'] . $_SERVER['PHP_SELF']; ?>
         <div class="gap"></div>
         <div class="c">            
             <img src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=<?=urlencode($eu)?>" alt="QR-Code"?>
@@ -766,7 +769,7 @@ if ($no_cfg) {
                     </div>
                     <h3>username / password</h3>
                     <div>
-                        <input type="text" name="username" placeholder="username" required autocomplete="username" value="admin"/>
+                        <input type="text" name="username" placeholder="username" required autocomplete="username" value="<?=$username?>"/>
                     </div>
                     <div>
                         <input type="password" name="pw1" placeholder="password" autocomplete="new-password" required />
