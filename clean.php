@@ -698,6 +698,23 @@ if ($no_cfg) {
     <script src="https://code.jquery.com/jquery-3.7.1.slim.min.js" integrity="sha256-kmHvs0B+OpCW5GVHUNjv9rOmY0IvSIRcf7zGUDTDQM8=" crossorigin="anonymous"></script>
 
     <script>
+        function updateOAuthCreateLink ()
+        {
+            let murl = <?=json_encode((@$_SERVER['HTTPS'] ? 'https://' : 'http://') . $hostname)?>;
+            let aurl = <?=json_encode((@$_SERVER['HTTPS'] ? 'https://' : 'http://') . $hostname . $url)?>;
+            let name = $('form.install input[name=appname]').val();
+                        
+            let e_name = encodeURIComponent(name);
+            let e_url = encodeURIComponent(murl);
+            let e_aurl = encodeURIComponent(aurl);
+
+            let url = `https://github.com/settings/applications/new?oauth_application[name]=${e_name}&oauth_application[url]=${e_url}&oauth_application[callback_url]=${e_aurl}`;
+
+            console.log('updating link');
+
+            $('form.install #oauth').prop('href',url);
+        }
+
         $(() => {
 
             $('form.install input[name=github_clientid]').change(e => {
@@ -718,6 +735,10 @@ if ($no_cfg) {
                 }
 
             });
+            
+            $('form.install input[name=name]').change(e => {
+                updateOAuthCreateLink();
+            });
 
             $('form.install input[type=password]').change(() => {
                 $('#err_pwd_mismatch').hide();
@@ -730,6 +751,7 @@ if ($no_cfg) {
                 }
             });
 
+            updateOAuthCreateLink();
         });
     </script>
 
@@ -739,7 +761,7 @@ if ($no_cfg) {
     <header></header>
 
     <div id="content">
-        <?php $eu = (@$_SERVER['HTTPS'] ? 'https://' : 'http://') . $hostname . $_SERVER['PHP_SELF']; ?>
+        <?php $eu = (@$_SERVER['HTTPS'] ? 'https://' : 'http://') . $hostname . $url; ?>
 	<?php if ($hostname != 'localhost:8000') : ?>
           <div class="gap"></div>
 	  <div class="c">            
@@ -796,7 +818,7 @@ if ($no_cfg) {
                         <input type="name" name="name" placeholder="your name" autocomplete="name"/>
                     </div>
                     <div>
-                        <input type="name" name="name" placeholder="name of your app" autocomplete="on" value="<?="$dirname on $hostname"?>" required />
+                        <input type="name" name="appname" placeholder="name of your app" autocomplete="on" value="<?="$dirname on $hostname"?>" required />
                     </div>                    
 
                     <h2>secure your app</h2>
@@ -805,7 +827,7 @@ if ($no_cfg) {
                         choose your favorite authentication method.
                     </p>
                     <h3>GitHub OAuth</h3>
-                    <p><a href="https://github.com/settings/applications/new?oauth_application[name]=aoeu">register a new OAuth application</a></p>
+                    <p><a id="oauth" href="#" target="_blank">register a new OAuth application</a></p>
                     <div>
                         <input type="text" name="github_clientid" placeholder="client id" />
                     </div>
@@ -890,7 +912,7 @@ if ($no_cfg) {
                     <p>
                         You can install it for production purposes with this tool now, if you want to.
                     </p>
-                    <form method="post" action="<?=$_SERVER['PHP_SELF'] ?>">
+                    <form method="post" action="<?=$url?>">
                         <div class="gap"></div>
                         <div class="ff">
                             <button type="submit" name="action" value="install">
