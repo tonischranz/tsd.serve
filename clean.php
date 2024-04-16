@@ -700,8 +700,8 @@ if ($no_cfg) {
     <header></header>
 
     <div id="content">
-        <?php $eu = (@$_SERVER['HTTPS'] ? 'https://' : 'http://') . $_SERVER['HTTP_HOST'] . $_SERVER['PHP_SELF']; ?>
-	<?php if ($_SERVER['HTTP_HOST'] != 'localhost:8000') : ?>
+        <?php $eu = (@$_SERVER['HTTPS'] ? 'https://' : 'http://') . $hostname . $_SERVER['PHP_SELF']; ?>
+	<?php if ($hostname != 'localhost:8000') : ?>
           <div class="gap"></div>
 	  <div class="c">            
 	  <img src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=<?=urlencode($eu)?>" alt="QR-Code"?>
