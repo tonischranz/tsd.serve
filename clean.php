@@ -32,7 +32,6 @@ $serve_file = '.' . SERVE_REPO . '.php';
 $filename = basename(__FILE__);
 $dirname = getenv('CLEAN_DIRNAME') ? getenv('CLEAN_DIRNAME') : basename(__DIR__);
 $username = getenv('CLEAN_USERNAME') ? getenv('CLEAN_USERNAME') : get_current_user();
-$url = $_SERVER['PHP_SELF'];
 $ext= get_loaded_extensions();
 $no_cfg = !file_exists(CONFIG_FILE);
 
@@ -75,6 +74,7 @@ if (PHP_SAPI == 'cli') {
         global $username;
 
         $docker = shell_exec('which docker');
+        $dir = __DIR__;
         
         if ($docker) {            
             $df = file_exists('Dockerfile');
@@ -92,9 +92,8 @@ if (PHP_SAPI == 'cli') {
             {
                 echo "Running docker image $in\n";
                 
-                shell_exec('chmod a+w .');
-                
-                $rid = strtok(shell_exec("docker run -d -v .:/var/www/html -e CLEAN_DIRNAME=\"`basename $(pwd)`\"  -e CLEAN_USERNAME=\"$username\" -e XDEBUG_CONFIG=\"client_host=`hostname -I | cut -d \" \" -f 1`\" -p $port:80 $in"), "\n");
+                shell_exec("chmod 777 .");
+                $rid = strtok(shell_exec("docker run -d -v $dir:/var/www/html:z -e CLEAN_DIRNAME=\"`basename $(pwd)`\"  -e CLEAN_USERNAME=\"$username\" -e XDEBUG_CONFIG=\"client_host=`hostname -I | cut -d \" \" -f 1`\" -p $port:80 $in"), "\n");
                                 
                 if ($rid)
                 {
@@ -112,7 +111,6 @@ if (PHP_SAPI == 'cli') {
         
         echo "Launching dev webserver\n";
 
-        $dir = __DIR__;        
         $h = popen(PHP_BINARY . " -S $hostname:$port -t $dir -dextension=zip $filename\n", 'r');
 
         echo "\nPress CTRL+C to shut down\n\n";
@@ -124,7 +122,7 @@ if (PHP_SAPI == 'cli') {
     $hn = gethostname();
     if ($hn == 'penguin')
         $hn = 'localhost';
-    
+
     $lu = $no_cfg ? "http://$hn:8000/$filename" : "http://$hn:8000/";
 
     if ($argc == 1) {
@@ -141,8 +139,8 @@ if (PHP_SAPI == 'cli') {
         phpinfo();
     }
     else {
-        echo "Usage: php $filename [info]\n";
-        var_dump($argv);        
+        echo "Usage: php $filename [info|debug]\n";
+        var_dump($argv);
         echo "\n";
     }
     exit(0);
@@ -151,6 +149,8 @@ if (PHP_SAPI == 'cli') {
 ////¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨|
 /// ☮ router script ⚒ load and execute the app                               /
 //__________________________________________________________________________/
+
+$url = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 
 if ($url != "/$filename")
 {
@@ -238,6 +238,7 @@ const MINVER = "8.0.0";
 
 $serve_url = 'https://' . SERVE_HOST . '/' . SERVE_BASE . '/' . SERVE_REPO . '/archive/' . SERVE_BRANCH . '.zip';
 //$admin_url = SERVE_BASE . '/' . ADMIN_REPO . '/archive/' . ADMIN_BRANCH . '.zip';
+
 
 ////¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨|
 /// lib functions                                                            /
@@ -440,6 +441,7 @@ $admin_update_available = false;
 $config_no_key = false;
 $extensions_ok = false;
 $missing_extensions = [];
+$missing_standalone = [];
 $minver = false;
 
 $ext= get_loaded_extensions();
@@ -449,6 +451,24 @@ foreach (EXTENSIONS_SERVE as $et)
     if (!in_array($et, $ext))
     $missing_extensions[]=$et;
 }
+
+foreach (EXTENSIONS_STANDALONE as $et)
+{
+    if (!in_array($et, $ext))
+    $missing_standalone[]=$et;
+}
+
+foreach (EXTENSIONS_SERVE as $et)
+{
+    if (!in_array($et, $ext))
+    $missing_extensions[]=$et;
+}
+
+$ok = @file_put_contents('.flag', time());
+$readonly = !$ok;
+
+if ($ok)
+    unlink('.flag');
 
 $minver = version_compare(\PHP_VERSION, MINVER) >= 0;
 
@@ -556,6 +576,10 @@ if ($no_cfg) {
             font-family: sans-serif;
         }
 
+        body.ro {
+            color: #600;
+        }
+
         a,
         a:visited {
             text-decoration: none;
@@ -622,6 +646,11 @@ if ($no_cfg) {
             padding-right: 1em;
         }
 
+        input[disabled] {
+            color: #888;
+            background-color: #444;
+        }
+
         input::placeholder {
             text-align: left;
             font-size: .8em;
@@ -673,9 +702,19 @@ if ($no_cfg) {
 
             $('form.install input[name=github_clientid]').change(e => {
                 let i = $(e.currentTarget);
-                if (i.val())
-                {
+                if (i.val()) {
                     $('form.install input[name=username]').prop('disabled', true);
+                    $('form.install input[name=pw1]').prop('disabled', true);
+                    $('form.install input[name=pw2]').prop('disabled', true);
+
+                    $('form.install input[name=github_secret]').prop('disabled', false);
+                }
+                else {
+                    $('form.install input[name=username]').prop('disabled', false);
+                    $('form.install input[name=pw1]').prop('disabled', false);
+                    $('form.install input[name=pw2]').prop('disabled', false);
+
+                    $('form.install input[name=github_secret]').prop('disabled', true);
                 }
 
             });
@@ -696,7 +735,7 @@ if ($no_cfg) {
 
 </head>
 
-<body>
+<body <?=$readonly?'class="ro"':''?>>
     <header></header>
 
     <div id="content">
@@ -766,11 +805,12 @@ if ($no_cfg) {
                         choose your favorite authentication method.
                     </p>
                     <h3>GitHub OAuth</h3>
+                    <p><a href="https://github.com/settings/applications/new?oauth_application[name]=aoeu">register a new OAuth application</a></p>
                     <div>
                         <input type="text" name="github_clientid" placeholder="client id" />
                     </div>
                     <div>
-                        <input type="text" name="github_secret" placeholder="secret" />
+                        <input type="text" name="github_secret" placeholder="secret" disabled />
                     </div>
                     <h3>username / password</h3>
                     <div>
@@ -889,6 +929,14 @@ if ($no_cfg) {
             <?php endif ?>
 
         <?php endif ?>
+
+        <ul>
+            <?php foreach (scandir('.') as $f) { ?>
+                <li>
+                    <a href="<?=$f?>"><?=$f?></a>
+                </li>
+            <?php } ?>
+        </ul>
 
     </div>
     <footer>
