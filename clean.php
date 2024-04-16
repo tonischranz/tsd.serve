@@ -122,6 +122,9 @@ if (PHP_SAPI == 'cli') {
 
     // CLI entry point
     $hn = gethostname();
+    if ($hn == 'penguin')
+        $hn = 'localhost';
+    
     $lu = $no_cfg ? "http://$hn:8000/$filename" : "http://$hn:8000/";
 
     if ($argc == 1) {
