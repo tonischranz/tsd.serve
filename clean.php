@@ -297,8 +297,41 @@ function create_config(string $username, string $pw, string $name, string $email
     file_put_contents(CONFIG_FILE, json_encode($config, JSON_PRETTY_PRINT));
 }
 
-function create_github_config($clientid){
+function create_github_config(string $clientid, string $secret){
+    $config = [
+        // 'clean' =>  ['key' => $key],
+        'member' =>  [
+            'github_clientid' => $clientid,
+            'github_secret' => $secret
+        ]
+    ];
+    file_put_contents(CONFIG_FILE, json_encode($config, JSON_PRETTY_PRINT));
+}
 
+function register_user(string $id, string $name, string $email) {
+    $config = json_decode(file_get_contents(CONFIG_FILE));
+
+    if (@!$config['member']['users'])
+    {
+        $config['member']['users'] = [
+            "github@$id" => [                
+                'name' => $name,
+                'email' => $email,
+                'groups' => ['admin', 'developer']
+            ]
+        ];        
+    }
+    else {
+        $config['member']['users'] = [
+            "github@$id" => [                
+                'name' => $name,
+                'email' => $email,
+                'groups' => []
+            ]
+        ];        
+    }
+
+    file_put_contents(CONFIG_FILE, json_encode($config, JSON_PRETTY_PRINT));
 }
 // function update_config()
 // {
@@ -616,6 +649,18 @@ if ($no_cfg) {
             font-size: 4rem;
         }
 
+        h2 {
+            margin-top: 3em;
+        }
+
+        h3 {
+            margin-top: 1em;
+        }
+
+        div {
+            margin-bottom: 1em;
+        }
+
         div.gap {
             height: 2em;
         }
@@ -693,6 +738,14 @@ if ($no_cfg) {
         .c {
             text-align: center;
         }
+
+        ul.n {
+            padding-left: .25em;
+        }
+
+        ul.n>li {
+            list-style-type: none;
+        }
     </style>
 
     <script src="https://code.jquery.com/jquery-3.7.1.slim.min.js" integrity="sha256-kmHvs0B+OpCW5GVHUNjv9rOmY0IvSIRcf7zGUDTDQM8=" crossorigin="anonymous"></script>
@@ -762,19 +815,17 @@ if ($no_cfg) {
 
     <div id="content">
         <?php $eu = (@$_SERVER['HTTPS'] ? 'https://' : 'http://') . $hostname . $url; ?>
-	<?php if ($hostname != 'localhost:8000') : ?>
-          <div class="gap"></div>
-	  <div class="c">            
-	  <img src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=<?=urlencode($eu)?>" alt="QR-Code"?>
-	</div>
-	<?php endif ?>
+        <?php if ($hostname != 'localhost:8000') : ?>
+            <div class="gap"></div>
+            <div class="c">            
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=<?=urlencode($eu)?>" alt="QR-Code"?>
+            </div>
+        <?php endif ?>
     
         <h1> 🧽 <?=$filename?> </h1>
         
         <div class="r"><?=$appname??"$dirname on $hostname"?></div>
         
-        <div class="gap"></div>
-
         <?php if ($missing_extensions) : ?>
             <div>
                 <h2>extensions</h2>
@@ -846,8 +897,7 @@ if ($no_cfg) {
                     </div>
                     <div>
                         <span class="e" style="display:none;" id="err_pwd_mismatch">passwords do not match</span>
-                    </div>
-                    <div class="gap"></div>
+                    </div>                    
                     <h2>install</h2>
                     <h3>additional modules</h3>
                     <div>
@@ -859,8 +909,7 @@ if ($no_cfg) {
                             <input id="admin" type="checkbox" name="module[]" value="pages">
                             install serve.pages
                         </label>
-                    </div>
-                    <div class="gap"></div>
+                    </div>                    
                     <h3>choose your method</h2>
                     <div class="ff">
                         <button type="submit" name="action" value="install"><img  alt="install standalone" src="http://tsd.ovh/%E2%92%B6.svg" /></button>
@@ -935,7 +984,7 @@ if ($no_cfg) {
                     There is a new version of tsd.serve.admin available.
                 </p>
                 <?php endif; ?>
-                <form method="post" action="<?=$_SERVER['PHP_SELF'] ?>">
+                <form method="post" action="<?=$url?>">
                     <div class="gap"></div>
                     <div class="r">
                         <button type="submit" name="action" value="update">install</button>
@@ -952,14 +1001,16 @@ if ($no_cfg) {
 
         <?php endif ?>
 
-        <ul>
-            <?php foreach (scandir('.') as $f) { ?>
-                <li>
-                    <a href="<?=$f?>"><?=$f?></a>
-                </li>
-            <?php } ?>
-        </ul>
-
+        <?php if ($no_cfg || $auth) : ?>
+            <h2>your files and directories</h2>
+            <ul class="n">
+                <?php foreach (scandir('.') as $f) { ?>
+                    <li>
+                        <a href="<?=$f?>"><?=$f?></a>
+                    </li>
+                <?php } ?>
+            </ul>
+        <?php endif ?>
     </div>
     <footer>
         <pre></pre>
