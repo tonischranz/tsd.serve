@@ -69,7 +69,7 @@ class MysqlDB implements DB
 
         foreach ($cond as $k => $v) {
             if (\is_null($v)) $params[] = "$k=NULL";
-            else if (\is_int($v) || \is_float($v)) $params[] = "$k=$v";
+            else if (\is_numeric($v)) $params[] = "$k=$v";
             else $params[] = "$k='" . \mysqli_escape_string($this->con(), $v) . "'";
         }
 
@@ -80,7 +80,7 @@ class MysqlDB implements DB
     {
         $params = [];
         foreach ($cond as $k => $v) {
-            if (\is_int($v) || \is_float($v)) $params[] = "$k=$v";
+            if (\is_numeric($v)) $params[] = "$k=$v";
             else if (\is_null($v)) $params[] = "$k IS NULL";
             else if (\is_array($v)) {
                 if ($v[0] == '!')
@@ -91,12 +91,17 @@ class MysqlDB implements DB
                 }
                 else if ($v[0] == 'IN')
                 {
-                    $l = join(',',$v[1]);
+                    $l = join(',',array_map(fn($a)=>
+                        is_numeric($a) ? $a :
+                            "'" . \mysqli_escape_string($this->con(), $a) . "'",
+                        $v[1]));
                     $params[] = "$k IN ($l)";
                 }
                 else if ($v[0] == 'BETWEEN')
                 {
-                    $params[] = "$k $v[0] $v[1] AND $v[2]";
+                    $v1 = is_numeric($v[1])?$v[1]:"'" . \mysqli_escape_string($this->con(), $v[1]) . "'";
+                    $v2 = is_numeric($v[2])?$v[2]:"'" . \mysqli_escape_string($this->con(), $v[2]) . "'";
+                    $params[] = "$k $v1  AND $v2";
                 }
                 else
                 {
@@ -115,7 +120,7 @@ class MysqlDB implements DB
 
         foreach ($cond as $v) {
             if (\is_null($v)) $params[] = 'NULL';
-            else if (\is_int($v) || \is_float($v)) $params[] = $v;
+            else if (\is_numeric($v)) $params[] = $v;
             else $params[] = "'" . \mysqli_escape_string($this->con(), $v) . "'";
         }
 
