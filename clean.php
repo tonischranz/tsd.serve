@@ -1,43 +1,39 @@
 <?php
 
-////¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨|
-///  tsd.serve ⚒ clean.php                                                    |
-// ♫ Toni Schranz                                                             |
-// ---------------------------------------------------------------------------|
-// This file helps you to setup your new application based on the             |
-// [tsd.serve] framework. It also acts as router-script/FallbackResource.     |
-// If called via CLI it starts a development webserver and browser           /
-// _________________________________________________________________________/
+////¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨|
+///  tsd.serve ⚒ clean.php                                                |
+// ♫ Toni Schranz                                                         |
+// -----------------------------------------------------------------------|
+// This file helps you to setup your new application based on the         |
+// [tsd.serve] framework. It also acts as router-script/FallbackResource. |
+// If called via CLI it starts a development webserver and browser.      /
+// _____________________________________________________________________/
 
 namespace tsd\serve;
 
-////¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨|
-/// ⚒ paths                                                                  /
-//__________________________________________________________________________/
+////¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨|
+/// ⚒ paths                                                              /
+//______________________________________________________________________/
 
 const SERVE_HOST = 'github.com';
 const SERVE_BASE = 'tonischranz';
 const SERVE_REPO = 'tsd.serve';
 const SERVE_BRANCH = 'next';
-const SERVE_FILE = '.tsd.serve.php';
 
 const CONFIG_FILE = '.htconfig.json';
 const EXTENSIONS_SERVE = ['dom', 'session'];
 
-ini_set('display_errors', true);
-// echo "${url}";
-// var_dump($_SERVER);
-
 $serve_file = '.' . SERVE_REPO . '.php';
-$filename = basename(__FILE__);
-$dirname = getenv('CLEAN_DIRNAME') ? getenv('CLEAN_DIRNAME') : basename(__DIR__);
-$username = getenv('CLEAN_USERNAME') ? getenv('CLEAN_USERNAME') : get_current_user();
-$ext= get_loaded_extensions();
 $no_cfg = !file_exists(CONFIG_FILE);
+$ext = get_loaded_extensions();
 
-////¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨|
-/// CLI ♫ launch dev webserver and browser                                   /
-//__________________________________________________________________________/
+$filename = basename(__FILE__);
+$dirname = getenv('__DN__') ? getenv('__DN__') : basename(__DIR__);
+$username = getenv('__UN__') ? getenv('__UN__') : get_current_user();
+
+////¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨|
+/// CLI ♫ launch dev webserver and browser                               /
+//______________________________________________________________________/
 
 if (PHP_SAPI == 'cli') {
 
@@ -93,7 +89,7 @@ if (PHP_SAPI == 'cli') {
                 echo "Running docker image $in\n";
                 
                 shell_exec("chmod 777 .");
-                $rid = strtok(shell_exec("docker run -d -v $dir:/var/www/html:z -e CLEAN_DIRNAME=\"`basename $(pwd)`\"  -e CLEAN_USERNAME=\"$username\" -e XDEBUG_CONFIG=\"client_host=`hostname -I | cut -d \" \" -f 1`\" -p $port:80 $in"), "\n");
+                $rid = strtok(shell_exec("docker run -d -v $dir:/var/www/html:z -e __DN__=\"$dirname\"  -e __UN__=\"$username\" -e XDEBUG_CONFIG=\"client_host=`hostname -I | cut -d \" \" -f 1`\" -p $port:80 $in"), "\n");
                                 
                 if ($rid)
                 {
@@ -146,9 +142,9 @@ if (PHP_SAPI == 'cli') {
     exit(0);
 }
 
-////¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨|
-/// ☮ router script ⚒ load and execute the app                               /
-//__________________________________________________________________________/
+////¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨|
+/// ☮ router script ⚒ load and execute the app                           /
+//______________________________________________________________________/
 
 $url = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 
@@ -199,8 +195,8 @@ if ($url != "/$filename")
         include __DIR__ . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'autoload.php';
     
     // standalone
-    elseif (file_exists(__DIR__ . DIRECTORY_SEPARATOR . SERVE_FILE))
-        include __DIR__ . DIRECTORY_SEPARATOR . SERVE_FILE;
+    elseif (file_exists(__DIR__ . DIRECTORY_SEPARATOR . $serve_file))
+        include __DIR__ . DIRECTORY_SEPARATOR . $serve_file;
 
     // dev
     elseif (file_exists(__DIR__ . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . 'App.php'))
@@ -226,9 +222,9 @@ if ($url != "/$filename")
     exit(0);
 }
 
-////¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨|
-/// 🧽 clean.php ⚒ install and setup your tsd.serve application              /
-//__________________________________________________________________________/
+////¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨|
+/// 🧽 clean.php ⚒ install and setup your tsd.serve application          /
+//______________________________________________________________________/
 
 
 const EXTENSIONS_STANDALONE = ['openssl', 'session', 'zip'];
@@ -240,9 +236,9 @@ $serve_url = 'https://' . SERVE_HOST . '/' . SERVE_BASE . '/' . SERVE_REPO . '/a
 //$admin_url = SERVE_BASE . '/' . ADMIN_REPO . '/archive/' . ADMIN_BRANCH . '.zip';
 
 
-////¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨|
-/// lib functions                                                            /
-//__________________________________________________________________________/
+////¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨|
+/// lib functions                                                        /
+//______________________________________________________________________/
 
 function rrmdir($dir)
 {
@@ -278,9 +274,9 @@ function rcopy($src, $dest)
     return true;
 }
 
-////¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨|
-/// install functions                                                        /
-//__________________________________________________________________________/
+////¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨|
+/// install functions                                                    /
+//______________________________________________________________________/
 
 function create_config(string $username, string $pw, string $name, string $email)
 {
@@ -400,6 +396,7 @@ function get_admin()
 function get_serve()
 {
     global $serve_url;
+    global $serve_file;
 
     $md5 = md5_file($serve_url);
 
@@ -424,7 +421,7 @@ function get_serve()
 
     $files = glob($dir . DIRECTORY_SEPARATOR . '*.php');
 
-    file_put_contents(SERVE_FILE, ["<?php\n", "namespace tsd\serve;\n"]);
+    file_put_contents($serve_file, ["<?php\n", "namespace tsd\serve;\n"]);
     $uses = array();
     foreach ($files as $f) {
         $lines = file($f);
@@ -443,11 +440,11 @@ function get_serve()
             }
             if (preg_match('/^\s*$/', $l)) continue;
 
-            file_put_contents(SERVE_FILE, $l, FILE_APPEND);
+            file_put_contents($serve_file, $l, FILE_APPEND);
         }
     }
 
-    file_put_contents(SERVE_FILE, 'App::serve();', FILE_APPEND);
+    //file_put_contents($serve_file, 'App::serve();', FILE_APPEND);
     
     $cfg = json_decode(file_get_contents(CONFIG_FILE), true);
     $cfg['clean']['serve_md5'] = $md5;
@@ -457,9 +454,9 @@ function get_serve()
     unlink("serve.$md5.zip");
 }
 
-////¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨|
-/// clean.php entry point                                                    /
-//__________________________________________________________________________/
+////¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨|
+/// clean.php entry point                                                /
+//______________________________________________________________________/
 
 
 
@@ -497,11 +494,12 @@ foreach (EXTENSIONS_SERVE as $et)
     $missing_extensions[]=$et;
 }
 
-$ok = @file_put_contents('.flag', time());
-$readonly = !$ok;
+$write_ok = @file_put_contents('.flag', time());
 
-if ($ok)
+if ($write_ok)
     unlink('.flag');
+
+$exec_ok = shell_exec('which sh');
 
 $minver = version_compare(\PHP_VERSION, MINVER) >= 0;
 
@@ -525,13 +523,6 @@ if ($no_cfg) {
 } else {
     $config = json_decode(file_get_contents(CONFIG_FILE), true);
     $appname = @$config['name'];
-
-    // if (@$config['clean']['key']) {
-    //     if (@$_POST['key']) {
-    //         if ($_POST['key'] == $config['clean']['key']) $auth = true;
-    //         else $error_bad_key = true;
-    //     }
-    // } else $config_no_key = true;
 
     if (@$config['member']['users']) {
         if (@$_POST['username'] && @$_POST['pw']) {
@@ -561,7 +552,7 @@ if ($no_cfg) {
 
         $cfg = json_decode(file_get_contents(CONFIG_FILE), true);
         
-        if (file_exists(SERVE_FILE))
+        if (file_exists($serve_file))
         {
             if (@$cfg['clean']['serve_md5']) 
             {
@@ -611,6 +602,14 @@ if ($no_cfg) {
 
         body.ro {
             color: #600;
+        }
+
+        body.ne {
+            color: #006;
+        }
+
+        body.ro.ne {
+            color: #606;
         }
 
         a,
@@ -810,7 +809,7 @@ if ($no_cfg) {
 
 </head>
 
-<body <?=$readonly?'class="ro"':''?>>
+<body <?=!$write_ok?'class="ro"':''?> <?=!$exec_ok?'class="ne"':''?>>
     <header></header>
 
     <div id="content">
