@@ -101,7 +101,7 @@ class MysqlDB implements DB
                 {
                     $v1 = is_numeric($v[1])?$v[1]:"'" . \mysqli_escape_string($this->con(), $v[1]) . "'";
                     $v2 = is_numeric($v[2])?$v[2]:"'" . \mysqli_escape_string($this->con(), $v[2]) . "'";
-                    $params[] = "$k $v1  AND $v2";
+                    $params[] = "$k $v[0] $v1  AND $v2";
                 }
                 else
                 {
