@@ -34,7 +34,7 @@ $username = getenv('__UN__') ? getenv('__UN__') : get_current_user();
 ////¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨¨|
 /// CLI ♫ launch dev webserver and browser                               /
 //______________________________________________________________________/
-
+ini_set('display_errors', 'On');
 if (PHP_SAPI == 'cli') {
 
     function launchBrowser (string $url)
@@ -128,9 +128,9 @@ if (PHP_SAPI == 'cli') {
         echo "Shutting down\n";
         $stop();
     }
-    elseif ($argv[1] == 'debug') {
-        launchIDE();        
-    }
+    // elseif ($argv[1] == 'debug') {
+    //     launchIDE();        
+    // }
     elseif ($argv[1] == 'info') {
         phpinfo();
     }
@@ -278,7 +278,7 @@ function rcopy($src, $dest)
 /// install functions                                                    /
 //______________________________________________________________________/
 
-function create_config(string $username, string $pw, string $name, string $email)
+function create_config(string $username, string $pw, string $name = '', string $email='')
 {
     // $key = str_replace('+', '_', base64_encode(random_bytes(128)));
     $config = [
@@ -354,17 +354,27 @@ function install_serve($modules = [])
 
     //install modules
     if (in_array('admin', $modules)) {
-        get_admin();
+        get_plugin('admin');
     }
 }
 
-function get_admin()
+function get_plugin(string $name, string $branch=SERVE_BRANCH)
 {
-    global $admin_url;
+    $parts = str_split($name, '/');
+    if (count($parts) == 1) {
+        $owner = SERVE_BASE;
+        $repo = "serve.$name";
+    }
+    else{
+        $owner = $parts[0];
+        $repo = $parts[1];
+    }
+    
+    $admin_url = 'https://' . SERVE_HOST . "/$owner/$repo/archive/$branch.zip";
 
     $md5 = md5_file($admin_url);
 
-    $z = "admin.$md5.zip";
+    $z = "$repo.$md5.zip";
     $h = fopen($admin_url, 'rb');
     $o = fopen($z, 'wb');
 
@@ -375,22 +385,22 @@ function get_admin()
     fclose($h);
     fclose($o);
 
-    $zip = new ZipArchive;
+    $zip = new \ZipArchive;
 
     $zip->open($z);
-    $zip->extractTo("admin.$md5");
+    $zip->extractTo("$repo.$md5");
     $zip->close();
 
-    $dir = "admin.$md5/" . ADMIN_REPO . '-' . ADMIN_BRANCH;
+    $dir = "$repo.$md5/$repo-$branch";
 
-    rcopy($dir, 'plugins'.DIRECTORY_SEPARATOR.'admin');
+    rcopy($dir, 'plugins'.DIRECTORY_SEPARATOR.$name);
 
     $cfg = json_decode(file_get_contents(CONFIG_FILE), true);
-    $cfg['clean']['admin_md5'] = $md5;
+    $cfg['clean']['plugins'][$name] = $md5;
     file_put_contents(CONFIG_FILE, json_encode($cfg, JSON_PRETTY_PRINT));
 
-    rrmdir("admin.$md5");
-    unlink("admin.$md5.zip");
+    rrmdir("$repo.$md5");
+    unlink("$repo.$md5.zip");
 }
 
 function get_serve()
@@ -411,7 +421,7 @@ function get_serve()
     fclose($h);
     fclose($o);
 
-    $zip = new ZipArchive;
+    $zip = new \ZipArchive;
 
     $zip->open($z);
     $zip->extractTo("serve.$md5");
@@ -447,7 +457,7 @@ function get_serve()
     //file_put_contents($serve_file, 'App::serve();', FILE_APPEND);
     
     $cfg = json_decode(file_get_contents(CONFIG_FILE), true);
-    $cfg['clean']['serve_md5'] = $md5;
+    $cfg['clean']['serve'] = $md5;
     file_put_contents(CONFIG_FILE, json_encode($cfg, JSON_PRETTY_PRINT));
 
     rrmdir("serve.$md5");
@@ -571,7 +581,7 @@ if ($no_cfg) {
         if (@$_POST['action']) {
             if ($_POST['action'] == 'update') {
                 if ($update_available) get_serve();
-                if ($admin_update_available) get_admin();
+                if ($admin_update_available) get_plugin('admin');
                 $update_available = false;
                 $admin_update_available = false;
             } else if ($_POST['action'] == 'install') {
@@ -744,6 +754,10 @@ if ($no_cfg) {
 
         ul.n>li {
             list-style-type: none;
+        }
+
+        img {
+            width: 100%;
         }
     </style>
 
@@ -970,19 +984,19 @@ if ($no_cfg) {
                             <button type="submit" name="action" value="composer"><img  alt="install with composer" src="https://getcomposer.org/img/logo-composer-transparent.png" /></button>
                         </div>
                     </form>
-                <?php endif; ?>
+                <?php endif ?>
             <?php elseif ($update_available || $admin_update_available) : ?>
                 <h2>update available</h2>
                 <?php if ($update_available) : ?>
                 <p>
                     There is a new version of tsd.serve available.
                 </p>
-                <?php endif; ?>
+                <?php endif ?>
                 <?php if ($admin_update_available) : ?>
                 <p>
                     There is a new version of tsd.serve.admin available.
                 </p>
-                <?php endif; ?>
+                <?php endif ?>
                 <form method="post" action="<?=$url?>">
                     <div class="gap"></div>
                     <div class="r">
@@ -1001,14 +1015,49 @@ if ($no_cfg) {
         <?php endif ?>
 
         <?php if ($no_cfg || $auth) : ?>
-            <h2>your files and directories</h2>
-            <ul class="n">
-                <?php foreach (scandir('.') as $f) { ?>
-                    <li>
-                        <a href="<?=$f?>"><?=$f?></a>
-                    </li>
-                <?php } ?>
-            </ul>
+            <h2>your content</h2>
+                            
+                <?php 
+
+                function rglob ($pat, $base = '')
+                {
+                    if ($base == 'vendor') return;
+
+                    $files = glob($base ? "$base/$pat" : $pat, GLOB_BRACE);
+                    $dirs = glob($base ? "$base/*": "*", GLOB_ONLYDIR);
+
+                    foreach ( $dirs as $d) 
+                        foreach (rglob($pat, $base ? "$base/$d" :$d) as $s)
+                            yield $s;
+
+                    foreach ( $files as $f)
+                        yield $f;
+                }
+
+                $pics = rglob("*.{JPG,jpg,jpeg,png,gif,svg}");
+                $files = rglob("*.{php,json,md,Dockerfile}");
+
+                ?>
+                <?php if ($pics) : ?>
+                    <details open>
+                    <summary>your pictures</summary>
+                    <div>
+                        <?php foreach($pics as $p) { ?>
+                            <a href="/<?=$p?>">
+                                <img src="/<?=$p?>" alt="<?=$p?>" />
+                            </a>
+                        <?php } ?>
+                    </details>
+                <?php endif ?>
+                
+                <h3>your files and directories</h3>
+                <ul class="n">
+                    <?php foreach ($files as $f) { ?>
+                        <li>
+                            <a href="<?=$f?>"><?=$f?></a>
+                        </li>
+                    <?php } ?>
+                </ul>
         <?php endif ?>
     </div>
     <footer>
