@@ -758,6 +758,7 @@ if ($no_cfg) {
 
         img {
             width: 100%;
+            font-size: 3rem;
         }
     </style>
 
