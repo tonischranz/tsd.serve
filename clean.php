@@ -1023,42 +1023,46 @@ if ($no_cfg) {
                 function rglob ($pat, $base = '')
                 {
                     if ($base == 'vendor') return;
+                    if ($base == 'node_modules') return;
 
                     $files = glob($base ? "$base/$pat" : $pat, GLOB_BRACE);
                     $dirs = glob($base ? "$base/*": "*", GLOB_ONLYDIR);
 
                     foreach ( $dirs as $d) 
-                        foreach (rglob($pat, $base ? "$base/$d" :$d) as $s)
+                        foreach (rglob($pat, $d) as $s)
                             yield $s;
 
                     foreach ( $files as $f)
                         yield $f;
                 }
 
-                $pics = rglob("*.{JPG,jpg,jpeg,png,gif,svg}");
-                $files = rglob("*.{php,json,md,Dockerfile}");
+                $pics = iterator_to_array(rglob("*.{JPG,jpg,jpeg,png,gif,svg}"));
+                $files = iterator_to_array(rglob("*.{php,html,json,md,txt,csv}"));
 
                 ?>
                 <?php if ($pics) : ?>
                     <details open>
-                    <summary>your pictures</summary>
-                    <div>
-                        <?php foreach($pics as $p) { ?>
-                            <a href="/<?=$p?>">
-                                <img src="/<?=$p?>" alt="<?=$p?>" />
-                            </a>
-                        <?php } ?>
+                        <summary>your pictures  <b>(<?=count($pics)?>)</summary>
+                        <div>
+                            <?php foreach($pics as $p) { ?>
+                                <a href="/<?=$p?>" target="_blank">
+                                    <img src="/<?=$p?>" alt="<?=$p?>" />
+                                </a>
+                            <?php } ?>
+                        </div>
                     </details>
                 <?php endif ?>
                 
-                <h3>your files and directories</h3>
-                <ul class="n">
-                    <?php foreach ($files as $f) { ?>
-                        <li>
-                            <a href="<?=$f?>"><?=$f?></a>
-                        </li>
-                    <?php } ?>
-                </ul>
+                <details open>
+                    <summary>your files and directories <b>(<?=count($files)?>)</b></summary>
+                    <ul class="n">
+                        <?php foreach ($files as $f) { ?>
+                            <li>
+                                <a href="<?=$f?>" target="_blank"><?=$f?></a>
+                            </li>
+                        <?php } ?>
+                    </ul>
+                </details>
         <?php endif ?>
     </div>
     <footer>
