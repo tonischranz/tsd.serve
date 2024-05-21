@@ -65,6 +65,6 @@ class LoginController extends Controller
     function doLogout(?string $returnUrl = null)
     {
         $this->_member->logout();
-        return new ViewResult('loggedout', ['returnUrl'=>$returnUrl?urlencode($returnUrl):'']);
+        return $this->redirect($returnUrl?$returnUrl:'/');
     }
 }
