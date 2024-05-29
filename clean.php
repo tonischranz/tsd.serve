@@ -836,7 +836,10 @@ if ($no_cfg) {
             </div>
         <?php endif ?>
     
-        <h1> 🧽 <?=$filename?> </h1>
+        <h1>
+            <?=['avocado.php'=>'🥑','my.php'=>'🥆','new.php'=>'🥜','clean.php'=>'🧽','php.php'=>'🤦'][$filename]??'🤪'?>
+            <?=$filename?>
+        </h1>
         
         <div class="r"><?=$appname??"$dirname on $hostname"?></div>
         
