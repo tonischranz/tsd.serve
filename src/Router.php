@@ -235,19 +235,27 @@ class Router
 
         require_once $fileName;
 
-        return $this->injectController($ctrlName, $name, $plugin);
+        $c = Controller::instance();
+        
+
+        $this->injectController($c,$ctrlName, $name, $plugin);
+
+        return $c;
     }
 
-    private function injectController($cname, $name, $plugin = '')
+    private function injectController($inst, $cname, $name, $plugin = '')
     {
-        $ctx = new InjectionContext();
+        /*$ctx = new InjectionContext();
         $ctx->name = 'serve';
         $ctx->fullname = "tsd.serve";
         $ctx->plugin = $plugin;
 
         $c = $this->factory->create($cname, $name, $ctx);
 
-        return $c;
+        return $c;*/
+
+        // $this->factory->
+
     }
 }
 

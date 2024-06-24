@@ -550,9 +550,17 @@ class View
               $o = View::compileOutput('@pluginRoot');
               return "<?php echo @$o; ?>";
             },
-            '/\{((\@?[a-zA-Z_]\w*(\.\w+)*(\|\w+)*)|\.)\s*\}/' => function ($m) {
+            '/\{\{\{((\@?[a-zA-Z_]\w*(\.\w+)*(\|\w+)*)|\.)\s*\}\}\}/' => function ($m) {
                 $o = View::compileOutput($m[1]);
                 return "<?php echo @$o; ?>";
+            },
+            '/\{\{((\@?[a-zA-Z_]\w*(\.\w+)*(\|\w+)*)|\.)\s*\}\}/' => function ($m) {
+                $o = View::compileOutput($m[1]);
+                return "<?php echo tsd\serve\View::mdtotml(@$o); ?>";
+            },
+            '/\{((\@?[a-zA-Z_]\w*(\.\w+)*(\|\w+)*)|\.)\s*\}/' => function ($m) {
+                $o = View::compileOutput($m[1]);
+                return "<?php echo htmlspecialchars(@$o, ENT_QUOTES|ENT_HTML5); ?>";
                 //return "<?=@$o >"; doesnt work
             },
         ];

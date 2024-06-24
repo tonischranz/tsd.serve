@@ -9,12 +9,21 @@ namespace tsd\serve;
  */
 class Controller
 {
+    private static $instance;
 
     protected string $_name;
     protected string $_plugin;
     protected Membership $_member;
 
-    protected function view($data = null, string $view = null)
+    function __construct() {
+        self::$instance = $this;
+    }
+
+    static function instance() {
+        return self::$instance;
+    }
+
+    protected function view($model = null, array $data = [], string $view = null)
     {
         if ($view == null) {
             $backtrace = debug_backtrace();
@@ -24,7 +33,7 @@ class Controller
             else if (\preg_match('/^do/', $view) == 1) $view = \strtolower(\substr($view, 2));
         }
 
-        return new ViewResult($this->_name . DIRECTORY_SEPARATOR . $view, $data, $this->_plugin);
+        return new ViewResult($this->_name . DIRECTORY_SEPARATOR . $view, $model, $this->_plugin);
     }
 
     public function prepare()

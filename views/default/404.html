@@ -8,6 +8,14 @@
 <body>
     <main>
         <h1>Not Found</h1>
+        <div>
+            <p>try searching for:</p>
+            <ul>
+            {each words}
+                <li><a href="https://duckduckgo.com/?q={.}">{.}</a></li>
+            {/each}
+            </ul>
+        </div>
     </main>    
 </body>
 </html>
