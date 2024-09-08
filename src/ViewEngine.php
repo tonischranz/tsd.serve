@@ -573,7 +573,7 @@ class View
             },
             '/\{((\@?[a-zA-Z_]\w*(\.\w+)*(\|\w+)*)|\.)\s*\}/' => function ($m) {
                 $o = View::compileOutput($m[1]);
-                return "<?php echo htmlspecialchars(@$o, ENT_QUOTES|ENT_HTML5); ?>";                
+                return "<?php echo htmlspecialchars(@$o??'', 51); ?>";
             },
         ];
 
