@@ -571,6 +571,14 @@ class View
               }
               return "<?php if (@$arg) { array_push(\$s, \$d); foreach($arg as \$d) { array_push(\$s, \$d);  ?>$inner<?php array_pop(\$s); } array_pop(\$s); \$d=end(\$s); } ?>";
             },
+            '/\{~\}/' => function ($m) {
+              $o = View::compileOutput('@pluginRoot');
+              return "<?php echo @$o; ?>";
+            },
+            '/\{\{\{((\@?[a-zA-Z_]\w*(\.\w+)*(\|\w+)*)|\.)\s*\}\}\}/' => function ($m) {
+                $o = View::compileOutput($m[1]);
+                return "<?php echo @$o; ?>";
+            },
             '/\{((\@?[a-zA-Z_]\w*(\.\w+)*(\|\w+)*)|\.)\s*\}/' => function ($m) {
                 $o = View::compileOutput($m[1]);
                 return "<?php echo htmlspecialchars(@$o??'', 51); ?>";
