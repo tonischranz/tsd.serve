@@ -283,6 +283,10 @@ class MysqlDB implements DB
         $this->con()->query($q);
         return $this->con()->affected_rows > 0;
     }
+    function escape(string $s): string
+    {
+        return \mysqli_escape_string($this->con(),$s);
+    }
 }
 
 /**
