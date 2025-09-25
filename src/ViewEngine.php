@@ -2,12 +2,6 @@
 
 namespace tsd\serve;
 
-use \DOMDocument;
-use \DOMElement;
-use \DOMNode;
-use \DOMText;
-use \DOMXPath;
-
 abstract class ViewEngine
 {
     function render($result, ViewContext $ctx, string $accept)
@@ -125,14 +119,14 @@ class ServeViewEngine extends ViewEngine
             $layout = new Layout($layoutPlugin);
             $layoutTemplate = $layout->compile();
 
-            $t = \Dom\HTMLDocument::createFromString($template);
-            $o = \Dom\HTMLDocument::createFromString($layoutTemplate);
+            $t = \Dom\HTMLDocument::createFromString($template, \Dom\HTML_NO_DEFAULT_NS);
+            $o = \Dom\HTMLDocument::createFromString($layoutTemplate, \Dom\HTML_NO_DEFAULT_NS);
 
             $title = $t->getElementsByTagName('title')[0]->C14N();
             $title = str_replace(['<title>', '</title>'], '', $title);
             $title = str_replace('??>', '?>', $title);
-            $x = new DOMXPath($t);
-            $xL = new DOMXPath($o);
+            $x = new \Dom\XPath($t);
+            $xL = new \Dom\XPath($o);
             $links = $x->query('head/link');
             $styles = $x->query('head/style');
             $scripts = $x->query('head/script');
@@ -489,17 +483,19 @@ class View
 
     private static function localizeTemplate(string $template, Label $labels)
     {
-        $t = new DOMDocument;
-        $o = new DOMDocument;
-        libxml_use_internal_errors(true);
-        $t->loadHTML($template);
-        View::copyNode($t, $o, $o, $labels);
-        $to = $o->saveHTML();
+        // $t = new DOMDocument;
+        // $o = new DOMDocument;
+        // libxml_use_internal_errors(true);
+        // $t->loadHTML($template);
+        //$t = \Dom\HTMLDocument::createFromString($template, \Dom\HTML_NO_DEFAULT_NS);
+        //$o = new \Dom\HTMLDocument();
+        //View::copyNode($t, $o, $o, $labels);
+        //$to = $t->saveHTML();
 
-        $to = preg_replace('/%7B/', '{', $to);
-        $to = preg_replace('/%7D/', '}', $to);
+        //$to = preg_replace('/%7B/', '{', $to);
+        //$to = preg_replace('/%7D/', '}', $to);
         
-        return $to;
+        return $template;
     }
 
     private static function compileExpression($exp)
@@ -588,7 +584,7 @@ class View
         return preg_replace_callback_array($patterns, $template, -1);
     }
 
-    private static function copyNode(DOMNode $t, DOMDocument $o, DOMNode $p, Label $l)
+    private static function copyNode(\Dom\Node $t, \Dom\Document $o, \Dom\Node $p, Label $l)
     {
         switch ($t->nodeType) {
             case XML_HTML_DOCUMENT_NODE:
@@ -608,7 +604,7 @@ class View
         }
     }
 
-    private static function localizeAttributes(DOMElement $e, Label $l)
+    private static function localizeAttributes(\Dom\Element $e, Label $l)
     {
         foreach ($e->attributes as $a) {
             if ($e->nodeName == 'input' && $a->name == 'placeholder') $a->value = View::localizeText($a->value, $l);
@@ -616,12 +612,12 @@ class View
         }
     }
 
-    private static function copyCData(DOMText $t, DOMDocument $o, DOMElement $p)
+    private static function copyCData(\Dom\Text $t, \Dom\Document $o, \Dom\Element $p)
     {
         $p->appendChild($o->createCDATASection($t->data));
     }
 
-    private static function copyText(DOMText $t, DOMDocument $o, DOMElement $p, Label $l)
+    private static function copyText(\Dom\Text $t, \Dom\Document $o, \Dom\Element $p, Label $l)
     {
         if ($t->isElementContentWhitespace()) return;
         if ($p->nodeName == 'style' || $p->nodeName == 'script') return;
