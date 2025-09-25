@@ -8,6 +8,7 @@ use tsd\serve\App;
 
 // wanna see errors?
 ini_set('display_errors', 'On');
+error_reporting(E_ALL);
 
 if (PHP_SAPI == 'cli') {
     if ($argc == 1) {
