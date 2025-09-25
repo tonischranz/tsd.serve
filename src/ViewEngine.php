@@ -125,12 +125,8 @@ class ServeViewEngine extends ViewEngine
             $layout = new Layout($layoutPlugin);
             $layoutTemplate = $layout->compile();
 
-            $t = new DOMDocument;
-            $o = new DOMDocument;
-
-            libxml_use_internal_errors(true);
-            $t->loadHTML($template);
-            $o->loadHTML($layoutTemplate);
+            $t = Dom\HTMLDocument::createFromString($template);
+            $o = Dom\HTMLDocument::createFromString($layoutTemplate);
 
             $title = $t->getElementsByTagName('title')[0]->C14N();
             $title = str_replace(['<title>', '</title>'], '', $title);
@@ -160,6 +156,10 @@ class ServeViewEngine extends ViewEngine
             
             $to = preg_replace('/\&lt;\?php/', '<?php', $to);
             $to = preg_replace('/\?\&gt;/', '?>', $to);
+            
+            $to = preg_replace('/<!--\?php/', '<?php', $to);
+            $to = preg_replace('/\?-->/', '?>', $to);
+            
             $to = preg_replace('/%20/', ' ', $to);
             $to = preg_replace('/%24/', '$', $to);
             $to = preg_replace('/%5B/', '[', $to);
