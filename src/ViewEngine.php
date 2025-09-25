@@ -115,12 +115,10 @@ class ServeViewEngine extends ViewEngine
         } else {
             if (!$v) $v = new View($view, $plugin);
             
-            $template = $v->compile();
             $layout = new Layout($layoutPlugin);
-            $layoutTemplate = $layout->compile();
 
-            $t = \Dom\HTMLDocument::createFromString($template, \Dom\HTML_NO_DEFAULT_NS);
-            $o = \Dom\HTMLDocument::createFromString($layoutTemplate, \Dom\HTML_NO_DEFAULT_NS);
+            $t = \Dom\HTMLDocument::createFromString($v->template, \Dom\HTML_NO_DEFAULT_NS);
+            $o = \Dom\HTMLDocument::createFromString($layout->template, \Dom\HTML_NO_DEFAULT_NS);
 
             $title = $t->getElementsByTagName('title')[0]->C14N();
             $title = str_replace(['<title>', '</title>'], '', $title);
@@ -144,21 +142,8 @@ class ServeViewEngine extends ViewEngine
             foreach ($scripts as $h) $lHead->appendChild($o->importNode($h, true));
 
 
-            /*$ctx->title = $title;*/
-            $to = $o->saveHTML();
-            $to = preg_replace('/\{#title\}/', $title, $to);
-            
-            $to = preg_replace('/\&lt;\?php/', '<?php', $to);
-            $to = preg_replace('/\?\&gt;/', '?>', $to);
-            
-            $to = preg_replace('/<!--\?php/', '<?php', $to);
-            $to = preg_replace('/\?-->/', '?>', $to);
-            
-            $to = preg_replace('/%20/', ' ', $to);
-            $to = preg_replace('/%24/', '$', $to);
-            $to = preg_replace('/%5B/', '[', $to);
-            $to = preg_replace('/%5D/', ']', $to);
-            $to = preg_replace('/PUBLIC.*/', '>', $to, 1);
+
+            $to = View::compileTemplate($o->saveHTML());
 
             //cache
             $md5 = $v->md5();
@@ -190,7 +175,7 @@ class ServeViewEngine extends ViewEngine
 class View
 {
     private Label $labels;
-    private string $template;
+    public string $template;
     private string $md5;
 
     function __construct(string $path, string $plugin = '')
@@ -206,15 +191,6 @@ class View
         return $this->md5;
     }
 
-    public function compile()
-    {
-        return View::compileTemplate($this->localize($this->template));
-    }
-
-    protected function localize($template)
-    {
-        return View::localizeTemplate($template, $this->labels);
-    }
 
     private static function loadTemplate($path, $plugin)
     {
@@ -481,22 +457,6 @@ class View
         return file_get_contents($viewPath);
     }
 
-    private static function localizeTemplate(string $template, Label $labels)
-    {
-        // $t = new DOMDocument;
-        // $o = new DOMDocument;
-        // libxml_use_internal_errors(true);
-        // $t->loadHTML($template);
-        //$t = \Dom\HTMLDocument::createFromString($template, \Dom\HTML_NO_DEFAULT_NS);
-        //$o = new \Dom\HTMLDocument();
-        //View::copyNode($t, $o, $o, $labels);
-        //$to = $t->saveHTML();
-
-        //$to = preg_replace('/%7B/', '{', $to);
-        //$to = preg_replace('/%7D/', '}', $to);
-        
-        return $template;
-    }
 
     private static function compileExpression($exp)
     {
@@ -534,7 +494,7 @@ class View
         return $o;
     }
 
-    private static function compileTemplate($template): string
+    static function compileTemplate(string $template): string
     {
         $patterns = [
             '/\{if\s+(?<arg>\@?\w[\.\|\w]*)\s*\}(?<inner>((?:(?!(\{\/?if|\{else)).)|(?R))*)(\{else\}(?<else>((?:(?!\{\/if).)|(?R))*))?\{\/if\}/ms' => function ($m) {
@@ -584,55 +544,6 @@ class View
         return preg_replace_callback_array($patterns, $template, -1);
     }
 
-    private static function copyNode(\Dom\Node $t, \Dom\Document $o, \Dom\Node $p, Label $l)
-    {
-        switch ($t->nodeType) {
-            case XML_HTML_DOCUMENT_NODE:
-                View::copyNode($t->documentElement, $o, $o, $l);
-                break;
-            case XML_ELEMENT_NODE:
-                $n = $o->importNode($t);
-                $n = $p->appendChild($n);
-                View::localizeAttributes($n, $l);
-                foreach ($t->childNodes as $c) View::copyNode($c, $o, $n, $l);
-                break;
-            case XML_CDATA_SECTION_NODE:
-                View::copyCData($t, $o, $p);
-            case XML_TEXT_NODE:
-                View::copyText($t, $o, $p, $l);
-                break;
-        }
-    }
-
-    private static function localizeAttributes(\Dom\Element $e, Label $l)
-    {
-        foreach ($e->attributes as $a) {
-            if ($e->nodeName == 'input' && $a->name == 'placeholder') $a->value = View::localizeText($a->value, $l);
-            if ($e->nodeName == 'img' && $a->name == 'alt') $a->value = View::localizeText($a->value, $l);
-        }
-    }
-
-    private static function copyCData(\Dom\Text $t, \Dom\Document $o, \Dom\Element $p)
-    {
-        $p->appendChild($o->createCDATASection($t->data));
-    }
-
-    private static function copyText(\Dom\Text $t, \Dom\Document $o, \Dom\Element $p, Label $l)
-    {
-        if ($t->isElementContentWhitespace()) return;
-        if ($p->nodeName == 'style' || $p->nodeName == 'script') return;
-        else {
-            //todo: MD
-            $p->appendChild($o->createTextNode(View::localizeText($t->wholeText, $l)));
-        }
-    }
-
-    private static function localizeText(string $s, Label $l)
-    {
-        return $s;
-        //todo: localize!
-        //return $l->getLabel($s);
-    }
 }
 
 class Layout extends View
