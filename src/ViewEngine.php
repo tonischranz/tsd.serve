@@ -125,8 +125,8 @@ class ServeViewEngine extends ViewEngine
             $layout = new Layout($layoutPlugin);
             $layoutTemplate = $layout->compile();
 
-            $t = Dom\HTMLDocument::createFromString($template);
-            $o = Dom\HTMLDocument::createFromString($layoutTemplate);
+            $t = \Dom\HTMLDocument::createFromString($template);
+            $o = \Dom\HTMLDocument::createFromString($layoutTemplate);
 
             $title = $t->getElementsByTagName('title')[0]->C14N();
             $title = str_replace(['<title>', '</title>'], '', $title);
