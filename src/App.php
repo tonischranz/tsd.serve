@@ -37,7 +37,7 @@ class App
      * 
      * @param array $config optional alternative Configuration values to use
      */
-    function __construct(array $config = null)
+    function __construct(?array $config = null)
     {
         if ($config == null && file_exists(App::CONFIG))
             $config = json_decode(file_get_contents(App::CONFIG), true);

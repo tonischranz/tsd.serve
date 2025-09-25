@@ -18,7 +18,7 @@ interface DB
      * @param array $order array of either a name or an array with [0]=>$name, [1]=>ASC/DESC
      * @return array array of rows as associative arrays $field=>$value
      */
-    function select(string $table, array $fields = null, array $cond = null, $order = false, int $limit = 0): array;
+    function select(string $table, ?array $fields = null, ?array $cond = null, $order = false, int $limit = 0): array;
 
     /**
      * Execute a INSERT statement
@@ -205,7 +205,7 @@ class MysqlDB implements DB
         return $rows;
     }
 
-    function select(string $table, array $fields = null, array $cond = null, $order = false, int $limit = 0): array
+    function select(string $table, ?array $fields = null, ?array $cond = null, $order = false, int $limit = 0): array
     {
         $q = 'SELECT ';
         $q .= join(',', $fields);
@@ -298,7 +298,7 @@ class FakeDB implements DB
 {
     private array $data = [];
 
-    function select(string $table, array $fields = null, array $cond = null, $order = false, int $limit = 0): array
+    function select(string $table, ?array $fields = null, ?array $cond = null, $order = false, int $limit = 0): array
     {
         if (key_exists($table, $this->data) && $cond)
         {

@@ -14,7 +14,7 @@ class Controller
     protected string $_plugin;
     protected Membership $_member;
 
-    protected function view($data = null, string $view = null)
+    protected function view($data = null, ?string $view = null)
     {
         if ($view == null) {
             $backtrace = debug_backtrace();

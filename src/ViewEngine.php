@@ -667,7 +667,7 @@ class JSONLabels implements Label
     private $root;
     private $data;
 
-    public function __construct(string $path, JSONLabels $root = null)
+    public function __construct(string $path, ?JSONLabels $root = null)
     {
         if ($root)
             $this->root = $root;
