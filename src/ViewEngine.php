@@ -282,7 +282,7 @@ class View
                     </div>
                     <div class="right">
                       <input type="submit" value="go" />
-                    </div
+                    </div>
                   </form>
                 </main>
               </body>
@@ -305,7 +305,7 @@ class View
                   {with returnUrl}<input type="hidden" name="returnUrl" value="{.}" />{/with}
                     <div class="right">
                         <input type="submit" value="yes" />
-                    </div
+                    </div>
                   </form>
                 </main>
               </body>
@@ -357,7 +357,7 @@ class View
                     </div>                   
                     <div class="right">
                       <input type="submit" value="save" />
-                    </div
+                    </div>
                     <div>
                         <a class="nopopup" href="password">change password</a>
                     </div>
@@ -408,7 +408,7 @@ class View
                     </div>
                     <div class="right">
                       <input type="submit" value="change" />
-                    </div
+                    </div>
                   </form>
                 </main>
               </body>
