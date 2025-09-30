@@ -117,8 +117,8 @@ class ServeViewEngine extends ViewEngine
             
             $layout = new Layout($layoutPlugin);
 
-            $t = \Dom\HTMLDocument::createFromString($v->template, \Dom\HTML_NO_DEFAULT_NS);
-            $o = \Dom\HTMLDocument::createFromString($layout->template, \Dom\HTML_NO_DEFAULT_NS);
+            $t = \Dom\HTMLDocument::createFromString(View::escapeTemplate($v->template), \Dom\HTML_NO_DEFAULT_NS);
+            $o = \Dom\HTMLDocument::createFromString(View::escapeTemplate($layout->template), \Dom\HTML_NO_DEFAULT_NS);
 
             $title = $t->getElementsByTagName('title')[0]->C14N();
             $title = str_replace(['<title>', '</title>'], '', $title);
@@ -494,10 +494,25 @@ class View
         return $o;
     }
 
+    static function escapeTemplate(string $template) : string
+    {
+      return preg_replace(
+        ['/\{each ([^\}]+)\}/', '/\{\/each\}/', '/\{none\}/',
+         '/\{if ([^\}]+)\}/', '/\{else\}/', '/\{\/if\}/',
+         '/\{with ([^\}]+)\}/', '/\{\/with\}/', '/\{without\}/'
+        ],
+        ['<!--{each $1}-->', '<!--{/each}-->', '<!--{none}-->',
+         '<!--{if $1}-->', '<!--{else}-->', '<!--{/if}-->',
+         '<!--{with $1}-->', '<!--{/with}-->', '<!--{without}-->'
+        ],
+        $template
+      );
+    }
+
     static function compileTemplate(string $template): string
     {
         $patterns = [
-            '/\{if\s+(?<arg>\@?\w[\.\|\w]*)\s*\}(?<inner>((?:(?!(\{\/?if|\{else)).)|(?R))*)(\{else\}(?<else>((?:(?!\{\/if).)|(?R))*))?\{\/if\}/ms' => function ($m) {
+            '/<!--\{if\s+(?<arg>\@?\w[\.\|\w]*)\s*\}-->(?<inner>((?:(?!(<!--\{\/?if|<!--\{else)).)|(?R))*)(<!--\{else\}-->(?<else>((?:(?!<!--\{\/if).)|(?R))*))?<!--\{\/if\}-->/ms' => function ($m) {
                 $inner = View::compileTemplate($m['inner']);
                 $arg   = View::compileExpression($m['arg']);
                 if (key_exists('else', $m))
@@ -507,7 +522,7 @@ class View
                 }
                 return "<?php if (@$arg) { ?>$inner<?php } ?>";
             },
-            '/\{with\s+(?<arg>\@?\w[\.\|\w]*)\s*\}(?<inner>((?:(?!(\{\/?with|\{without)).)|(?R))*)(\{without\}(?<else>((?:(?!\{\/with).)|(?R))*))?\{\/with\}/ms' => function ($m) {
+            '/<!--\{with\s+(?<arg>\@?\w[\.\|\w]*)\s*\}(?<inner>((?:(?!(<!--\{\/?with|<!--\{without)).)|(?R))*)(<!--\{without\}-->(?<else>((?:(?!<!--\{\/with).)|(?R))*))?<!--\{\/with\}-->/ms' => function ($m) {
                 $inner = View::compileTemplate($m['inner']);
                 $arg   = View::compileExpression($m['arg']);
                 if (key_exists('else', $m))
@@ -517,7 +532,7 @@ class View
                 }
                 else return "<?php if (@$arg) { array_push(\$s, $arg); \$d=$arg; ?>$inner<?php array_pop(\$s); \$d=end(\$s); } ?>";
             },
-            '/\{each\s+(?<arg>\@?\w[\.\|\w]*)\s*\}(?<inner>((?:(?!(\{\/?each|\{none)).)|(?R))*)(\{none\}(?<else>((?:(?!\{\/each).)|(?R))*))?\{\/each\}/ms' => function ($m) {
+            '/<!--\{each\s+(?<arg>\@?\w[\.\|\w]*)\s*\}-->(?<inner>((?:(?!(<!--\{\/?each|<!--\{none)).)|(?R))*)(<!--\{none\}-->(?<else>((?:(?!<!--\{\/each).)|(?R))*))?<!--\{\/each\}-->/ms' => function ($m) {
               $inner = View::compileTemplate($m['inner']);
               $arg   = View::compileExpression($m['arg']);
               if (key_exists('else', $m))
