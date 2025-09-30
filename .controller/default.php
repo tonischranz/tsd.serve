@@ -7,7 +7,16 @@ class defaultController extends Controller
 
   function showIndex ()
   {
-    return $this->view (['user' => 'Toni Schranz']);
+    return $this->view ([
+      'user' => 'Toni Schranz', 
+      'items' => [
+        ['foo'=>'Hello', 'bar' =>'World'],
+        ['foo'=>'How', 'bar' =>'are you?']
+      ],
+      'no_items' => [],
+      'foo' => rand(0, 2) > 1,
+      'bar' => rand(0, 2) > 1
+    ]);
   }
 
   function showBar (float $amt)

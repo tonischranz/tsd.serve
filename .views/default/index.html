@@ -25,6 +25,37 @@
       <input placeholder="{user}" />
       <a href="✔">[✔]</a>
       <a href="/admin/code">[_code]</a>
+
+      <table>
+        <tr>
+          <th>H1</th>
+          <th>H2</th>
+        </tr>
+        {each items}
+          <tr>
+            <td>{foo}</td>
+            <td>{bar}</td>
+          </tr>
+        {/each}
+      </table>
+      <ul>
+        {each no_items}
+          <li>{foo}</li>
+        {none}
+          <li>No items!</li>
+        {/each}
+      </ul>
+      {if foo}
+        <p>foo</p>
+        {if bar}
+          <p>BAR</p>
+        {else}
+          <p>NOT BAR</p>
+        {/if}
+        <p>after barcheck</p>
+      {else}
+        <p>not foo</p>
+      {/if}
     </main>
   </body>
 </html>
