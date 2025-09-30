@@ -120,9 +120,7 @@ class ServeViewEngine extends ViewEngine
             $t = \Dom\HTMLDocument::createFromString(View::escapeTemplate($v->template), \Dom\HTML_NO_DEFAULT_NS);
             $o = \Dom\HTMLDocument::createFromString(View::escapeTemplate($layout->template), \Dom\HTML_NO_DEFAULT_NS);
 
-            $title = $t->getElementsByTagName('title')[0]->C14N();
-            $title = str_replace(['<title>', '</title>'], '', $title);
-            $title = str_replace('??>', '?>', $title);
+            $title = $t->getElementsByTagName('title')[0];
             $x = new \Dom\XPath($t);
             $xL = new \Dom\XPath($o);
             $links = $x->query('head/link');
@@ -141,7 +139,8 @@ class ServeViewEngine extends ViewEngine
             foreach ($styles as $h) $lHead->appendChild($o->importNode($h, true));
             foreach ($scripts as $h) $lHead->appendChild($o->importNode($h, true));
 
-
+            $lTitle = $xL->query('head/title')[0];
+            $lTitle->textContent = $title->textContent;
 
             $to = View::compileTemplate($o->saveHTML());
 
