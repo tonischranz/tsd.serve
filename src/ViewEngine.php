@@ -522,7 +522,7 @@ class View
                 }
                 return "<?php if (@$arg) { ?>$inner<?php } ?>";
             },
-            '/<!--\{with\s+(?<arg>\@?\w[\.\|\w]*)\s*\}(?<inner>((?:(?!(<!--\{\/?with|<!--\{without)).)|(?R))*)(<!--\{without\}-->(?<else>((?:(?!<!--\{\/with).)|(?R))*))?<!--\{\/with\}-->/ms' => function ($m) {
+            '/<!--\{with\s+(?<arg>\@?\w[\.\|\w]*)\s*\}-->(?<inner>((?:(?!(<!--\{\/?with|<!--\{without)).)|(?R))*)(<!--\{without\}-->(?<else>((?:(?!<!--\{\/with).)|(?R))*))?<!--\{\/with\}-->/ms' => function ($m) {
                 $inner = View::compileTemplate($m['inner']);
                 $arg   = View::compileExpression($m['arg']);
                 if (key_exists('else', $m))
