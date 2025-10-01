@@ -117,19 +117,17 @@ class ServeViewEngine extends ViewEngine
             
             $layout = new Layout($layoutPlugin);
 
-            $t = \Dom\HTMLDocument::createFromString(View::escapeTemplate($v->template), \Dom\HTML_NO_DEFAULT_NS);
-            $o = \Dom\HTMLDocument::createFromString(View::escapeTemplate($layout->template), \Dom\HTML_NO_DEFAULT_NS);
+            $t = \Dom\HTMLDocument::createFromString(View::escapeTemplate($v->template));
+            $o = \Dom\HTMLDocument::createFromString(View::escapeTemplate($layout->template));
 
-            $title = $t->getElementsByTagName('title')[0];
-            $x = new \Dom\XPath($t);
-            $xL = new \Dom\XPath($o);
-            $links = $x->query('head/link');
-            $styles = $x->query('head/style');
-            $scripts = $x->query('head/script');
-            $main = $x->query('body/main')[0];
+            $title = $t->head->getElementsByTagName('title')[0];
+            $links = $t->head->getElementsByTagName('link');
+            $styles = $t->head->getElementsByTagName('style');
+            $scripts = $t->head->getElementsByTagName('script');
+            $main = $t->body->getElementsByTagName('main')[0];
 
             $lBody = $o->getElementsByTagName('body')[0];
-            $lOldMain = $xL->query('//main')[0];
+            $lOldMain = $o->body->getElementsByTagName('main')[0];
             $lMain = $o->importNode($main, true);
             $lBody->replaceChild($lMain, $lOldMain);
 
@@ -139,7 +137,7 @@ class ServeViewEngine extends ViewEngine
             foreach ($styles as $h) $lHead->appendChild($o->importNode($h, true));
             foreach ($scripts as $h) $lHead->appendChild($o->importNode($h, true));
 
-            $lTitle = $xL->query('head/title')[0];
+            $lTitle = $o->head->getElementsByTagName('title')[0];
             $lTitle->textContent = $title->textContent;
 
             $to = View::compileTemplate($o->saveHTML());
