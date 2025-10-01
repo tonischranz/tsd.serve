@@ -9,7 +9,23 @@
         font-size: 10rem;
         font-weight: normal;
       }
+
+      body > main p {
+        color:#090;
+      }
     </style>
+
+    <script>
+
+      $(()=> {
+        let i = 10;
+
+        if (i > 5) {
+          $('body>main>ul').append('<li>dynamic</li>');
+        }
+      });
+      
+    </script>
   </head>
 
   <body>
