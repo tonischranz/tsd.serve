@@ -31,6 +31,12 @@ class Controller
     public function prepare()
     {}
 
+    static function instance()
+    {
+        if (self::$instance == null) self::$instance = new Controller();
+        return self::$instance;
+    }
+
     static function message(string $message, ?string $url = null)
     {
         return new MessageResult('info', $message, url: $url);
