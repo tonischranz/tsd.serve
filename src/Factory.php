@@ -195,7 +195,7 @@ class Factory
         return new Injection($t, $name, $ctx, $config);
     }
 
-    function getImplementation(string $type, string $mode = null)
+    function getImplementation(string $type, ?string $mode = null)
     {
         if (!$mode && @Factory::$classes[$type][0]) return new ReflectionClass(Factory::$classes[$type][0]);
         else if ($mode && @Factory::$classes[$type][1][$mode]) return new ReflectionClass(Factory::$classes[$type][1][$mode]);

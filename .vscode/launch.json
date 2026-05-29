@@ -35,7 +35,7 @@
           "-dxdebug.mode=develop,debug",
           "-dxdebug.start_with_request=yes",
           "-S",
-          "127.0.0.1:0"
+          "[::1]:0"
         ],
         "xdebugSettings": {
           "max_data": -1, "max_children": 1000
@@ -43,11 +43,13 @@
         
         "cwd": "${workspaceRoot}",
         "port": 9000,
+
         "serverReadyAction": {
-          "pattern": "Development Server \\(http://127.0.0.1:([0-9]+)\\) started",
+          "pattern": "Development Server \\(http://\\[::1\\]:([0-9]+)\\) started",
           "uriFormat": "http://localhost:%s",
           "action": "openExternally"
         }
+        
       }
     ]
   }

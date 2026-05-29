@@ -15,15 +15,7 @@ class Controller
     protected string $_plugin;
     protected Membership $_member;
 
-    function __construct() {
-        self::$instance = $this;
-    }
-
-    static function instance() {
-        return self::$instance;
-    }
-
-    protected function view($model = null, array $data = [], string $view = null)
+    protected function view($data = null, ?string $view = null)
     {
         if ($view == null) {
             $backtrace = debug_backtrace();

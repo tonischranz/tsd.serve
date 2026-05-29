@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>tsd.serve test page</title>
+    <style type="text/css">
+      h1 {
+        text-align: center;
+        font-size: 10rem;
+        font-weight: normal;
+      }
+
+      body > main p {
+        color:#090;
+      }
+    </style>
+
+    <script>
+
+      $(()=> {
+        let i = 10;
+
+        if (i > 5) {
+          $('body>main>ul').append('<li>dynamic</li>');
+        }
+      });
+      
+    </script>
+  </head>
+
+  <body>
+    <main>
+      <h1>
+        <a href="/">⚒</a>
+        ⚜ ❖ ↈ ⍟ ⎆ ⌬
+        <a href="/lorem/">❦</a>
+        <a href="/lorem/zahn">❄</a>
+        <a href="/egea.Curlingbelegung">✨</a>
+      </h1>
+      <p>Hallo {user}</p>
+      <input placeholder="{user}" />
+      <a href="✔">[✔]</a>
+      <a href="/admin/code">[_code]</a>
+
+      <table>
+        <tr>
+          <th>H1</th>
+          <th>H2</th>
+        </tr>
+        {each items}
+          <tr>
+            <td>{foo}</td>
+            <td>{bar}</td>
+          </tr>
+        {/each}
+      </table>
+      <ul>
+        {each no_items}
+          <li>{foo}</li>
+        {none}
+          <li>No items!</li>
+        {/each}
+      </ul>
+      {if foo}
+        <p>foo</p>
+        {if bar}
+          <p>BAR</p>
+        {else}
+          <p>NOT BAR</p>
+        {/if}
+        <p>after barcheck</p>
+      {else}
+        <p>not foo</p>
+      {/if}
+
+      {with bar}
+      <pre>a      b     c</pre>
+      {/with}
+    </main>
+  </body>
+</html>
