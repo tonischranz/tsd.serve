@@ -18,7 +18,7 @@ abstract class ViewEngine
             header($h);
         }
 
-        if (strstr($accept,'application/json'||strstr($accept,'*/*'))) $this->renderJson($result);
+        if (strstr($accept,'application/json')||strstr($accept,'*/*')) $this->renderJson($result);
         if (strstr($accept,'text/xml')) $this->renderXml($result);
 
         if ($result instanceof ViewResult) {
