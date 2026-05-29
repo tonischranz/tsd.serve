@@ -43,6 +43,8 @@ interface DB
      * @param array $cond associative array with conditions $field=>$value 
      */
     function delete(string $table, array $cond): bool;
+
+    function read($query);
 }
 
 /**
