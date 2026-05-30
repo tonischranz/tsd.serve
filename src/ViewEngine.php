@@ -4,8 +4,6 @@ namespace tsd\serve;
 
 abstract class ViewEngine
 {
-    const VIEWS = 'views';
-
     function render($result, ViewContext $ctx, string $accept)
     {
         if ($result instanceof AccessDeniedException) $result = Controller::error($result, 403);
@@ -57,12 +55,15 @@ abstract class ViewEngine
     protected abstract function renderView(IViewResult $result, ViewContext $ctx);
 }
 
-#[DefaultMode]
+/**
+ * @Default
+ */
 class ServeViewEngine extends ViewEngine
 {
-    const CACHED_VIEWS = App::CACHE . DIRECTORY_SEPARATOR . 'views.php';
-    const CACHED_DIR =  App::CACHE . DIRECTORY_SEPARATOR .'views';
+    const CACHED_VIEWS = '.cached_views.php';
+    const CACHED_DIR = '.cached_views';
     const CACHE_DURATION = 30;
+    const VIEWS = 'html';
 
     public static array $cached_views = array();
 
@@ -93,7 +94,7 @@ class ServeViewEngine extends ViewEngine
         $plugin = $result->plugin();
         $view = $result->view();
         $layoutPlugin = $ctx->layoutPlugin;
-        $key = "$layoutPlugin-$plugin-" . str_replace(DIRECTORY_SEPARATOR, '.', $view);
+        $key = "$layoutPlugin-$plugin-" . str_replace('/', '.', $view);
         $cached_view = '';
         $view_file = '';
         $v = null;
@@ -103,7 +104,7 @@ class ServeViewEngine extends ViewEngine
             $timestamp = ServeViewEngine::$cached_views[$key][1];
 
             if ($timestamp + ServeViewEngine::CACHE_DURATION < time()) {
-                $v = new View($view, $layoutPlugin, $plugin);
+                $v = new View($view, $plugin);
                 $md5 = $v->md5();
             }
             $cached_view = "$key.$md5.php";
@@ -112,15 +113,40 @@ class ServeViewEngine extends ViewEngine
         if ($cached_view && file_exists(ServeViewEngine::CACHED_VIEWS . DIRECTORY_SEPARATOR . $cached_view)) {
             $view_file = ServeViewEngine::CACHED_VIEWS . DIRECTORY_SEPARATOR . $cached_view;
         } else {
-            if (!$v) $v = new View($view, $layoutPlugin, $plugin);
+            if (!$v) $v = new View($view, $plugin);
             
-            $template = $v->compile();
+            $layout = new Layout($layoutPlugin);
+
+            $t = \Dom\HTMLDocument::createFromString(View::escapeTemplate($v->template));
+            $o = \Dom\HTMLDocument::createFromString(View::escapeTemplate($layout->template));
+
+            $title = $t->head->getElementsByTagName('title')->item(0);
+            $links = $t->head->getElementsByTagName('link');
+            $styles = $t->head->getElementsByTagName('style');
+            $scripts = $t->head->getElementsByTagName('script');
+            $main = $t->body->getElementsByTagName('main')->item(0);
+
+            $lBody = $o->getElementsByTagName('body')->item(0);
+            $lOldMain = $o->body->getElementsByTagName('main')->item(0);
+            $lMain = $o->importNode($main, true);
+            $lBody->replaceChild($lMain, $lOldMain);
+
+            $lHead = $o->getElementsByTagName('head')->item(0);
+
+            foreach ($links as $h) $lHead->appendChild($o->importNode($h, true));
+            foreach ($styles as $h) $lHead->appendChild($o->importNode($h, true));
+            foreach ($scripts as $h) $lHead->appendChild($o->importNode($h, true));
+
+            $lTitle = $o->head->getElementsByTagName('title')->item(0);
+            $lTitle->textContent = $title->textContent;
+
+            $to = View::compileTemplate($o->saveHTML());
 
             //cache
             $md5 = $v->md5();
             $view_file = ServeViewEngine::CACHED_DIR . DIRECTORY_SEPARATOR . "$key.$md5.php";
             array_map('unlink', glob(ServeViewEngine::CACHED_DIR . DIRECTORY_SEPARATOR . "$key.*.php"));
-            file_put_contents($view_file, $template);
+            file_put_contents($view_file, $to);
             ServeViewEngine::$cached_views[$key] = [$md5, time()];
             ServeViewEngine::writeCacheFile();
         }
@@ -128,7 +154,7 @@ class ServeViewEngine extends ViewEngine
         ServeViewEngine::run($view_file, $result->data(), $ctx);
     }
 
-    private static function run(string $view, $data, ViewContext $ctx)
+    private static function run(string $view, ?array $data, ViewContext $ctx)
     {
         $debug = ob_get_contents();
         ob_end_clean();
@@ -146,52 +172,14 @@ class ServeViewEngine extends ViewEngine
 class View
 {
     private Label $labels;
-    private string $template;
+    public string $template;
     private string $md5;
 
-    function __construct(string $path, string $layoutPlugin, string $plugin = '')
+    function __construct(string $path, string $plugin = '')
     {
-        $vt = View::loadTemplate($path . '.html', $plugin);
-        $lt = View::loadTemplate('layout.html', $layoutPlugin);
+        $this->labels = Labels::create($path);
 
-        if (!$vt) throw new NotFoundException("View $path in $plugin");
-        
-        $t = new DOMDocument;
-        $o = new DOMDocument;
-
-        libxml_use_internal_errors(true);
-        $t->loadHTML($vt);
-        $o->loadHTML($lt);
-
-        $title = $t->getElementsByTagName('title')[0];
-        $lTitle = $o->getElementsByTagName('title')[0];
-
-        $lTitle->nodeValue = str_replace('{#title}', $title->nodeValue, $lTitle->nodeValue);
-
-        $x = new DOMXPath($t);
-        $xL = new DOMXPath($o);
-        $links = $x->query('head/link');
-        $styles = $x->query('head/style');
-        $scripts = $x->query('head/script');
-        $main = $x->query('body/main')[0];
-
-        $lBody = $o->getElementsByTagName('body')[0];
-        $lOldMain = $xL->query('//main')[0];
-        $lMain = $o->importNode($main, true);
-        $lBody->replaceChild($lMain, $lOldMain);
-
-        $lHead = $o->getElementsByTagName('head')[0];
-
-        foreach ($links as $h) $lHead->appendChild($o->importNode($h, true));
-        foreach ($styles as $h) $lHead->appendChild($o->importNode($h, true));
-        foreach ($scripts as $h) $lHead->appendChild($o->importNode($h, true));
-
-        $to = $o->saveHTML();
-
-        $to = preg_replace('/%7B/', '{', $to);
-        $to = preg_replace('/%7D/', '}', $to);
-    
-        $this->template = $to;
+        $this->template = View::loadTemplate($path . '.html', $plugin);
         $this->md5 = md5($this->template);
     }
 
@@ -200,21 +188,12 @@ class View
         return $this->md5;
     }
 
-    public function compile()
-    {
-        return View::compileTemplate($this->localize($this->template));
-    }
-
-    protected function localize($template)
-    {
-        return View::localizeTemplate($template, $this->labels);
-    }
 
     private static function loadTemplate($path, $plugin)
     {
-        $noPluginBasePath = ViewEngine::VIEWS;
-        $basePath = $plugin ? App::PLUGINS . DIRECTORY_SEPARATOR . $plugin . DIRECTORY_SEPARATOR . ViewEngine::VIEWS : $noPluginBasePath;
-        $alternateBasePath = $plugin ? ViewEngine::VIEWS . DIRECTORY_SEPARATOR . $plugin : '';
+        $noPluginBasePath = $_SERVER['DOCUMENT_ROOT'] . DIRECTORY_SEPARATOR . ServeViewEngine::VIEWS;
+        $basePath = $plugin ? $_SERVER['DOCUMENT_ROOT'] . DIRECTORY_SEPARATOR . App::PLUGINS . DIRECTORY_SEPARATOR . $plugin . DIRECTORY_SEPARATOR . ServeViewEngine::VIEWS : $noPluginBasePath;
+        $alternateBasePath = $plugin ? $_SERVER['DOCUMENT_ROOT'] . DIRECTORY_SEPARATOR . ServeViewEngine::VIEWS . DIRECTORY_SEPARATOR . App::PLUGINS . DIRECTORY_SEPARATOR . $plugin : '';
 
         $viewPath = $alternateBasePath ? $alternateBasePath . DIRECTORY_SEPARATOR . $path : $basePath . DIRECTORY_SEPARATOR . $path;
 
@@ -234,7 +213,7 @@ class View
               <body>
                 <main>
                   <h1>💥 error</h1>
-                  <pre>{message}</pre>
+                  <p>{message}</p>
                 </main>
               </body>
             </html>
@@ -283,7 +262,7 @@ class View
               </head>
             
               <body>
-                <main class="s">
+                <main>
                   <h1>🔑 login</h1>
                   <form method="post" action="/_login">
                     {with returnUrl}<input type="hidden" name="returnUrl" value="{.}" />{/with}
@@ -316,7 +295,7 @@ class View
               </head>
             
               <body>
-                <main class="s">
+                <main>
                   <h1>🔒 logout</h1>
                   <p>do you really want to logout?</p>
                   <form method="post" action="/_login/logout">
@@ -339,7 +318,7 @@ class View
               </head>
             
               <body>
-                <main class="s">
+                <main>
                   <h1>🔒 logged out</h1>
                   <p>you have successfully logged out</p>
                   {with returnUrl}
@@ -361,7 +340,7 @@ class View
               </head>
             
               <body>
-                <main class="s">
+                <main>
                   <h1>⚐ user profile</h1>
                   <form method="post" action="profile">
                     <div>
@@ -372,7 +351,7 @@ class View
                     </div>
                     <div>
                       <input type="email" name="email" placeholder="email" value="{email}" />
-                    </div>
+                    </div>                   
                     <div class="right">
                       <input type="submit" value="save" />
                     </div>
@@ -392,24 +371,24 @@ class View
                 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
                 <title>change password</title>
                 <script>
-                  $(function() {
-          
-                      $('form.password input[type=password]').change(function() {
-                          $('#err_pwd_mismatch').hide();
-                      });
-          
-                      $('form.password').submit(function(e) {
-                          if ($('input[name=pw1]').val() != $('input[name=pw2]').val()) {
-                              $('#err_pwd_mismatch').show();
-                              e.preventDefault();
-                          }
-                      });
-                  });
-                </script>
+                $(function() {
+        
+                    $('form.password input[type=password]').change(function() {
+                        $('#err_pwd_mismatch').hide();
+                    });
+        
+                    $('form.password').submit(function(e) {
+                        if ($('input[name=pw1]').val() != $('input[name=pw2]').val()) {
+                            $('#err_pwd_mismatch').show();
+                            e.preventDefault();
+                        }
+                    });
+                });
+            </script>
               </head>
             
               <body>
-                <main class="s">
+                <main>
                   <h1>🔑 change password</h1>
                   <form method="post" action="password" class="password">
                     <div>
@@ -437,60 +416,44 @@ class View
             <!doctype html>
             <html>
             
-              <head>
-                  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-                  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+            <head>
+                <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+                <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-                  <title>{#title} - tsd.serve</title>
+                <title>{#title} - tsd.serve</title>
 
-                  <link rel="icon" type="image/svg+xml" href="/_static/favicon.svg" sizes="any" />
-                  <link rel="stylesheet" href="/_static/style.css" />
+                <link rel="icon" type="image/svg+xml" href="/_static/favicon.svg" sizes="any" />
+                <link rel="stylesheet" href="/_static/style.css" />
 
-                  <script src="https://code.jquery.com/jquery-3.7.1.slim.min.js" integrity="sha256-kmHvs0B+OpCW5GVHUNjv9rOmY0IvSIRcf7zGUDTDQM8=" crossorigin="anonymous"></script>
+                <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
 
-              </head>
+            </head>
 
-              <body>
-                  <header>
-                    <nav>
-                      <ul>
-                        <li><a href="/">⚒</a></li>
-                      </ul>
-                    </nav>
-                  </header>
-                  <main>
-                  </main>
-                  <footer class="debug">
-                      {@debug}
-                  </footer>
-                  <footer class="sticky">
-                    <span style="color:#040">tsd.serve</span>  
-                    <div style="text-align: right;">by&nbsp;&nbsp;&nbsp;&nbsp;Δ@✞εℕᚹⅤᚢᛕ</div>                
-                  </footer>
-              </body>
+            <body>
+                <header>
+                <nav>
+                <ul>
+                <li><a href="/">⚒</a></li>
+                </ul>
+                </nav>
+                </header>
+                <main>
+                </main>
+                <footer class="debug">
+                    {@debug}
+                </footer>
+                <footer class="sticky">
+                <span style="color:#040">tsd.serve</span>  
+                <div style="text-align: right;">by&nbsp;&nbsp;&nbsp;&nbsp;Δ@✞εℕᚹⅤᚢᛕ</div>                
+                </footer>
+            </body>
             </html>
             EOLayout;
         }
 
-        if (!file_exists($viewPath)) throw new NotFoundException("View $viewPath");
-
         return file_get_contents($viewPath);
     }
 
-    private static function localizeTemplate(string $template, Label $labels)
-    {
-        $t = new DOMDocument;
-        $o = new DOMDocument;
-        libxml_use_internal_errors(true);
-        $t->loadHTML($template);
-        View::copyNode($t, $o, $o, $labels);
-        $to = $o->saveHTML();
-
-        $to = preg_replace('/%7B/', '{', $to);
-        $to = preg_replace('/%7D/', '}', $to);
-        
-        return $to;
-    }
 
     private static function compileExpression($exp)
     {
@@ -504,10 +467,10 @@ class View
 
         $name = substr($parts[0], 1);
 
-        $o = str_split($parts[0])[0] == '@' ? "\$c['$name']" : "((array)\$d)['$parts[0]']";
+        $o = str_split($parts[0])[0] == '@' ? "\$c['$name']" : "\$d['$parts[0]']";
         array_shift($parts);
         foreach ($parts as $p) {
-            $o = "((array){$o})['$p']";
+            $o .= "['$p']";
         }
 
         return $o;
@@ -576,64 +539,23 @@ class View
               }
               return "<?php if (@$arg) { array_push(\$s, \$d); foreach($arg as \$d) { array_push(\$s, \$d);  ?>$inner<?php array_pop(\$s); } array_pop(\$s); \$d=end(\$s); } ?>";
             },
+            '/\{~\}/' => function ($m) {
+              $o = View::compileOutput('@pluginRoot');
+              return "<?php echo @$o; ?>";
+            },
+            '/\{\{\{((\@?[a-zA-Z_]\w*(\.\w+)*(\|\w+)*)|\.)\s*\}\}\}/' => function ($m) {
+                $o = View::compileOutput($m[1]);
+                return "<?php echo @$o; ?>";
+            },
             '/\{((\@?[a-zA-Z_]\w*(\.\w+)*(\|\w+)*)|\.)\s*\}/' => function ($m) {
                 $o = View::compileOutput($m[1]);
-                return "<?php echo @$o; ?>";                
+                return "<?php echo htmlspecialchars(@$o??'', 51); ?>";
             },
         ];
 
         return preg_replace_callback_array($patterns, $template, -1);
     }
 
-    private static function copyNode(DOMNode $t, DOMDocument $o, DOMNode $p, Label $l)
-    {
-        switch ($t->nodeType) {
-            case XML_HTML_DOCUMENT_NODE:
-                View::copyNode($t->documentElement, $o, $o, $l);
-                break;
-            case XML_ELEMENT_NODE:
-                $n = $o->importNode($t);
-                $n = $p->appendChild($n);
-                View::localizeAttributes($n, $l);
-                foreach ($t->childNodes as $c) View::copyNode($c, $o, $n, $l);
-                break;
-            case XML_CDATA_SECTION_NODE:
-                View::copyCData($t, $o, $p);
-            case XML_TEXT_NODE:
-                View::copyText($t, $o, $p, $l);
-                break;
-        }
-    }
-
-    private static function localizeAttributes(DOMElement $e, Label $l)
-    {
-        foreach ($e->attributes as $a) {
-            if ($e->nodeName == 'input' && $a->name == 'placeholder') $a->value = View::localizeText($a->value, $l);
-            if ($e->nodeName == 'img' && $a->name == 'alt') $a->value = View::localizeText($a->value, $l);
-        }
-    }
-
-    private static function copyCData(DOMText $t, DOMDocument $o, DOMElement $p)
-    {
-        $p->appendChild($o->createCDATASection($t->data));
-    }
-
-    private static function copyText(DOMText $t, DOMDocument $o, DOMElement $p, Label $l)
-    {
-        if ($t->isElementContentWhitespace()) return;
-        if ($p->nodeName == 'style' || $p->nodeName == 'script') return;
-        else {
-            //todo: MD
-            $p->appendChild($o->createTextNode(View::localizeText($t->wholeText, $l)));
-        }
-    }
-
-    private static function localizeText(string $s, Label $l)
-    {
-        return $s;
-        //todo: localize!
-        //return $l->getLabel($s);
-    }
 }
 
 class Layout extends View
@@ -664,7 +586,7 @@ class JSONLabels implements Label
     private $root;
     private $data;
 
-    public function __construct(string $path, JSONLabels $root = null)
+    public function __construct(string $path, ?JSONLabels $root = null)
     {
         if ($root)
             $this->root = $root;
