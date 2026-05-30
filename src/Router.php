@@ -15,7 +15,7 @@ class Router
     /**
      * Controller directory name
      */
-    const CONTROLLER = 'controller';
+    const CONTROLLER = 'http';
 
     private Factory $factory;
     private array $domains = [];
@@ -254,12 +254,16 @@ class Router
 
     private function createController(string $name, string $plugin = '')
     {
-        $path = $plugin ? '.' . App::PLUGINS . DIRECTORY_SEPARATOR . $plugin . DIRECTORY_SEPARATOR . Router::CONTROLLER : '.' . Router::CONTROLLER;
+        $path = $plugin 
+            ? '.' . App::PLUGINS . DIRECTORY_SEPARATOR . $plugin . DIRECTORY_SEPARATOR . Router::CONTROLLER 
+            : $_SERVER['DOCUMENT_ROOT'] . DIRECTORY_SEPARATOR . Router::CONTROLLER;
 
         $fileName = $path . DIRECTORY_SEPARATOR . $name . '.php';
         $ctrlName = $name . 'Controller';
 
-        $namespace = @App::$plugins[$plugin]['namespace'];
+        $namespace = $plugin 
+            ? @App::$plugins[$plugin]['namespace']
+            : App::$namespace;
 
         if ($namespace) $ctrlName = "$namespace\\$ctrlName";
 

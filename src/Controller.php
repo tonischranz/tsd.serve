@@ -15,7 +15,7 @@ class Controller
     protected string $_plugin;
     protected Membership $_member;
 
-    protected function view(mixed $model, object|array|null $data = null, ?string $view = null)
+    protected function view(mixed $model, mixed $data = null, ?string $view = null)
     {
         if ($view == null) {
             $backtrace = debug_backtrace();
@@ -121,7 +121,7 @@ class ViewResult extends ResultBase implements IViewResult
     private string $_view;
     private string $_plugin;
 
-    function __construct(string $view, object|array|null $data, string $plugin = '', int $statuscode = 200)
+    function __construct(string $view, mixed $data, string $plugin = '', int $statuscode = 200)
     {
         parent::__construct($data, $statuscode);
         $this->_view = $view;
@@ -165,7 +165,7 @@ class SuccessResult extends MessageResult
 
 class DataResult extends ResultBase
 {
-    function __construct(object|array|null $data)
+    function __construct(mixed $data)
     {
         parent::__construct($data, 200);
     }

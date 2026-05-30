@@ -37,6 +37,8 @@ class App
 
     private Time $time;
 
+    public static string $namespace = '';
+
     /**
      * Creates a new Instance
      * 
@@ -99,6 +101,8 @@ class App
 
         $this->router = $factory->create('tsd\serve\Router', 'router');        
         $this->view_engine = $factory->create('tsd\serve\ViewEngine', 'views');
+
+        self::$namespace = $config['namespace'] ?? '';
     }
 
     /**
