@@ -215,7 +215,7 @@ class View
               <body>
                 <main>
                   <h1>💥 error</h1>
-                  <p>{message}</p>
+                  <pre>{message}</pre>
                 </main>
               </body>
             </html>
