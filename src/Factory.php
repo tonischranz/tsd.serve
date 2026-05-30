@@ -70,6 +70,7 @@ class Factory
         //         break;
         //     }
         // }
+        $stats = '';
 
         $plugin_files = Factory::rglob(App::PLUGINS . DIRECTORY_SEPARATOR . '*' . DIRECTORY_SEPARATOR . Factory::SRC, '*.php');
         foreach ($plugin_files as $pf) $stats .= stat($pf)['mtime'];
