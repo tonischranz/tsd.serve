@@ -18,9 +18,6 @@ abstract class ViewEngine
             header($h);
         }
 
-        if (strstr($accept,'application/json') || strstr($accept,'*/*')) $this->renderJson($result);
-        if (strstr($accept,'text/xml')) $this->renderXml($result);
-
         if ($result instanceof ViewResult) {
             try {
                 $this->renderView($result, $ctx);
@@ -31,13 +28,23 @@ abstract class ViewEngine
                 http_response_code(500);
                 $this->renderView(Controller::error($e->getMessage(), 500), $ctx);
             }
+            exit;
         }
         else if ($result instanceof FileResult) {
           readfile($result->data());
+          exit;
         }
         else if ($result instanceof TextResult) {
           echo $result->data();
         }
+
+        if (strstr($accept,'application/json') || strstr($accept,'*/*'))
+        {
+          $this->renderJson($result);
+        } 
+        if (strstr($accept,'text/xml')) $this->renderXml($result);
+
+        
     }
 
     private function renderJson(Result $result)

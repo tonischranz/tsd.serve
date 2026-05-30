@@ -51,7 +51,7 @@ class StaticController extends Controller
             if (file_exists($file)) return new FileResult($file, 'text/css');
         }
         $file = 'style.css';
-        if (file_exists($file)) return new FileResult($file, 'text/css');
+        if (file_exists($_SERVER['DOCUMENT_ROOT'] . DIRECTORY_SEPARATOR . $file)) return new FileResult($_SERVER['DOCUMENT_ROOT'] . DIRECTORY_SEPARATOR .$file, 'text/css');
         else
         {
             $css = <<< 'EOCSS'
