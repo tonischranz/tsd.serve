@@ -31,45 +31,45 @@ class Factory
         $this->config = $config;
         $this->singletons['tsd\\serve\\Factory'] = $this;
 
-        spl_autoload_register(function ($name) {
-            $parts = explode('\\', $name);
-            $n = $i = count($parts);
-            $nm = $parts[$n - 1];
+        // spl_autoload_register(function ($name) {
+        //     $parts = explode('\\', $name);
+        //     $n = $i = count($parts);
+        //     $nm = $parts[$n - 1];
 
-            while ($i > 0) {
-                $i--;
-                $ns = implode('\\', array_slice($parts, 0, $i));
-                $dn = implode(DIRECTORY_SEPARATOR, array_slice($parts, $i, $n - $i - 1));
+        //     while ($i > 0) {
+        //         $i--;
+        //         $ns = implode('\\', array_slice($parts, 0, $i));
+        //         $dn = implode(DIRECTORY_SEPARATOR, array_slice($parts, $i, $n - $i - 1));
 
-                foreach (App::$plugins as $k => $p) {
-                    if (is_array($p)) {
-                        if (@$p['namespace'] == $ns) {
-                            $file = App::PLUGINS . DIRECTORY_SEPARATOR . $k . DIRECTORY_SEPARATOR . Factory::SRC . DIRECTORY_SEPARATOR . $dn . DIRECTORY_SEPARATOR . $nm . '.php';
-                            if (file_exists($file)) {
-                                include $file;
-                                return;
-                            }
-                        }
-                    }
-                }
-            }
-        });
+        //         foreach (App::$plugins as $k => $p) {
+        //             if (is_array($p)) {
+        //                 if (@$p['namespace'] == $ns) {
+        //                     $file = App::PLUGINS . DIRECTORY_SEPARATOR . $k . DIRECTORY_SEPARATOR . Factory::SRC . DIRECTORY_SEPARATOR . $dn . DIRECTORY_SEPARATOR . $nm . '.php';
+        //                     if (file_exists($file)) {
+        //                         include $file;
+        //                         return;
+        //                     }
+        //                 }
+        //             }
+        //         }
+        //     }
+        // });
 
-        $files = get_included_files();
-        $sfiles = [];
-        $stats = '';
-        foreach ($files as $f) {
-            if (basename($f) == 'App.php') {
-                $sfiles = glob(dirname($f) . DIRECTORY_SEPARATOR . '*.php');
+        // $files = get_included_files();
+        // $sfiles = [];
+        // $stats = '';
+        // foreach ($files as $f) {
+        //     if (basename($f) == 'App.php') {
+        //         $sfiles = glob(dirname($f) . DIRECTORY_SEPARATOR . '*.php');
 
-                foreach ($sfiles as $sf) $stats .= stat($sf)['mtime'];
-                break;
-            }
-            if (basename($f) == '.tsd.serve.php') {
-                $stats .= stat($f)['mtime'];
-                break;
-            }
-        }
+        //         foreach ($sfiles as $sf) $stats .= stat($sf)['mtime'];
+        //         break;
+        //     }
+        //     if (basename($f) == '.tsd.serve.php') {
+        //         $stats .= stat($f)['mtime'];
+        //         break;
+        //     }
+        // }
 
         $plugin_files = Factory::rglob(App::PLUGINS . DIRECTORY_SEPARATOR . '*' . DIRECTORY_SEPARATOR . Factory::SRC, '*.php');
         foreach ($plugin_files as $pf) $stats .= stat($pf)['mtime'];
@@ -82,8 +82,15 @@ class Factory
         else {
             array_map('unlink', glob(App::CACHE . DIRECTORY_SEPARATOR . "classes.*.php"));
 
-            foreach ($sfiles as $sf) require_once $sf;
+            // foreach ($sfiles as $sf) require_once $sf;
+            $dir = __DIR__ . DIRECTORY_SEPARATOR ;
+            
+            foreach (scandir($dir) as $f) {
+                if (is_file($dir . DIRECTORY_SEPARATOR . $f) && pathinfo($f, PATHINFO_EXTENSION) == 'php')
+                    require_once $dir . DIRECTORY_SEPARATOR . $f;
+            }
             foreach ($plugin_files as $pf) require_once $pf;
+            
 
             $classes = get_declared_classes();
 
@@ -160,6 +167,9 @@ class Factory
     {
         if (@$this->singletons[$type]) return $this->singletons[$type];
 
+        //if (!$type) 
+        //   throw new \Exception("Cannot create instance of empty type");
+
         $in = $this->getInjection($type, $name, $ctx);
         return $in->inject($this);
     }
@@ -171,9 +181,11 @@ class Factory
         return $in;
     }
 
-    function getInjection(string $type, string $name, ?InjectionContext $ctx)
+    function getInjection(string $type, string $name, ?InjectionContext $ctx) : Injection
     {      
         $t = new ReflectionClass($type);
+
+        if (!$t) throw new \Exception("Type $type not found");
 
         $config = array_key_exists($name, $this->config) ?
             $this->config[$name] : [];

@@ -56,8 +56,10 @@ abstract class ViewEngine
 }
 
 /**
- * @Default
+ * Default View Engine for tsd.serve. It compiles the Views and Layouts into PHP Files and caches them for later use.
+ * The Views are written in a simple Template Syntax and support basic Control Structures like if, each
  */
+#[DefaultMode]
 class ServeViewEngine extends ViewEngine
 {
     const CACHED_VIEWS = '.cached_views.php';
