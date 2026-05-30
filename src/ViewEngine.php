@@ -4,7 +4,7 @@ namespace tsd\serve;
 
 abstract class ViewEngine
 {
-    function render($result, ViewContext $ctx, string $accept)
+    function render(mixed$result, ViewContext $ctx, string $accept)
     {
         if ($result instanceof AccessDeniedException) $result = Controller::error($result, 403);
         if ($result instanceof NotFoundException) $result = Controller::error($result, 404);
@@ -189,7 +189,7 @@ class View
     }
 
 
-    private static function loadTemplate($path, $plugin)
+    private static function loadTemplate(string $path, string $plugin)
     {
         $noPluginBasePath = $_SERVER['DOCUMENT_ROOT'] . DIRECTORY_SEPARATOR . ServeViewEngine::VIEWS;
         $basePath = $plugin ? $_SERVER['DOCUMENT_ROOT'] . DIRECTORY_SEPARATOR . App::PLUGINS . DIRECTORY_SEPARATOR . $plugin . DIRECTORY_SEPARATOR . ServeViewEngine::VIEWS : $noPluginBasePath;
@@ -455,7 +455,7 @@ class View
     }
 
 
-    private static function compileExpression($exp)
+    private static function compileExpression(string $exp)
     {
         if ($exp == '.') return '$d';
 
@@ -476,7 +476,7 @@ class View
         return $o;
     }
 
-    private static function compileOutput($output)
+    private static function compileOutput(string $output)
     {
         $parts = explode('|', $output);
         if (!$parts)
@@ -583,8 +583,8 @@ interface Label
 class JSONLabels implements Label
 {
 
-    private $root;
-    private $data;
+    private ?JSONLabels $root;
+    private ?array $data;
 
     public function __construct(string $path, ?JSONLabels $root = null)
     {

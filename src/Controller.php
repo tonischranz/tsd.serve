@@ -9,13 +9,13 @@ namespace tsd\serve;
  */
 class Controller
 {
-    private static $instance;
+    private static ?Controller $instance;
 
     protected string $_name;
     protected string $_plugin;
     protected Membership $_member;
 
-    protected function view($data = null, ?string $view = null)
+    protected function view(mixed $model, object|array|null $data = null, ?string $view = null)
     {
         if ($view == null) {
             $backtrace = debug_backtrace();
@@ -47,17 +47,17 @@ class Controller
         return new SuccessResult($message, $url);
     }
 
-    static function redirect($url)
+    static function redirect(string $url)
     {
         return new RedirectResult($url);
     }
 
-    static function error($result, $code)
+    static function error(mixed $result, int $code)
     {
         return new ErrorResult($result, $code);
     }
 
-    static function data($result)
+    static function data(mixed $result)
     {
         return new DataResult($result);
     }
@@ -81,11 +81,11 @@ interface Result
 
 class ResultBase implements Result
 {
-    private $statuscode;
-    private $data;
-    private $headers;
+    private int $statuscode;
+    private mixed $data;
+    private array $headers;
 
-    function __construct($data, $statuscode, $headers = [])
+    function __construct(mixed $data, int $statuscode, array $headers = [])
     {
         $this->statuscode = $statuscode;
         $this->data = $data;
@@ -110,7 +110,7 @@ class ResultBase implements Result
 
 class RedirectResult extends ResultBase
 {
-    function __construct($location)
+    function __construct(string $location)
     {
         parent::__construct($location, 302, ["Location: $location"]);
     }
@@ -121,7 +121,7 @@ class ViewResult extends ResultBase implements IViewResult
     private string $_view;
     private string $_plugin;
 
-    function __construct(string $view, $data, string $plugin = '', $statuscode = 200)
+    function __construct(string $view, object|array|null $data, string $plugin = '', int $statuscode = 200)
     {
         parent::__construct($data, $statuscode);
         $this->_view = $view;
@@ -141,7 +141,7 @@ class ViewResult extends ResultBase implements IViewResult
 
 class MessageResult extends ViewResult
 {
-    function __construct($type, $message, $code = 200, $url = null)
+    function __construct(string $type, string $message, int $code = 200, ?string $url = null)
     {
         parent::__construct($type, ["message" => $message, "url" => $url], '', $code);
     }
@@ -149,7 +149,7 @@ class MessageResult extends ViewResult
 
 class ErrorResult extends MessageResult
 {
-    function __construct($message, int $code = 500)
+    function __construct(string $message, int $code = 500)
     {
         parent::__construct('error', $message, $code);
     }
@@ -157,7 +157,7 @@ class ErrorResult extends MessageResult
 
 class SuccessResult extends MessageResult
 {
-    function __construct($message, $url = null)
+    function __construct(string $message, ?string $url = null)
     {
         parent::__construct('success', $message, 200, $url);
     }
@@ -165,7 +165,7 @@ class SuccessResult extends MessageResult
 
 class DataResult extends ResultBase
 {
-    function __construct($data)
+    function __construct(object|array|null $data)
     {
         parent::__construct($data, 200);
     }

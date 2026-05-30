@@ -113,7 +113,7 @@ class DefaulMembership implements Membership
     return !$this->_session->get('logged_in');
   }
 
-  public function isInGroup($group): bool
+  public function isInGroup(string $group): bool
   {
     if ($this->isAnonymous()) return false;
 
@@ -152,7 +152,7 @@ class Session
     return @$_SESSION[$key];
   }
 
-  function set(string $key, $value)
+  function set(string $key, mixed $value)
   {
     if (!session_id()) session_start();
     $_SESSION[$key] = $value;

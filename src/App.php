@@ -135,7 +135,7 @@ class App
      * 
      * @internal
      */
-    protected function serveRequest(string $method, string $host, string $path, array $data, $accept)
+    protected function serveRequest(string $method, string $host, string $path, array $data, string $accept)
     {
         $i = \strpos($path, '?');
         $route = $this->router->getRoute($host, $method, \substr($path, 0, $i > 0 ? $i : \strlen($path)));
@@ -211,7 +211,7 @@ class Time
 
 class Exception extends \Exception
 {
-    function __construct($m)
+    function __construct(string $m)
     {
         parent::__construct($m);
     }
@@ -219,7 +219,7 @@ class Exception extends \Exception
 
 class AccessDeniedException extends \Exception
 {
-    function __construct()
+    function __construct(string $path)
     {
         parent::__construct("access denied!");
     }

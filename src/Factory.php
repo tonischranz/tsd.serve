@@ -142,7 +142,7 @@ class Factory
         }
     }
 
-    private  static function rglob($path, $exp, ?array &$arr = null): array
+    private  static function rglob(string $path, string $exp, ?array &$arr = null): array
     {
         if (!$arr) $arr = [];
 

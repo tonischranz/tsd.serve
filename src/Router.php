@@ -272,7 +272,7 @@ class Router
         return $this->injectController($ctrlName, $name, $plugin);
     }
 
-    private function injectController($cname, $name, $plugin = '')
+    private function injectController(string $cname, string $name, string $plugin = '')
     {
         $ctx = new InjectionContext();
         $ctx->name = 'serve';
@@ -293,7 +293,7 @@ abstract class Route
     private ViewContext $ctx;
     protected array $data = [];
 
-    function __construct($controller, $methodInfo, ViewContext $ctx, array $data = [])
+    function __construct(?Controller $controller, ?ReflectionMethod $methodInfo, ViewContext $ctx, array $data = [])
     {
         $this->ctx = $ctx;
         $this->controller = $controller;
@@ -344,6 +344,11 @@ abstract class Route
     function ctx(): ViewContext
     {
         return $this->ctx;
+    }
+
+    function __toString()
+    {
+        return $this->methodInfo->class . "::" . $this->methodInfo->name;
     }
 }
 
