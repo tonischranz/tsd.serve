@@ -4,11 +4,7 @@ namespace tsd\serve;
 
 use \ReflectionClass;
 use \ReflectionProperty;
-use \RecursiveDirectoryIterator;
-use \RecursiveIteratorIterator;
-use \RegexIterator;
-use \RecursiveRegexIterator;
-use ReflectionNamedType;
+use \ReflectionNamedType;
 
 /**
  * The Factory
