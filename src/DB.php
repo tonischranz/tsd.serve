@@ -49,10 +49,8 @@ interface DB
 
 /**
  * MySQL implementation of tsd\serve\DB
- *
- * @Default
- * @Mode mysql
  */
+#[DefaultMode]
 class MysqlDB implements DB
 {
     private ?\mysqli $_con = null;
@@ -122,7 +120,7 @@ class MysqlDB implements DB
 
         foreach ($cond as $v) {
             if (\is_null($v)) $params[] = 'NULL';
-            else if (\is_numeric($v)) $params[] = $v;
+            else if (\is_int($v) || \is_float($v)) $params[] = $v;
             else $params[] = "'" . \mysqli_escape_string($this->con(), $v) . "'";
         }
 
@@ -293,14 +291,13 @@ class MysqlDB implements DB
 
 /**
  * In-memory fake implementation of tsd\serve\DB
- *
- * @Mode fake
  */
+#[Mode("fake")]
 class FakeDB implements DB
 {
     private array $data = [];
 
-    function select(string $table, ?array $fields = null, ?array $cond = null, $order = false, int $limit = 0): array
+    function select(string $table, array $fields = null, array $cond = null, $order = false, int $limit = 0): array
     {
         if (key_exists($table, $this->data) && $cond)
         {

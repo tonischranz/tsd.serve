@@ -18,9 +18,7 @@ interface Membership
   function save();
 }
 
-/**
- * @Default
- */
+#[DefaultMode]
 class DefaulMembership implements Membership
 {
   private Session $_session;
