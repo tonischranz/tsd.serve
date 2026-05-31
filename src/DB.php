@@ -344,4 +344,9 @@ class FakeDB implements DB
     {
         return true;
     }
+
+    function read($query)
+    {
+        return [];
+    }
 }
