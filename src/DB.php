@@ -44,7 +44,9 @@ interface DB
      */
     function delete(string $table, array $cond): bool;
 
-    function read($query);
+    function read(string $query) : array;
+
+    function escape(string $s): string;
 }
 
 /**
@@ -63,7 +65,7 @@ class MysqlDB implements DB
 
     #region private functions
 
-    private function buildParams($cond)
+    private function buildParams(array $cond)
     {
         $params = [];
 
@@ -76,7 +78,7 @@ class MysqlDB implements DB
         return $params;
     }
 
-    private function buildConditions($cond)
+    private function buildConditions(array $cond)
     {
         $params = [];
         foreach ($cond as $k => $v) {
@@ -114,7 +116,7 @@ class MysqlDB implements DB
         return $params;
     }
 
-    private function buildValues($cond)
+    private function buildValues(array $cond)
     {
         $params = [];
 
@@ -167,7 +169,7 @@ class MysqlDB implements DB
 
             $con = new \mysqli($host, $user, $pw, $db);
 
-            if ($con->connect_errno) throw new Exception("MySQL connection to $user@$host failed.", 1);
+            if ($con->connect_errno) throw new Exception("MySQL connection to $user@$host failed.");
 
             $con->set_charset('utf8mb4');
 
@@ -184,7 +186,7 @@ class MysqlDB implements DB
         $this->prefix = $_plugin ? "$_plugin." : '';
     }
 
-    function read($query)
+    function read(string $query) : array
     {
         if ($this->log) var_dump($query);
 
@@ -195,7 +197,7 @@ class MysqlDB implements DB
         if (!$r) 
         {
             $e = $this->con()->error;
-            throw new Exception("MySQL error: $e", 1);
+            throw new Exception("MySQL error: $e");
         }
 
         while ($row = $r->fetch_array()) $rows[] = $row;
@@ -342,8 +344,13 @@ class FakeDB implements DB
         return true;
     }
 
-    function read($query)
+    function read(string $query): array
     {
         return [];
+    }
+
+    function escape(string $s): string
+    {
+        return $s;
     }
 }
