@@ -114,7 +114,7 @@ class App
                     '_GET' => $_GET, '_COOKIE' => $_COOKIE,
                     '_POST' => $_POST, '_FILES' => $_FILES
                 ],
-                $_SERVER['HTTP_ACCEPT']
+                isset($_SERVER['HTTP_ACCEPT']) ? $_SERVER['HTTP_ACCEPT'] : ''
             );            
         } catch (\Exception $e) {
             ob_end_clean();
