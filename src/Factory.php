@@ -62,7 +62,7 @@ class Factory
             }
         }
 
-        $plugin_files = Factory::rglob(App::PLUGINS . DIRECTORY_SEPARATOR . '*' . DIRECTORY_SEPARATOR . 'src', '*.php');
+        $plugin_files = Factory::rglob('.' . App::PLUGINS . DIRECTORY_SEPARATOR . '*' . DIRECTORY_SEPARATOR . 'src', '*.php');
         foreach ($plugin_files as $pf) $stats .= stat($pf)['mtime'];
 
 
