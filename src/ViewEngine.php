@@ -2,15 +2,9 @@
 
 namespace tsd\serve;
 
-use \DOMDocument;
-use \DOMElement;
-use \DOMNode;
-use \DOMText;
-use \DOMXPath;
-
 abstract class ViewEngine
 {
-    function render($result, ViewContext $ctx, string $accept)
+    function render(mixed $result, ViewContext $ctx, string $accept)
     {
         if ($result instanceof AccessDeniedException) $result = Controller::error($result, 403);
         if ($result instanceof NotFoundException) $result = Controller::error($result, 404);
@@ -24,9 +18,6 @@ abstract class ViewEngine
             header($h);
         }
 
-        if (strstr($accept,'application/json')) $this->renderJson($result);
-        if (strstr($accept,'text/xml')) $this->renderXml($result);
-
         if ($result instanceof ViewResult) {
             try {
                 $this->renderView($result, $ctx);
@@ -37,13 +28,21 @@ abstract class ViewEngine
                 http_response_code(500);
                 $this->renderView(Controller::error($e->getMessage(), 500), $ctx);
             }
+            exit;
         }
         else if ($result instanceof FileResult) {
           readfile($result->data());
+          exit;
         }
         else if ($result instanceof TextResult) {
           echo $result->data();
         }
+
+        else if (strstr($accept,'application/json') || strstr($accept,'*/*'))
+        {
+          $this->renderJson($result);
+        } 
+        else if (strstr($accept,'text/xml')) $this->renderXml($result);
     }
 
     private function renderJson(Result $result)
@@ -61,6 +60,10 @@ abstract class ViewEngine
     protected abstract function renderView(IViewResult $result, ViewContext $ctx);
 }
 
+/**
+ * Default View Engine for tsd.serve. It compiles the Views and Layouts into PHP Files and caches them for later use.
+ * The Views are written in a simple Template Syntax and support basic Control Structures like if, each
+ */
 #[DefaultMode]
 class ServeViewEngine extends ViewEngine
 {
@@ -98,7 +101,7 @@ class ServeViewEngine extends ViewEngine
         $plugin = $result->plugin();
         $view = $result->view();
         $layoutPlugin = $ctx->layoutPlugin;
-        $key = "$layoutPlugin-$plugin-" . str_replace(DIRECTORY_SEPARATOR, '.', $view);
+        $key = "$layoutPlugin-$plugin-" . str_replace('/', '.', $view);
         $cached_view = '';
         $view_file = '';
         $v = null;
@@ -108,7 +111,7 @@ class ServeViewEngine extends ViewEngine
             $timestamp = ServeViewEngine::$cached_views[$key][1];
 
             if ($timestamp + ServeViewEngine::CACHE_DURATION < time()) {
-                $v = new View($view, $layoutPlugin, $plugin);
+                $v = new View($view, $plugin);
                 $md5 = $v->md5();
             }
             $cached_view = "$key.$md5.php";
@@ -117,15 +120,40 @@ class ServeViewEngine extends ViewEngine
         if ($cached_view && file_exists(ServeViewEngine::CACHED_VIEWS . DIRECTORY_SEPARATOR . $cached_view)) {
             $view_file = ServeViewEngine::CACHED_VIEWS . DIRECTORY_SEPARATOR . $cached_view;
         } else {
-            if (!$v) $v = new View($view, $layoutPlugin, $plugin);
+            if (!$v) $v = new View($view, $plugin);
             
-            $template = $v->compile();
+            $layout = new Layout($layoutPlugin);
+
+            $t = \Dom\HTMLDocument::createFromString(View::escapeTemplate($v->template));
+            $o = \Dom\HTMLDocument::createFromString(View::escapeTemplate($layout->template));
+
+            $title = $t->head->getElementsByTagName('title')->item(0);
+            $links = $t->head->getElementsByTagName('link');
+            $styles = $t->head->getElementsByTagName('style');
+            $scripts = $t->head->getElementsByTagName('script');
+            $main = $t->body->getElementsByTagName('main')->item(0);
+
+            $lBody = $o->getElementsByTagName('body')->item(0);
+            $lOldMain = $o->body->getElementsByTagName('main')->item(0);
+            $lMain = $o->importNode($main, true);
+            $lBody->replaceChild($lMain, $lOldMain);
+
+            $lHead = $o->getElementsByTagName('head')->item(0);
+
+            foreach ($links as $h) $lHead->appendChild($o->importNode($h, true));
+            foreach ($styles as $h) $lHead->appendChild($o->importNode($h, true));
+            foreach ($scripts as $h) $lHead->appendChild($o->importNode($h, true));
+
+            $lTitle = $o->head->getElementsByTagName('title')->item(0);
+            $lTitle->textContent = $title->textContent;
+
+            $to = View::compileTemplate($o->saveHTML());
 
             //cache
             $md5 = $v->md5();
             $view_file = ServeViewEngine::CACHED_DIR . DIRECTORY_SEPARATOR . "$key.$md5.php";
             array_map('unlink', glob(ServeViewEngine::CACHED_DIR . DIRECTORY_SEPARATOR . "$key.*.php"));
-            file_put_contents($view_file, $template);
+            file_put_contents($view_file, $to);
             ServeViewEngine::$cached_views[$key] = [$md5, time()];
             ServeViewEngine::writeCacheFile();
         }
@@ -133,7 +161,7 @@ class ServeViewEngine extends ViewEngine
         ServeViewEngine::run($view_file, $result->data(), $ctx);
     }
 
-    private static function run(string $view, $data, ViewContext $ctx)
+    private static function run(string $view, ?array $data, ViewContext $ctx)
     {
         $debug = ob_get_contents();
         ob_end_clean();
@@ -150,48 +178,15 @@ class ServeViewEngine extends ViewEngine
 
 class View
 {
-    private string $template;
+    private Label $labels;
+    public string $template;
     private string $md5;
 
-    function __construct(string $path, string $layoutPlugin, string $plugin = '')
+    function __construct(string $path, string $plugin = '')
     {
-        $vt = View::loadTemplate($path . '.html', $plugin);
-        $lt = View::loadTemplate('layout.html', $layoutPlugin);
-        
-        $t = new DOMDocument;
-        $o = new DOMDocument;
+        $this->labels = Labels::create($path);
 
-        libxml_use_internal_errors(true);
-        $t->loadHTML($vt);
-        $o->loadHTML($lt);
-
-        $title = $t->getElementsByTagName('title')[0]->C14N();
-        $title = str_replace(['<title>', '</title>'], '', $title);
-        $title = str_replace('??>', '?>', $title);
-        $x = new DOMXPath($t);
-        $xL = new DOMXPath($o);
-        $links = $x->query('head/link');
-        $styles = $x->query('head/style');
-        $scripts = $x->query('head/script');
-        $main = $x->query('body/main')[0];
-
-        $lBody = $o->getElementsByTagName('body')[0];
-        $lOldMain = $xL->query('//main')[0];
-        $lMain = $o->importNode($main, true);
-        $lBody->replaceChild($lMain, $lOldMain);
-
-        $lHead = $o->getElementsByTagName('head')[0];
-
-        foreach ($links as $h) $lHead->appendChild($o->importNode($h, true));
-        foreach ($styles as $h) $lHead->appendChild($o->importNode($h, true));
-        foreach ($scripts as $h) $lHead->appendChild($o->importNode($h, true));
-
-        $to = $o->saveHTML();
-
-        $to = preg_replace('/%7B/', '{', $to);
-        $to = preg_replace('/%7D/', '}', $to);
-    
-        $this->template = $to;
+        $this->template = View::loadTemplate($path . '.html', $plugin);
         $this->md5 = md5($this->template);
     }
 
@@ -200,16 +195,12 @@ class View
         return $this->md5;
     }
 
-    public function compile()
-    {
-      return View::compileTemplate($this->template);
-    }
 
-    private static function loadTemplate($path, $plugin)
+    private static function loadTemplate(string $path, string $plugin)
     {
-        $noPluginBasePath = ServeViewEngine::VIEWS;
-        $basePath = $plugin ? App::PLUGINS . DIRECTORY_SEPARATOR . $plugin . DIRECTORY_SEPARATOR . ServeViewEngine::VIEWS : $noPluginBasePath;
-        $alternateBasePath = $plugin ? ServeViewEngine::VIEWS . DIRECTORY_SEPARATOR . App::PLUGINS . DIRECTORY_SEPARATOR . $plugin : '';
+        $noPluginBasePath = $_SERVER['DOCUMENT_ROOT'] . DIRECTORY_SEPARATOR . ServeViewEngine::VIEWS;
+        $basePath = $plugin ? $_SERVER['DOCUMENT_ROOT'] . DIRECTORY_SEPARATOR . App::PLUGINS . DIRECTORY_SEPARATOR . $plugin . DIRECTORY_SEPARATOR . ServeViewEngine::VIEWS : $noPluginBasePath;
+        $alternateBasePath = $plugin ? $_SERVER['DOCUMENT_ROOT'] . DIRECTORY_SEPARATOR . ServeViewEngine::VIEWS . DIRECTORY_SEPARATOR . App::PLUGINS . DIRECTORY_SEPARATOR . $plugin : '';
 
         $viewPath = $alternateBasePath ? $alternateBasePath . DIRECTORY_SEPARATOR . $path : $basePath . DIRECTORY_SEPARATOR . $path;
 
@@ -229,7 +220,7 @@ class View
               <body>
                 <main>
                   <h1>💥 error</h1>
-                  <p>{message}</p>
+                  <pre>{message}</pre>
                 </main>
               </body>
             </html>
@@ -295,7 +286,7 @@ class View
                     </div>
                     <div class="right">
                       <input type="submit" value="go" />
-                    </div
+                    </div>
                   </form>
                 </main>
               </body>
@@ -318,7 +309,7 @@ class View
                   {with returnUrl}<input type="hidden" name="returnUrl" value="{.}" />{/with}
                     <div class="right">
                         <input type="submit" value="yes" />
-                    </div
+                    </div>
                   </form>
                 </main>
               </body>
@@ -367,10 +358,10 @@ class View
                     </div>
                     <div>
                       <input type="email" name="email" placeholder="email" value="{email}" />
-                    </div>
+                    </div>                   
                     <div class="right">
                       <input type="submit" value="save" />
-                    </div
+                    </div>
                     <div>
                         <a class="nopopup" href="password">change password</a>
                     </div>
@@ -387,20 +378,20 @@ class View
                 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
                 <title>change password</title>
                 <script>
-                  $(function() {
-          
-                      $('form.password input[type=password]').change(function() {
-                          $('#err_pwd_mismatch').hide();
-                      });
-          
-                      $('form.password').submit(function(e) {
-                          if ($('input[name=pw1]').val() != $('input[name=pw2]').val()) {
-                              $('#err_pwd_mismatch').show();
-                              e.preventDefault();
-                          }
-                      });
-                  });
-                </script>
+                $(function() {
+        
+                    $('form.password input[type=password]').change(function() {
+                        $('#err_pwd_mismatch').hide();
+                    });
+        
+                    $('form.password').submit(function(e) {
+                        if ($('input[name=pw1]').val() != $('input[name=pw2]').val()) {
+                            $('#err_pwd_mismatch').show();
+                            e.preventDefault();
+                        }
+                    });
+                });
+            </script>
               </head>
             
               <body>
@@ -421,7 +412,7 @@ class View
                     </div>
                     <div class="right">
                       <input type="submit" value="change" />
-                    </div
+                    </div>
                   </form>
                 </main>
               </body>
@@ -470,7 +461,8 @@ class View
         return file_get_contents($viewPath);
     }
 
-    private static function compileExpression($exp)
+
+    private static function compileExpression(string $exp)
     {
         if ($exp == '.') return '$d';
 
@@ -482,16 +474,16 @@ class View
 
         $name = substr($parts[0], 1);
 
-        $o = str_split($parts[0])[0] == '@' ? "\$c['$name']" : "((array)\$d)['$parts[0]']";
+        $o = str_split($parts[0])[0] == '@' ? "\$c['$name']" : "\$d['$parts[0]']";
         array_shift($parts);
         foreach ($parts as $p) {
-            $o = "((array){$o})['$p']";
+            $o .= "['$p']";
         }
 
         return $o;
     }
 
-    private static function compileOutput($output)
+    private static function compileOutput(string $output)
     {
         $parts = explode('|', $output);
         if (!$parts)
@@ -506,10 +498,25 @@ class View
         return $o;
     }
 
-    private static function compileTemplate($template): string
+    static function escapeTemplate(string $template) : string
+    {
+      return preg_replace(
+        ['/\{each ([^\}]+)\}/', '/\{\/each\}/', '/\{none\}/',
+         '/\{if ([^\}]+)\}/', '/\{else\}/', '/\{\/if\}/',
+         '/\{with ([^\}]+)\}/', '/\{\/with\}/', '/\{without\}/'
+        ],
+        ['<!--{each $1}-->', '<!--{/each}-->', '<!--{none}-->',
+         '<!--{if $1}-->', '<!--{else}-->', '<!--{/if}-->',
+         '<!--{with $1}-->', '<!--{/with}-->', '<!--{without}-->'
+        ],
+        $template
+      );
+    }
+
+    static function compileTemplate(string $template): string
     {
         $patterns = [
-            '/\{if\s+(?<arg>\@?\w[\.\|\w]*)\s*\}(?<inner>((?:(?!(\{\/?if|\{else)).)|(?R))*)(\{else\}(?<else>((?:(?!\{\/if).)|(?R))*))?\{\/if\}/ms' => function ($m) {
+            '/<!--\{if\s+(?<arg>\@?\w[\.\|\w]*)\s*\}-->(?<inner>((?:(?!(<!--\{\/?if|<!--\{else)).)|(?R))*)(<!--\{else\}-->(?<else>((?:(?!<!--\{\/if).)|(?R))*))?<!--\{\/if\}-->/ms' => function ($m) {
                 $inner = View::compileTemplate($m['inner']);
                 $arg   = View::compileExpression($m['arg']);
                 if (key_exists('else', $m))
@@ -519,7 +526,7 @@ class View
                 }
                 return "<?php if (@$arg) { ?>$inner<?php } ?>";
             },
-            '/\{with\s+(?<arg>\@?\w[\.\|\w]*)\s*\}(?<inner>((?:(?!(\{\/?with|\{without)).)|(?R))*)(\{without\}(?<else>((?:(?!\{\/with).)|(?R))*))?\{\/with\}/ms' => function ($m) {
+            '/<!--\{with\s+(?<arg>\@?\w[\.\|\w]*)\s*\}-->(?<inner>((?:(?!(<!--\{\/?with|<!--\{without)).)|(?R))*)(<!--\{without\}-->(?<else>((?:(?!<!--\{\/with).)|(?R))*))?<!--\{\/with\}-->/ms' => function ($m) {
                 $inner = View::compileTemplate($m['inner']);
                 $arg   = View::compileExpression($m['arg']);
                 if (key_exists('else', $m))
@@ -529,7 +536,7 @@ class View
                 }
                 else return "<?php if (@$arg) { array_push(\$s, $arg); \$d=$arg; ?>$inner<?php array_pop(\$s); \$d=end(\$s); } ?>";
             },
-            '/\{each\s+(?<arg>\@?\w[\.\|\w]*)\s*\}(?<inner>((?:(?!(\{\/?each|\{none)).)|(?R))*)(\{none\}(?<else>((?:(?!\{\/each).)|(?R))*))?\{\/each\}/ms' => function ($m) {
+            '/<!--\{each\s+(?<arg>\@?\w[\.\|\w]*)\s*\}-->(?<inner>((?:(?!(<!--\{\/?each|<!--\{none)).)|(?R))*)(<!--\{none\}-->(?<else>((?:(?!<!--\{\/each).)|(?R))*))?<!--\{\/each\}-->/ms' => function ($m) {
               $inner = View::compileTemplate($m['inner']);
               $arg   = View::compileExpression($m['arg']);
               if (key_exists('else', $m))
@@ -539,12 +546,95 @@ class View
               }
               return "<?php if (@$arg) { array_push(\$s, \$d); foreach($arg as \$d) { array_push(\$s, \$d);  ?>$inner<?php array_pop(\$s); } array_pop(\$s); \$d=end(\$s); } ?>";
             },
+            '/\{~\}/' => function ($m) {
+              $o = View::compileOutput('@pluginRoot');
+              return "<?php echo @$o; ?>";
+            },
+            '/\{\{\{((\@?[a-zA-Z_]\w*(\.\w+)*(\|\w+)*)|\.)\s*\}\}\}/' => function ($m) {
+                $o = View::compileOutput($m[1]);
+                return "<?php echo @$o; ?>";
+            },
             '/\{((\@?[a-zA-Z_]\w*(\.\w+)*(\|\w+)*)|\.)\s*\}/' => function ($m) {
                 $o = View::compileOutput($m[1]);
-                return "<?php echo @$o; ?>";                
+                return "<?php echo htmlspecialchars(@$o??'', 51); ?>";
             },
         ];
 
         return preg_replace_callback_array($patterns, $template, -1);
+    }
+
+}
+
+class Layout extends View
+{
+
+    public function __construct(string $plugin = '')
+    {
+        parent::__construct('layout', $plugin);
+    }
+}
+
+
+interface Label
+{
+
+    /**
+     *
+     * @param string $name
+     * @return string
+     */
+    function getLabel(string $name);
+}
+
+
+class JSONLabels implements Label
+{
+
+    private ?JSONLabels $root;
+    private ?array $data;
+
+    public function __construct(string $path, ?JSONLabels $root = null)
+    {
+        if ($root)
+            $this->root = $root;
+
+        $file = $path . '/labels.json';
+
+        if (file_exists($file))
+            $this->data = json_decode(file_get_contents($file), true);
+    }
+
+    function getLabel(string $name)
+    {
+        $lang = 'de';
+
+        if (!$name)
+            return false;
+        if ($name[0] == '/') {
+            if ($this->root) {
+                return $this->root->getLabel(substr($name, 1));
+            }
+        }
+        if (!$this->data || !array_key_exists($name, $this->data))
+            return "[not found|$name]";
+        if (!array_key_exists($lang, $this->data[$name]))
+            return "[not $lang|$name]";
+        return $this->data[$name][$lang];
+    }
+}
+
+
+class Labels
+{
+
+    /**
+     *
+     * @param string $path
+     * @return \tsd\serve\Label
+     */
+    static function create(string $path)
+    {
+        $l = new JSONLabels(dirname($path), new JSONLabels('./views'));
+        return $l;
     }
 }
