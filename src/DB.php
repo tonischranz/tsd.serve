@@ -13,9 +13,9 @@ interface DB
     /**
      * Execute a SELECT query
      * @param string $table table name
-     * @param array $fields array of fieldnames
-     * @param array $cond associative array with conditions $field=>$value
-     * @param array $order array of either a name or an array with [0]=>$name, [1]=>ASC/DESC
+     * @param ?array $fields array of fieldnames
+     * @param ?array $cond associative array with conditions $field=>$value
+     * @param array|false $order array of either a name or an array with [0]=>$name, [1]=>ASC/DESC
      * @return array array of rows as associative arrays $field=>$value
      */
     function select(string $table, ?array $fields = null, ?array $cond = null, $order = false, int $limit = 0): array;
@@ -297,7 +297,7 @@ class FakeDB implements DB
 {
     private array $data = [];
 
-    function select(string $table, array $fields = null, array $cond = null, $order = false, int $limit = 0): array
+    function select(string $table, ?array $fields = null, ?array $cond = null, $order = false, int $limit = 0): array
     {
         if (key_exists($table, $this->data) && $cond)
         {
