@@ -4,7 +4,7 @@ namespace tsd\serve;
 
 abstract class ViewEngine
 {
-    function render($result, ViewContext $ctx, string $accept)
+    function render(mixed $result, ViewContext $ctx, string $accept)
     {
         if ($result instanceof AccessDeniedException) $result = Controller::error($result, 403);
         if ($result instanceof NotFoundException) $result = Controller::error($result, 404);
@@ -17,9 +17,6 @@ abstract class ViewEngine
         foreach ($headers as $h) {
             header($h);
         }
-
-        if (strstr($accept,'application/json')||strstr($accept,'*/*')) $this->renderJson($result);
-        if (strstr($accept,'text/xml')) $this->renderXml($result);
 
         if ($result instanceof ViewResult) {
             try {
@@ -37,6 +34,22 @@ abstract class ViewEngine
         }
         else if ($result instanceof TextResult) {
           echo $result->data();
+        }
+        else if (strstr($accept,'application/json') || strstr($accept,'*/*'))
+        {
+          $this->renderJson($result);
+        } 
+        else if (strstr($accept,'text/xml'))
+        {
+          $this->renderXml($result);
+        }
+        else if (ob_get_length())
+        {
+          ob_end_flush(); 
+        }
+        else {
+          //default to json
+          $this->renderJson($result);
         }
     }
 
@@ -56,8 +69,10 @@ abstract class ViewEngine
 }
 
 /**
- * @Default
+ * Default View Engine for tsd.serve. It compiles the Views and Layouts into PHP Files and caches them for later use.
+ * The Views are written in a simple Template Syntax and support basic Control Structures like if, each
  */
+#[DefaultMode]
 class ServeViewEngine extends ViewEngine
 {
     const CACHED_VIEWS = '.cached_views.php';
@@ -120,24 +135,24 @@ class ServeViewEngine extends ViewEngine
             $t = \Dom\HTMLDocument::createFromString(View::escapeTemplate($v->template));
             $o = \Dom\HTMLDocument::createFromString(View::escapeTemplate($layout->template));
 
-            $title = $t->head->getElementsByTagName('title')[0];
+            $title = $t->head->getElementsByTagName('title')->item(0);
             $links = $t->head->getElementsByTagName('link');
             $styles = $t->head->getElementsByTagName('style');
             $scripts = $t->head->getElementsByTagName('script');
-            $main = $t->body->getElementsByTagName('main')[0];
+            $main = $t->body->getElementsByTagName('main')->item(0);
 
-            $lBody = $o->getElementsByTagName('body')[0];
-            $lOldMain = $o->body->getElementsByTagName('main')[0];
+            $lBody = $o->getElementsByTagName('body')->item(0);
+            $lOldMain = $o->body->getElementsByTagName('main')->item(0);
             $lMain = $o->importNode($main, true);
             $lBody->replaceChild($lMain, $lOldMain);
 
-            $lHead = $o->getElementsByTagName('head')[0];
+            $lHead = $o->getElementsByTagName('head')->item(0);
 
             foreach ($links as $h) $lHead->appendChild($o->importNode($h, true));
             foreach ($styles as $h) $lHead->appendChild($o->importNode($h, true));
             foreach ($scripts as $h) $lHead->appendChild($o->importNode($h, true));
 
-            $lTitle = $o->head->getElementsByTagName('title')[0];
+            $lTitle = $o->head->getElementsByTagName('title')->item(0);
             $lTitle->textContent = $title->textContent;
 
             $to = View::compileTemplate($o->saveHTML());
@@ -189,11 +204,11 @@ class View
     }
 
 
-    private static function loadTemplate($path, $plugin)
+    private static function loadTemplate(string $path, string $plugin)
     {
-        $noPluginBasePath = '.' . ServeViewEngine::VIEWS;
-        $basePath = $plugin ? '.' . App::PLUGINS . DIRECTORY_SEPARATOR . $plugin . DIRECTORY_SEPARATOR . ServeViewEngine::VIEWS : $noPluginBasePath;
-        $alternateBasePath = $plugin ? '.' . ServeViewEngine::VIEWS . DIRECTORY_SEPARATOR . App::PLUGINS . DIRECTORY_SEPARATOR . $plugin : '';
+        $noPluginBasePath = $_SERVER['DOCUMENT_ROOT'] . DIRECTORY_SEPARATOR . ServeViewEngine::VIEWS;
+        $basePath = $plugin ? $_SERVER['DOCUMENT_ROOT'] . DIRECTORY_SEPARATOR . App::PLUGINS . DIRECTORY_SEPARATOR . $plugin . DIRECTORY_SEPARATOR . ServeViewEngine::VIEWS : $noPluginBasePath;
+        $alternateBasePath = $plugin ? $_SERVER['DOCUMENT_ROOT'] . DIRECTORY_SEPARATOR . ServeViewEngine::VIEWS . DIRECTORY_SEPARATOR . App::PLUGINS . DIRECTORY_SEPARATOR . $plugin : '';
 
         $viewPath = $alternateBasePath ? $alternateBasePath . DIRECTORY_SEPARATOR . $path : $basePath . DIRECTORY_SEPARATOR . $path;
 
@@ -213,7 +228,7 @@ class View
               <body>
                 <main>
                   <h1>💥 error</h1>
-                  <p>{message}</p>
+                  <pre>{message}</pre>
                 </main>
               </body>
             </html>
@@ -455,7 +470,7 @@ class View
     }
 
 
-    private static function compileExpression($exp)
+    private static function compileExpression(string $exp)
     {
         if ($exp == '.') return '$d';
 
@@ -476,7 +491,7 @@ class View
         return $o;
     }
 
-    private static function compileOutput($output)
+    private static function compileOutput(string $output)
     {
         $parts = explode('|', $output);
         if (!$parts)
@@ -583,8 +598,8 @@ interface Label
 class JSONLabels implements Label
 {
 
-    private $root;
-    private $data;
+    private ?JSONLabels $root;
+    private ?array $data;
 
     public function __construct(string $path, ?JSONLabels $root = null)
     {
