@@ -277,9 +277,9 @@ class View
               </head>
             
               <body>
-                <main>
-                  <h1>🔑 login</h1>
+                <main>                  
                   <form method="post" action="/_login">
+                    <h1>🔑 login</h1>
                     {with returnUrl}<input type="hidden" name="returnUrl" value="{.}" />{/with}
                     <div>
                       <input type="text" name="username" placeholder="username" />
@@ -310,10 +310,10 @@ class View
               </head>
             
               <body>
-                <main>
+                <main>                  
+                  <form method="post" action="/_login/logout">
                   <h1>🔒 logout</h1>
                   <p>do you really want to logout?</p>
-                  <form method="post" action="/_login/logout">
                   {with returnUrl}<input type="hidden" name="returnUrl" value="{.}" />{/with}
                     <div class="right">
                         <input type="submit" value="yes" />
