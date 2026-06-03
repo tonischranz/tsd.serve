@@ -506,7 +506,7 @@ class View
         foreach (array_slice($parts, 1) as $p) {
             // $o = "\$ctx->formatters['$p'](@$o)";
             if ($p == 'moment') {
-              $o = "(@$o) ? (new DateTime(@$o))->format('Y-m-d H:i:s') : ''";
+              $o = "(@$o) ? (new DateTime(@$o))->format('d.m.Y H:i') : ''";
             }
         }
 
