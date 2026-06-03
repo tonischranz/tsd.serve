@@ -25,7 +25,7 @@ class Controller
             else if (\preg_match('/^do/', $view) == 1) $view = \strtolower(\substr($view, 2));
         }
 
-        return new ViewResult($this->_name . DIRECTORY_SEPARATOR . $view, $model, $this->_plugin);
+        return new ViewResult($this->_name . DIRECTORY_SEPARATOR . $view, $model, $data, $this->_plugin);
     }
 
     public function prepare()
@@ -74,7 +74,7 @@ class Controller
 
 interface Result
 {
-    function data();
+    function model();
     function getStatusCode();
     function getHeaders();
 }
@@ -82,19 +82,19 @@ interface Result
 class ResultBase implements Result
 {
     private int $statuscode;
-    private mixed $data;
+    private mixed $model;
     private array $headers;
 
-    function __construct(mixed $data, int $statuscode, array $headers = [])
+    function __construct(mixed $model, int $statuscode, array $headers = [])
     {
         $this->statuscode = $statuscode;
-        $this->data = $data;
+        $this->model = $model;
         $this->headers = $headers;
     }
 
-    function data()
+    function model()
     {
-        return $this->data;
+        return $this->model;
     }
 
     function getStatusCode()
@@ -121,9 +121,9 @@ class ViewResult extends ResultBase implements IViewResult
     private string $_view;
     private string $_plugin;
 
-    function __construct(string $view, mixed $data, string $plugin = '', int $statuscode = 200)
+    function __construct(string $view, mixed $model, public mixed $data, string $plugin = '', int $statuscode = 200)
     {
-        parent::__construct($data, $statuscode);
+        parent::__construct($model, $statuscode);
         $this->_view = $view;
         $this->_plugin = $plugin;
     }
@@ -143,7 +143,7 @@ class MessageResult extends ViewResult
 {
     function __construct(string $type, string $message, int $code = 200, ?string $url = null)
     {
-        parent::__construct($type, ["message" => $message, "url" => $url], '', $code);
+        parent::__construct($type, ["message" => $message, "url" => $url], [], '', $code);
     }
 }
 

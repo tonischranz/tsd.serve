@@ -6,5 +6,5 @@ interface IViewResult
 {
     function view(): string;
     function plugin(): string;
-    function data();
+    function model();
 }

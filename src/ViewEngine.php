@@ -31,11 +31,11 @@ abstract class ViewEngine
             exit;
         }
         else if ($result instanceof FileResult) {
-          readfile($result->data());
+          readfile($result->model());
           exit;
         }
         else if ($result instanceof TextResult) {
-          echo $result->data();
+          echo $result->model();
         }
 
         if (strstr($accept,'application/json') || strstr($accept,'*/*'))
@@ -50,13 +50,13 @@ abstract class ViewEngine
     private function renderJson(Result $result)
     {
         ob_end_clean();
-        echo json_encode($result->data(), JSON_PRETTY_PRINT);
+        echo json_encode($result->model(), JSON_PRETTY_PRINT);
     }
 
     private function renderXml(Result $result)
     {
         ob_end_clean();
-        echo $result->data()->asXML();
+        echo $result->model()->asXML();
     }
 
     protected abstract function renderView(IViewResult $result, ViewContext $ctx);
@@ -160,18 +160,20 @@ class ServeViewEngine extends ViewEngine
             ServeViewEngine::writeCacheFile();
         }
 
-        ServeViewEngine::run($view_file, $result->data(), $ctx);
+        ServeViewEngine::run($view_file, $result->model(), $result->data ?? []);
     }
 
-    private static function run(string $view, ?array $data, ViewContext $ctx)
+    private static function run(string $view, ?array $model, array $data)
     {
         $debug = ob_get_contents();
         ob_end_clean();
 
-        $ctx->debug = $debug;
-        $c = (array)$ctx;
+        $c = [
+          'data' => $data,
+          'debug' => $debug
+        ];
 
-        $d     = $data;
+        $d     = $model??[];
         $s  = [$d];
 
         include $view;
