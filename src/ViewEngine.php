@@ -503,6 +503,13 @@ class View
         $o     = View::compileExpression($parts[0]);
         //array_shift($parts);
         //foreach formatter append
+        foreach (array_slice($parts, 1) as $p) {
+            // $o = "\$ctx->formatters['$p'](@$o)";
+            if ($p == 'moment') {
+              $o = "(@$o) ? (new DateTime(@$o))->format('Y-m-d H:i:s') : ''";
+            }
+        }
+
         return $o;
     }
 
