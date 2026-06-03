@@ -37,7 +37,7 @@ class Router
 
         $cutoff = 1;
 
-        $name = count($parts) > 1 ? $parts[1] : 'default';
+        $name = count($parts) > 1 ? $parts[1] : 'main';
 
         if (array_key_exists($host, $this->domains) && array_key_exists($this->domains[$host], App::$plugins)) {
             $hostPlugin = $this->domains[$host];
@@ -77,12 +77,12 @@ class Router
                     $overrideName = $hostPlugin;
                 }
 
-                $name = count($parts) > 2 ? $parts[2] : 'default';
+                $name = count($parts) > 2 ? $parts[2] : 'main';
 
                 $cutoff += 2;
 
                 if ($name == '') {
-                    $name = 'default';
+                    $name = 'main';
                     $cutoff--;
                 }
 
@@ -99,12 +99,12 @@ class Router
                         $overrideName = $oldPlugin;
                     }
 
-                    $name = count($parts) > 3 ? $parts[3] : 'default';
+                    $name = count($parts) > 3 ? $parts[3] : 'main';
 
                     $cutoff++;
 
                     if ($name == '') {
-                        $name = 'default';
+                        $name = 'main';
                         $cutoff--;
                     }
 
@@ -119,14 +119,14 @@ class Router
                     $c = $this->createController($overrideName, $plugin);
 
                     if (!$c) {
-                        $c = $this->createController('default', $oldPlugin);
+                        $c = $this->createController('main', $oldPlugin);
                         $pluginRoot = $oldPluginRoot;
                         $cutoff--;
                     }
                 } else {
                     $c = $this->createController($name, $plugin);
                     if (!$c) {
-                        $c = $this->createController('default', $plugin);
+                        $c = $this->createController('main', $plugin);
                         $cutoff--;
                     }
                 }
@@ -136,14 +136,14 @@ class Router
                 $c = $this->createController($name, $plugin);
                 $cutoff++;
                 if (!$c) {
-                    $c = $this->createController('default', $plugin);
+                    $c = $this->createController('main', $plugin);
                     $cutoff--;
                 }
             } else {
                 $c = $this->createController($name);
             }
             if (!$c) {
-                $c = $this->createController('default');
+                $c = $this->createController('main');
                 $pluginRoot = '';
             }
         }

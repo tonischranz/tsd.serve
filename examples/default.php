@@ -2,7 +2,7 @@
 
 use tsd\serve\Controller;
 
-class defaultController extends Controller
+class mainController extends Controller
 {
 
   function showIndex ()
