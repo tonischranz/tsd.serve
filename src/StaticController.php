@@ -4,16 +4,18 @@ namespace tsd\serve;
 
 class StaticController extends Controller
 {
-    private ViewContext $ctx;
+    // private ViewContext $ctx;
     const 
-    MIME_TYPES = ['svg' => 'image/svg+xml', 'css' => 'text/css'];
+    MIME_TYPES = ['svg' => 'image/svg+xml', 'css' => 'text/css', 'js' => 'text/javascript'];
 
     function show(array $parts)
     {
         $ext = array_pop($parts);
-        $plugin = array_shift($parts);
+        $plugin = count($parts) > 2 ? array_shift($parts) : null;
 
-        $file = App::PLUGINS . DIRECTORY_SEPARATOR . $plugin . DIRECTORY_SEPARATOR . 'static' . DIRECTORY_SEPARATOR . join(DIRECTORY_SEPARATOR, $parts) . '.' . $ext;
+        $file = $plugin
+            ? ( App::PLUGINS . DIRECTORY_SEPARATOR . $ctx->plugin . DIRECTORY_SEPARATOR . 'static' . DIRECTORY_SEPARATOR . join(DIRECTORY_SEPARATOR, $parts) . '.' . $ext )
+            : ( $_SERVER['DOCUMENT_ROOT'] . DIRECTORY_SEPARATOR . join(DIRECTORY_SEPARATOR, $parts) . '.' . $ext );
 
         if (!file_exists($file)) throw new NotFoundException("file $file");
 
