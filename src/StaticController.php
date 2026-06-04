@@ -14,7 +14,7 @@ class StaticController extends Controller
         $plugin = count($parts) > 2 ? array_shift($parts) : null;
 
         $file = $plugin
-            ? ( App::PLUGINS . DIRECTORY_SEPARATOR . $ctx->plugin . DIRECTORY_SEPARATOR . 'static' . DIRECTORY_SEPARATOR . join(DIRECTORY_SEPARATOR, $parts) . '.' . $ext )
+            ? ( App::PLUGINS . DIRECTORY_SEPARATOR . $plugin . DIRECTORY_SEPARATOR . 'static' . DIRECTORY_SEPARATOR . join(DIRECTORY_SEPARATOR, $parts) . '.' . $ext )
             : ( $_SERVER['DOCUMENT_ROOT'] . DIRECTORY_SEPARATOR . join(DIRECTORY_SEPARATOR, $parts) . '.' . $ext );
 
         if (!file_exists($file)) throw new NotFoundException("file $file");
@@ -26,11 +26,11 @@ class StaticController extends Controller
 
     function showFaviconSvg()
     {
-        if ($this->ctx->layoutPlugin)
-        {
-            $file = App::PLUGINS . DIRECTORY_SEPARATOR . $this->ctx->layoutPlugin . DIRECTORY_SEPARATOR . 'static' . DIRECTORY_SEPARATOR . 'favicon.svg';
-            if (file_exists($file)) return new FileResult($file, 'image/svg+xml');
-        }
+        // if ($this->ctx->layoutPlugin)
+        // {
+        //     $file = App::PLUGINS . DIRECTORY_SEPARATOR . $this->ctx->layoutPlugin . DIRECTORY_SEPARATOR . 'static' . DIRECTORY_SEPARATOR . 'favicon.svg';
+        //     if (file_exists($file)) return new FileResult($file, 'image/svg+xml');
+        // }
         $file = 'favicon.svg';
         if (file_exists($file)) return new FileResult($file, 'image/svg+xml');
         else
@@ -47,11 +47,11 @@ class StaticController extends Controller
 
     function showStyleCss()
     {
-        if ($this->ctx->layoutPlugin)
-        {
-            $file = App::PLUGINS . DIRECTORY_SEPARATOR . $this->ctx->layoutPlugin . DIRECTORY_SEPARATOR . 'static' . DIRECTORY_SEPARATOR . 'style.css';
-            if (file_exists($file)) return new FileResult($file, 'text/css');
-        }
+        // if ($this->ctx->layoutPlugin)
+        // {
+        //     $file = App::PLUGINS . DIRECTORY_SEPARATOR . $this->ctx->layoutPlugin . DIRECTORY_SEPARATOR . 'static' . DIRECTORY_SEPARATOR . 'style.css';
+        //     if (file_exists($file)) return new FileResult($file, 'text/css');
+        // }
         $file = 'style.css';
         if (file_exists($_SERVER['DOCUMENT_ROOT'] . DIRECTORY_SEPARATOR . $file)) return new FileResult($_SERVER['DOCUMENT_ROOT'] . DIRECTORY_SEPARATOR .$file, 'text/css');
         else
@@ -141,11 +141,11 @@ class StaticController extends Controller
 
     function showFaviconIco()
     {
-        if ($this->ctx->layoutPlugin)
-        {
-            $file = App::PLUGINS . DIRECTORY_SEPARATOR . $this->ctx->layoutPlugin . DIRECTORY_SEPARATOR . 'static' . DIRECTORY_SEPARATOR . 'favicon.ico';
-            if (file_exists($file)) return new FileResult($file);
-        }
+        // if ($this->ctx->layoutPlugin)
+        // {
+        //     $file = App::PLUGINS . DIRECTORY_SEPARATOR . $this->ctx->layoutPlugin . DIRECTORY_SEPARATOR . 'static' . DIRECTORY_SEPARATOR . 'favicon.ico';
+        //     if (file_exists($file)) return new FileResult($file);
+        // }
         $file = 'favicon.ico';
         if (!file_exists($file)) throw new NotFoundException('Favicon');
         return new FileResult($file);
