@@ -7,20 +7,20 @@ class LoginController extends Controller
 {
     function showIndex(?string $returnUrl = null)
     {
-        return new ViewResult('login', ['returnUrl'=>$returnUrl]);
+        return $this->view([],['returnUrl'=>$returnUrl],'login');
     }
 
     function doIndex(string $username, string $password, string $returnUrl = '_login/profile')
     {
         if ($this->_member->login($username, $password)) return $this->redirect(urldecode($returnUrl));
 
-        return new ViewResult('login', ['returnUrl'=>$returnUrl, 'error'=>true]);        
+        return $this->view([],['returnUrl'=>$returnUrl, 'error'=>true],'login');
     }
 
     #[SecurityUser]
     function showLogout(?string $returnUrl = null)
     {
-        return new ViewResult('logout', ['returnUrl'=>$returnUrl]);
+        return $this->view([],['returnUrl'=>$returnUrl],'logout');
     }
 
     #[SecurityUser]
@@ -29,7 +29,7 @@ class LoginController extends Controller
         $username = $this->_member->getName();
         $fullname = $this->_member->getFullName();
         $email = $this->_member->getEMail();
-        return new ViewResult('profile', ['username' => $username, 'fullname' => $fullname, 'email' => $email]);
+        return $this->view([],['username' => $username, 'fullname' => $fullname, 'email' => $email],'profile');
     }
 
     #[SecurityUser]
@@ -45,15 +45,15 @@ class LoginController extends Controller
     #[SecurityUser]
     function showPassword()
     {        
-        return new ViewResult('password',null);
+        return $this->view([],[],'password');
     }
 
     #[SecurityUser]
     function doPassword(string $old_password, string $pw1, string $pw2)
     {
         $username = $this->_member->getName();
-        if (!$this->_member->login($username, $old_password)) return new ViewResult('password', ['error_old_password'=>true]);
-        if ($pw1 != $pw2) return new ViewResult('password', ['error_mismatch'=>true]);
+        if (!$this->_member->login($username, $old_password)) return $this->view([],['error_old_password'=>true],'password');
+        if ($pw1 != $pw2) return $this->view([], ['error_mismatch'=>true],'password');
             
         $this->_member->setPassword($pw1);
         $this->_member->save();
