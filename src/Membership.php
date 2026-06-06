@@ -21,14 +21,14 @@ interface Membership
 #[DefaultMode]
 class DefaulMembership implements Membership
 {
-  private Session $_session;
+  // private Session $_session;
   private array $users;
 
   public function getName(): string
   {
-    if ($this->isAnonymous()) return '';
+    if ($this->isAnonymous()) return 'anonymous-'.uniqid();
 
-    $username = $this->_session->get('logged_in');
+    // $username = $this->_session->get('logged_in');
     return $username ?? '';
   }
 
@@ -110,7 +110,7 @@ class DefaulMembership implements Membership
 
   public function isAnonymous(): bool
   {
-    return !$this->_session->get('logged_in');
+    return true; // !$this->_session->get('logged_in');
   }
 
   public function isInGroup(string $group): bool
@@ -130,7 +130,7 @@ class DefaulMembership implements Membership
     {
       if (array_key_exists('password', $this->users[$username]))
       {
-        $this->_session->set('logged_in', $username);
+        //$this->_session->set('logged_in', $username);
         return password_verify($password, $this->users[$username]['password']);
       }
     }
@@ -140,26 +140,26 @@ class DefaulMembership implements Membership
 
   public function logout()
   {
-    $this->_session->reset();
+    //$this->_session->reset();
   }
 }
 
-class Session
-{
-  function get(string $key)
-  {
-    if (!session_id()) session_start();
-    return @$_SESSION[$key];
-  }
+// class Session
+// {
+//   function get(string $key)
+//   {
+//     if (!session_id()) session_start();
+//     return @$_SESSION[$key];
+//   }
 
-  function set(string $key, mixed $value)
-  {
-    if (!session_id()) session_start();
-    $_SESSION[$key] = $value;
-  }
+//   function set(string $key, mixed $value)
+//   {
+//     if (!session_id()) session_start();
+//     $_SESSION[$key] = $value;
+//   }
 
-  function reset()
-  {
-    session_destroy();
-  }
-}
+//   function reset()
+//   {
+//     session_destroy();
+//   }
+// }
