@@ -560,7 +560,7 @@ class View
             },
             '/\{((\@?[a-zA-Z_]\w*(\.\w+)*(\|\w+)*)|\.)\s*\}/' => function ($m) {
                 $o = View::compileOutput($m[1]);
-                return "<?php echo htmlspecialchars((is_string(@$o) ? @$o : json_encode(@$o)), ENT_QUOTES, 'UTF-8'); ?>";
+                return "<?php echo htmlspecialchars((is_string(@$o) ? @$o : json_encode(@$o,JSON_PRETTY_PRINT)), ENT_QUOTES, 'UTF-8'); ?>";
             },
         ];
 
