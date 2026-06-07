@@ -327,7 +327,7 @@ abstract class Route
 
         $input = file_get_contents('php://input');
         if ($input && count($pinfos)>count($params)) {
-            $params[] = json_decode($input);
+            $params[] = json_decode($input) ?? (object)$_POST;
         }
 
         return $this->methodInfo->invokeArgs($this->controller, $params);
