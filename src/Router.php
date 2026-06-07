@@ -325,6 +325,11 @@ abstract class Route
             $n++;
         }
 
+        $input = file_get_contents('php://input');
+        if ($input && count($pinfos)>count($params)) {
+            $params[] = json_decode($input);
+        }
+
         return $this->methodInfo->invokeArgs($this->controller, $params);
     }
 
