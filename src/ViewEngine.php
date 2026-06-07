@@ -143,8 +143,10 @@ class ServeViewEngine extends ViewEngine
 
             $lBody = $o->getElementsByTagName('body')->item(0);
             $lOldMain = $o->body->getElementsByTagName('main')->item(0);
-            $lMain = $o->importNode($main, true);
-            $lBody->replaceChild($lMain, $lOldMain);
+            if ($main) {
+                $lMain = $o->importNode($main, true);
+                $lBody->replaceChild($lMain, $lOldMain);
+            }
 
             $lHead = $o->getElementsByTagName('head')->item(0);
 
