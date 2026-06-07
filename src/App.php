@@ -149,7 +149,9 @@ class App
             $result = $e;
         }
 
-        $this->view_engine->render($result, $route?->ctx(), $accept);
+        if($result) {
+            $this->view_engine->render($result, $route?->ctx(), $accept);
+        }
     }
 
     /**
