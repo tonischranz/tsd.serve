@@ -186,7 +186,9 @@ class Router
             }
         }
 
-        return $method == 'POST' ? new PostRoute($c, $mi, $ctx, $params) : ($method == 'GET' ? new GetRoute($c, $mi, $ctx, $params) : false);
+        return $method == 'GET' 
+            ? new GetRoute($c, $mi, $ctx, $params)
+            : new PostRoute($c, $mi, $ctx, $params);
     }
 
     public static function getMethodName(string $methodPath, string $prefix, array &$params, ?array &$pathAlternatives = null): string
