@@ -116,7 +116,7 @@ class App
             (new App)->serveRequest(
                 $_SERVER['REQUEST_METHOD'],
                 $_SERVER['HTTP_HOST'],
-                $_SERVER['PHP_SELF'],
+                $_SERVER['REQUEST_URI'],
                 [
                     '_GET' => $_GET, '_COOKIE' => $_COOKIE,
                     '_POST' => $_POST, '_FILES' => $_FILES
