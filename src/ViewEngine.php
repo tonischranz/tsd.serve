@@ -69,8 +69,8 @@ abstract class ViewEngine
 #[DefaultMode]
 class ServeViewEngine extends ViewEngine
 {
-    const CACHED_VIEWS = '.cached_views.php';
-    const CACHED_DIR = '.cached_views';
+    const CACHED_VIEWS = '.cache/views.php';
+    const CACHED_DIR = '.cache/views';
     const CACHE_DURATION = 30;
     const VIEWS = 'html';
 
