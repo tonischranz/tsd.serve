@@ -64,9 +64,9 @@
       {if foo}
         <p>foo</p>
         {if bar}
-          <p>BAR</p>
+          <p>BAR {if @data.foo}datafoo{else}ndf{/if}</p>
         {else}
-          <p>NOT BAR</p>
+          <p>NOT BAR {if @data.foo}datafoo{else}ndf{/if}</p>
         {/if}
         <p>after barcheck</p>
       {else}
@@ -76,6 +76,7 @@
       {with bar}
       <pre>a      b     c</pre>
       {/with}
+
     </main>
   </body>
 </html>

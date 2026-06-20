@@ -532,54 +532,83 @@ class View
 
     static function compileTemplate(string $template): string
     {
+        // 1. SICHERHEITSPRÜFUNG: Prüfe die Balance der Block-Tags
+        $blocks = ['if', 'with', 'each'];
+        foreach ($blocks as $block) {
+            $openCount  = preg_match_all("/<!--\{$block\b/", $template);
+            $closeCount = preg_match_all("/<!--\{\/$block\}-->/", $template);
+
+            if ($openCount !== $closeCount) {
+                throw new \Exception(
+                    "Template-Syntaxfehler: Ungleiche Anzahl von Start- und End-Tags für '<!--{{$block}}-->'. " .
+                    "Gefunden: $openCount geöffnet, $closeCount geschlossen."
+                );
+            }
+        }
+
+        // Muster für die innersten Blöcke (von innen nach aussen)
         $patterns = [
-            '/<!--\{if\s+(?<arg>\@?\w[\.\|\w]*)\s*\}-->(?<inner>((?:(?!(<!--\{\/?if|<!--\{else)).)|(?R))*)(<!--\{else\}-->(?<else>((?:(?!<!--\{\/if).)|(?R))*))?<!--\{\/if\}-->/ms' => function ($m) {
+            '/<!--\{if\s+(?<arg>\@?\w[\.\|\w]*)\s*\}-->(?<inner>(?:(?!<!--\{if\b).)*?)(?:<!--\{else\}-->(?<else>(?:(?!<!--\{if\b).)*?))?<!--\{\/if\}-->/ms' => function ($m) {
                 $inner = View::compileTemplate($m['inner']);
                 $arg   = View::compileExpression($m['arg']);
-                if (key_exists('else', $m))
-                {
+                if (isset($m['else']) && $m['else'] !== '') {
                     $else = View::compileTemplate($m['else']);
                     return "<?php if (@$arg) { ?>$inner<?php } else { ?>$else<?php } ?>";
                 }
                 return "<?php if (@$arg) { ?>$inner<?php } ?>";
             },
-            '/<!--\{with\s+(?<arg>\@?\w[\.\|\w]*)\s*\}-->(?<inner>((?:(?!(<!--\{\/?with|<!--\{without)).)|(?R))*)(<!--\{without\}-->(?<else>((?:(?!<!--\{\/with).)|(?R))*))?<!--\{\/with\}-->/ms' => function ($m) {
+            '/<!--\{with\s+(?<arg>\@?\w[\.\|\w]*)\s*\}-->(?<inner>(?:(?!<!--\{with\b).)*?)(?:<!--\{without\}-->(?<else>(?:(?!<!--\{with\b).)*?))?<!--\{\/with\}-->/ms' => function ($m) {
                 $inner = View::compileTemplate($m['inner']);
                 $arg   = View::compileExpression($m['arg']);
-                if (key_exists('else', $m))
-                {
+                if (isset($m['else']) && $m['else'] !== '') {
                     $else = View::compileTemplate($m['else']);
                     return "<?php if (@$arg) { array_push(\$s, $arg); \$d=$arg; ?>$inner<?php array_pop(\$s); \$d=end(\$s); } else { ?>$else<?php } ?>";
                 }
-                else return "<?php if (@$arg) { array_push(\$s, $arg); \$d=$arg; ?>$inner<?php array_pop(\$s); \$d=end(\$s); } ?>";
+                return "<?php if (@$arg) { array_push(\$s, $arg); \$d=$arg; ?>$inner<?php array_pop(\$s); \$d=end(\$s); } ?>";
             },
-            '/<!--\{each\s+(?<arg>\@?\w[\.\|\w]*)\s*\}-->(?<inner>((?:(?!(<!--\{\/?each|<!--\{none)).)|(?R))*)(<!--\{none\}-->(?<else>((?:(?!<!--\{\/each).)|(?R))*))?<!--\{\/each\}-->/ms' => function ($m) {
-              $inner = View::compileTemplate($m['inner']);
-              $arg   = View::compileExpression($m['arg']);
-              if (key_exists('else', $m))
-              {
-                  $else = View::compileTemplate($m['else']);
-                  return "<?php if (@$arg) { array_push(\$s, \$d); foreach($arg as \$d) { array_push(\$s, \$d);  ?>$inner<?php array_pop(\$s); } array_pop(\$s); \$d=end(\$s); } else { ?>$else<?php } ?>";
-              }
-              return "<?php if (@$arg) { array_push(\$s, \$d); foreach($arg as \$d) { array_push(\$s, \$d);  ?>$inner<?php array_pop(\$s); } array_pop(\$s); \$d=end(\$s); } ?>";
+            '/<!--\{each\s+(?<arg>\@?\w[\.\|\w]*)\s*\}-->(?<inner>(?:(?!<!--\{each\b).)*?)(?:<!--\{none\}-->(?<else>(?:(?!<!--\{each\b).)*?))?<!--\{\/each\}-->/ms' => function ($m) {
+                $inner = View::compileTemplate($m['inner']);
+                $arg   = View::compileExpression($m['arg']);
+                if (isset($m['else']) && $m['else'] !== '') {
+                    $else = View::compileTemplate($m['else']);
+                    return "<?php if (@$arg) { array_push(\$s, \$d); foreach($arg as \$d) { array_push(\$s, \$d);  ?>$inner<?php array_pop(\$s); } array_pop(\$s); \$d=end(\$s); } else { ?>$else<?php } ?>";
+                }
+                return "<?php if (@$arg) { array_push(\$s, \$d); foreach($arg as \$d) { array_push(\$s, \$d);  ?>$inner<?php array_pop(\$s); } array_pop(\$s); \$d=end(\$s); } ?>";
             },
+        ];
+
+        // 2. SCHLEIFENSICHERUNG: Maximal 32 Verschachtelungsebenen erlauben (Überlastungsschutz)
+        $maxIterations = 32; 
+        $iterations = 0;
+
+        do {
+            $oldTemplate = $template;
+            $template = preg_replace_callback_array($patterns, $template, -1);
+            $iterations++;
+
+            if ($iterations > $maxIterations) {
+                throw new \Exception("Template-Kompilierung abgebrochen: Maximale Verschachtelungstiefe von $maxIterations Ebenen überschritten.");
+            }
+        } while ($template !== $oldTemplate);
+
+        // Einfache Variablen-Ersetzungen ganz am Ende
+        $staticPatterns = [
             '/\{~\}/' => function ($m) {
-              $o = View::compileOutput('@pluginRoot');
-              return "<?php echo @$o; ?>";
-            },
-            '/\{\{\{((\@?[a-zA-Z_]\w*(\.\w+)*(\|\w+)*)|\.)\s*\}\}\}/' => function ($m) {
-                $o = View::compileOutput($m[1]);
+                $o = View::compileOutput('@pluginRoot');
                 return "<?php echo @$o; ?>";
             },
-            '/\{((\@?[a-zA-Z_]\w*(\.\w+)*(\|\w+)*)|\.)\s*\}/' => function ($m) {
-                $o = View::compileOutput($m[1]);
+            '/\{\{\{(?<expr>(?:\@?[a-zA-Z_]\w*(?:\.\w+)*(?:\|\w+)*)|\.)\s*\}\}\}/' => function ($m) {
+                $o = View::compileOutput($m['expr']);
+                return "<?php echo @$o; ?>";
+            },
+            '/\{(?<expr>(?:\@?[a-zA-Z_]\w*(?:\.\w+)*(?:\|\w+)*)|\.)\s*\}/' => function ($m) {
+                $o = View::compileOutput($m['expr']);
                 return "<?php echo htmlspecialchars((is_string(@$o??'') ? @$o??'' : json_encode(@$o)), ENT_QUOTES, 'UTF-8'); ?>";
             },
         ];
 
-        return preg_replace_callback_array($patterns, $template, -1);
+        return preg_replace_callback_array($staticPatterns, $template, -1);
     }
-
 }
 
 class Layout extends View
